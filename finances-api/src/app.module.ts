@@ -8,6 +8,8 @@ import { BudgetsModule } from './modules/budgets/budgets.module';
 import { InvestmentsModule } from './modules/investments/investments.module';
 import { GoalsModule } from './modules/goals/goals.module';
 import { DebtsModule } from './modules/debts/debts.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -21,5 +23,7 @@ import { DebtsModule } from './modules/debts/debts.module';
     GoalsModule,
     DebtsModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
