@@ -325,5 +325,4 @@ const { data: session } = await supabase.auth.getSession()
 await supabase.auth.signOut()
 ```
 
-Next steps: implement a simple `AuthProvider`/hook and UI flows for sign-in/sign-up and to pass auth info to the backend API.
 
