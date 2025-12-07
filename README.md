@@ -95,3 +95,35 @@ export default defineConfig([
   },
 ])
 ```
+
+## Supabase Authentication (frontend)
+
+To use Supabase authentication from the React app:
+
+- Add environment variables to `.env` (Vite requires variables to start with `VITE_`):
+
+```dotenv
+VITE_SUPABASE_URL=your-supabase-url
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+- A Supabase client is already provided at `src/services/supabase.ts`:
+
+```ts
+import { supabase } from './services/supabase'
+
+// Sign up
+await supabase.auth.signUp({ email: 'me@email.com', password: 'password' })
+
+// Sign in
+await supabase.auth.signInWithPassword({ email: 'me@email.com', password: 'password' })
+
+// Get session
+const { data: session } = await supabase.auth.getSession()
+
+// Sign out
+await supabase.auth.signOut()
+```
+
+Next steps: implement a simple `AuthProvider`/hook and UI flows for sign-in/sign-up and to pass auth info to the backend API.
+
