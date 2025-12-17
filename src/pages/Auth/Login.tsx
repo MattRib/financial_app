@@ -17,7 +17,6 @@ const LoginPage: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      // Redirect to intended location or dashboard after login
       const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard'
       navigate(from, { replace: true })
     }
@@ -33,71 +32,141 @@ const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded shadow">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-            {mode === 'signin' ? 'Sign in to your account' : 'Create an account'}
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            {mode === 'signin' ? (
-              <>
-                Or <button className="text-indigo-600 hover:text-indigo-500 underline" onClick={() => setMode('signup')}>create new account</button>
-              </>
-            ) : (
-              <>
-                Already have an account? <button className="text-indigo-600 hover:text-indigo-500 underline" onClick={() => setMode('signin')}>Sign in</button>
-              </>
-            )}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="w-full max-w-sm mx-4">
+        {/* Logo/Brand */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary-600 mb-4">
+            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-semibold text-slate-900">
+            {mode === 'signin' ? 'Bem-vindo de volta' : 'Criar conta'}
+          </h1>
+          <p className="text-slate-500 mt-1 text-sm">
+            {mode === 'signin' ? 'Entre na sua conta para continuar' : 'Preencha os dados para começar'}
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
+
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email */}
             <div>
-              <label htmlFor="email-address" className="sr-only">Email address</label>
+              <label htmlFor="email-address" className="block text-sm font-medium text-slate-700 mb-1.5">
+                Email
+              </label>
               <input
                 id="email-address"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                placeholder="seu@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
+
+            {/* Password */}
             <div>
-              <label htmlFor="password" className="sr-only">Password</label>
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1.5">
+                Senha
+              </label>
               <input
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-          </div>
 
-          {error && <div className="text-sm text-red-600">{error}</div>}
+            {/* Forgot Password - only show on signin */}
+            {mode === 'signin' && (
+              <div className="text-right">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-primary-600 hover:text-primary-700 transition-colors"
+                >
+                  Esqueceu a senha?
+                </Link>
+              </div>
+            )}
 
-          <div>
+            {/* Error Message */}
+            {error && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-100 rounded-lg">
+                <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm text-red-600">{error}</span>
+              </div>
+            )}
+
+            {/* Submit Button */}
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
               disabled={loading}
+              className="w-full py-2.5 px-4 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
-              {loading ? 'Loading...' : (mode === 'signin' ? 'Sign in' : 'Sign up')}
+              {loading ? (
+                <span className="inline-flex items-center gap-2">
+                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Carregando...
+                </span>
+              ) : (
+                mode === 'signin' ? 'Entrar' : 'Criar conta'
+              )}
             </button>
+          </form>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="px-2 bg-white text-slate-400">ou</span>
+            </div>
           </div>
-          <div className="text-center text-sm text-gray-500">
-            <Link to="/forgot-password" className="text-indigo-600 hover:text-indigo-500 underline">Forgot your password?</Link>
-          </div>
-        </form>
+
+          {/* Toggle Mode */}
+          <p className="text-center text-sm text-slate-600">
+            {mode === 'signin' ? (
+              <>
+                Não tem uma conta?{' '}
+                <button
+                  type="button"
+                  onClick={() => setMode('signup')}
+                  className="text-primary-600 hover:text-primary-700 font-medium transition-colors cursor-pointer"
+                >
+                  Cadastre-se
+                </button>
+              </>
+            ) : (
+              <>
+                Já tem uma conta?{' '}
+                <button
+                  type="button"
+                  onClick={() => setMode('signin')}
+                  className="text-primary-600 hover:text-primary-700 font-medium transition-colors cursor-pointer"
+                >
+                  Entrar
+                </button>
+              </>
+            )}
+          </p>
+        </div>
       </div>
     </div>
   )
