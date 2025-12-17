@@ -1,10 +1,12 @@
 import React from 'react'
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
+import type { PieLabelRenderProps } from 'recharts'
 
 interface PieChartData {
   name: string
   value: number
   color: string
+  [key: string]: unknown
 }
 
 interface PieChartProps {
@@ -25,12 +27,12 @@ const PieChart: React.FC<PieChartProps> = ({ data, height = 250 }) => {
     <ResponsiveContainer width="100%" height={height}>
       <RechartsPieChart>
         <Pie
-          data={data as any}
+          data={data}
           cx="50%"
           cy="50%"
           labelLine={false}
-          label={(entry: any) => 
-            `${entry.name || ''}: ${entry.percent ? (entry.percent * 100).toFixed(0) : 0}%`
+          label={(props: PieLabelRenderProps) => 
+            `${props.name ?? ''}: ${props.percent ? (props.percent * 100).toFixed(0) : 0}%`
           }
           outerRadius={80}
           fill="#8884d8"
