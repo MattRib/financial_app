@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { MainLayout } from '../../components/layout'
 import { useTransactionsStore } from '../../store/transactionsStore'
 import { useCategoriesStore } from '../../store/categoriesStore'
@@ -7,12 +7,12 @@ import type { Transaction, TransactionFilters, TransactionType, CreateTransactio
 import { Plus, Filter, X, Edit2, Trash2, TrendingUp, TrendingDown, Wallet } from 'lucide-react'
 
 // Simple TransactionsList component
-const TransactionsList: React.FC<{
+const TransactionsList = React.memo<{
   transactions: Transaction[]
   onEdit: (transaction: Transaction) => void
   onDelete: (id: string) => void
   loading: boolean
-}> = ({ transactions, onEdit, onDelete, loading }) => {
+}>(({ transactions, onEdit, onDelete, loading }) => {
   if (loading && transactions.length === 0) {
     return (
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
@@ -142,7 +142,15 @@ const TransactionsList: React.FC<{
       </div>
     </div>
   )
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison to avoid unnecessary re-renders
+  return (
+    prevProps.transactions === nextProps.transactions &&
+    prevProps.loading === nextProps.loading &&
+    prevProps.onEdit === nextProps.onEdit &&
+    prevProps.onDelete === nextProps.onDelete
+  )
+})
 
 const TransactionsPage: React.FC = () => {
   // Stores
@@ -211,15 +219,15 @@ const TransactionsPage: React.FC = () => {
   }
 
   // Handle edit transaction
-  const handleEditTransaction = (transaction: Transaction) => {
+  const handleEditTransaction = useCallback((transaction: Transaction) => {
     setEditingTransaction(transaction)
     setShowForm(true)
-  }
+  }, [])
 
   // Handle delete transaction
-  const handleDeleteClick = (id: string) => {
+  const handleDeleteClick = useCallback((id: string) => {
     setDeleteConfirm({ id, show: true })
-  }
+  }, [])
 
   const handleDeleteConfirm = async () => {
     if (deleteConfirm.id) {

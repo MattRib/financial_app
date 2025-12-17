@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { MainLayout } from '../../components/layout'
 import { useBudgetsStore } from '../../store/budgetsStore'
 import { useCategoriesStore } from '../../store/categoriesStore'
@@ -99,15 +99,15 @@ const BudgetsPage: React.FC = () => {
   }
 
   // Handle edit budget
-  const handleEditBudget = (budget: Budget) => {
+  const handleEditBudget = useCallback((budget: Budget) => {
     setEditingBudget(budget)
     setShowForm(true)
-  }
+  }, [])
 
   // Handle delete budget
-  const handleDeleteClick = (id: string) => {
+  const handleDeleteClick = useCallback((id: string) => {
     setDeleteConfirm({ id, show: true })
-  }
+  }, [])
 
   const handleDeleteConfirm = async () => {
     if (deleteConfirm.id) {

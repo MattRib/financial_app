@@ -10,7 +10,71 @@ interface CategoriesListProps {
   onCreateFirst?: () => void
 }
 
-const CategoriesList: React.FC<CategoriesListProps> = ({
+// Memoized category card component
+const CategoryCard = React.memo<{
+  category: Category
+  onEdit: (category: Category) => void
+  onDelete: (id: string) => void
+  getTypeIcon: (type: Category['type']) => React.ReactNode
+  getTypeLabel: (type: Category['type']) => string
+  getTypeBadgeClasses: (type: Category['type']) => string
+}>(({ category, onEdit, onDelete, getTypeIcon, getTypeLabel, getTypeBadgeClasses }) => (
+  <div
+    className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200"
+  >
+    <div className="flex flex-col items-center text-center space-y-4">
+      {/* Icon */}
+      <div
+        className="w-16 h-16 rounded-full flex items-center justify-center text-2xl"
+        style={{
+          backgroundColor: `${category.color}20`,
+          color: category.color,
+        }}
+      >
+        {category.icon || '📁'}
+      </div>
+
+      {/* Name */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900">{category.name}</h3>
+      </div>
+
+      {/* Type Badge */}
+      <div className="flex items-center gap-1">
+        <span
+          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getTypeBadgeClasses(
+            category.type
+          )}`}
+        >
+          {getTypeIcon(category.type)}
+          {getTypeLabel(category.type)}
+        </span>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-2 pt-2 border-t border-gray-200 w-full justify-center">
+        <button
+          onClick={() => onEdit(category)}
+          className="p-2 text-indigo-600 hover:text-indigo-900 hover:bg-indigo-50 rounded-md transition-colors duration-200"
+          title="Editar categoria"
+        >
+          <Edit2 size={18} />
+        </button>
+        <button
+          onClick={() => onDelete(category.id)}
+          className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-md transition-colors duration-200"
+          title="Deletar categoria"
+        >
+          <Trash2 size={18} />
+        </button>
+      </div>
+    </div>
+  </div>
+))
+
+CategoryCard.displayName = 'CategoryCard'
+
+const CategoriesList = React.memo<CategoriesListProps>(({
   categories,
   loading,
   onEdit,
@@ -123,62 +187,30 @@ const CategoriesList: React.FC<CategoriesListProps> = ({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {categories.map((category) => (
-        <div
+        <CategoryCard
           key={category.id}
-          className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200"
-        >
-          <div className="flex flex-col items-center text-center space-y-4">
-            {/* Icon */}
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center text-2xl"
-              style={{
-                backgroundColor: `${category.color}20`,
-                color: category.color,
-              }}
-            >
-              {category.icon || '📁'}
-            </div>
-
-            {/* Name */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">{category.name}</h3>
-            </div>
-
-            {/* Type Badge */}
-            <div className="flex items-center gap-1">
-              <span
-                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getTypeBadgeClasses(
-                  category.type
-                )}`}
-              >
-                {getTypeIcon(category.type)}
-                {getTypeLabel(category.type)}
-              </span>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-2 pt-2 border-t border-gray-200 w-full justify-center">
-              <button
-                onClick={() => onEdit(category)}
-                className="p-2 text-indigo-600 hover:text-indigo-900 hover:bg-indigo-50 rounded-md transition-colors duration-200"
-                title="Editar categoria"
-              >
-                <Edit2 size={18} />
-              </button>
-              <button
-                onClick={() => onDelete(category.id)}
-                className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-md transition-colors duration-200"
-                title="Deletar categoria"
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
+          category={category}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          getTypeIcon={getTypeIcon}
+          getTypeLabel={getTypeLabel}
+          getTypeBadgeClasses={getTypeBadgeClasses}
+        />
       ))}
     </div>
   )
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison to avoid unnecessary re-renders
+  return (
+    prevProps.categories === nextProps.categories &&
+    prevProps.loading === nextProps.loading &&
+    prevProps.onEdit === nextProps.onEdit &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onCreateFirst === nextProps.onCreateFirst
+  )
+})
+
+CategoriesList.displayName = 'CategoriesList'
 
 export default CategoriesList
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { MainLayout } from '../../components/layout'
 import { useCategoriesStore } from '../../store/categoriesStore'
 import CategoriesList from './CategoriesList'
@@ -45,15 +45,15 @@ const CategoriesPage: React.FC = () => {
   }
 
   // Handle edit category
-  const handleEditCategory = (category: Category) => {
+  const handleEditCategory = useCallback((category: Category) => {
     setEditingCategory(category)
     setShowForm(true)
-  }
+  }, [])
 
   // Handle delete category
-  const handleDeleteClick = (id: string) => {
+  const handleDeleteClick = useCallback((id: string) => {
     setDeleteConfirm({ id, show: true })
-  }
+  }, [])
 
   const handleDeleteConfirm = async () => {
     if (deleteConfirm.id) {
