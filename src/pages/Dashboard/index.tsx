@@ -60,7 +60,14 @@ const Dashboard: React.FC = () => {
   // Local state
   const [investmentsTotal, setInvestmentsTotal] = React.useState<number | null>(null)
   const [investmentsLoading, setInvestmentsLoading] = React.useState(false)
-  const [categoryData, setCategoryData] = React.useState<any[]>([])
+
+  type CategoryData = {
+    category_name?: string
+    total: number
+    category_color?: string
+  }
+
+  const [categoryData, setCategoryData] = React.useState<CategoryData[]>([])
 
   // Get current month dates
   const currentDate = new Date()
@@ -69,46 +76,57 @@ const Dashboard: React.FC = () => {
   const startDate = new Date(currentYear, currentMonth - 1, 1).toISOString().split('T')[0]
   const endDate = new Date(currentYear, currentMonth, 0).toISOString().split('T')[0]
 
-  // Fetch data on mount
-  useEffect(() => {
-    // Fetch transactions for current month
-    fetchTransactions({
-      start_date: startDate,
-      end_date: endDate,
-    })
-
-    // Fetch summary for current month
-    fetchSummary(startDate, endDate)
-
-    // Fetch budgets for current month
-    fetchBudgets(currentMonth, currentYear)
-
-    // Fetch investments total
-    setInvestmentsLoading(true)
-    investmentsService
-      .getMonthlyTotal(currentMonth, currentYear)
-      .then((total) => {
-        setInvestmentsTotal(total)
-        setInvestmentsLoading(false)
-      })
-      .catch(() => {
-        setInvestmentsTotal(0)
-        setInvestmentsLoading(false)
-      })
-
-    // Fetch transactions by category
-    fetchTransactionsByCategory()
-  }, [fetchTransactions, fetchSummary, fetchBudgets, currentMonth, currentYear, startDate, endDate])
-
   // Fetch transactions by category
-  const fetchTransactionsByCategory = async () => {
-    try {
-      const data = await transactionsService.getByCategory(startDate, endDate)
-      setCategoryData(data)
-    } catch (err) {
-      setCategoryData([])
-    }
-  }
+    const fetchTransactionsByCategory = React.useCallback(async () => {
+      try {
+        const data = await transactionsService.getByCategory(startDate, endDate) as CategoryData[]
+        setCategoryData(data)
+      } catch {
+        setCategoryData([])
+      }
+    }, [startDate, endDate])
+  
+    // Fetch data on mount
+    useEffect(() => {
+      // Fetch transactions for current month
+      fetchTransactions({
+        start_date: startDate,
+        end_date: endDate,
+      })
+  
+      // Fetch summary for current month
+      fetchSummary(startDate, endDate)
+  
+      // Fetch budgets for current month
+      fetchBudgets(currentMonth, currentYear)
+  
+    // Fetch investments total (run async to avoid synchronous setState in effect)
+          let mounted = true
+          ;(async () => {
+            // ensure the following setState runs asynchronously to avoid cascading renders
+            await Promise.resolve()
+            if (!mounted) return
+    
+            setInvestmentsLoading(true)
+            try {
+              const total = await investmentsService.getMonthlyTotal(currentMonth, currentYear)
+              if (mounted) setInvestmentsTotal(total)
+            } catch {
+              if (mounted) setInvestmentsTotal(0)
+            } finally {
+              if (mounted) setInvestmentsLoading(false)
+            }
+          })()
+    
+          // Fetch transactions by category
+          fetchTransactionsByCategory()
+    
+          return () => {
+            mounted = false
+          }
+        }, [fetchTransactions, fetchSummary, fetchBudgets, currentMonth, currentYear, startDate, endDate, fetchTransactionsByCategory])
+
+  // Fetch transactions by category is defined above using React.useCallback
 
   // Format currency
   const formatCurrency = (value: number) => {
