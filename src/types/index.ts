@@ -112,6 +112,20 @@ export interface BudgetOverview {
   budgets: Budget[]
 }
 
+export interface CreateBudgetDto {
+  category_id?: string
+  amount: number
+  month: number
+  year: number
+}
+
+export interface UpdateBudgetDto {
+  category_id?: string
+  amount?: number
+  month?: number
+  year?: number
+}
+
 // Investment
 export type InvestmentType = 'renda_fixa' | 'renda_variavel' | 'cripto' | 'outros'
 
@@ -124,6 +138,22 @@ export interface Investment {
   date: string
   notes: string | null
   created_at: string
+}
+
+export interface CreateInvestmentDto {
+  type: InvestmentType
+  name: string
+  amount: number
+  date: string
+  notes?: string
+}
+
+export interface UpdateInvestmentDto {
+  type?: InvestmentType
+  name?: string
+  amount?: number
+  date?: string
+  notes?: string
 }
 
 // Goal
@@ -142,6 +172,24 @@ export interface Goal {
   created_at: string
 }
 
+export interface CreateGoalDto {
+  name: string
+  target_amount: number
+  target_date: string
+  category?: string
+  notes?: string
+}
+
+export interface UpdateGoalDto {
+  name?: string
+  target_amount?: number
+  current_amount?: number
+  target_date?: string
+  status?: GoalStatus
+  category?: string
+  notes?: string
+}
+
 // Debt
 export type DebtStatus = 'pending' | 'paid' | 'overdue'
 
@@ -156,4 +204,22 @@ export interface Debt {
   creditor?: string
   notes?: string
   created_at: string
+}
+
+export interface CreateDebtDto {
+  name: string
+  amount: number
+  due_date: string
+  creditor?: string
+  notes?: string
+}
+
+export interface UpdateDebtDto {
+  name?: string
+  amount?: number
+  due_date?: string
+  status?: DebtStatus
+  amount_paid?: number
+  creditor?: string
+  notes?: string
 }
