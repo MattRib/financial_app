@@ -168,6 +168,8 @@ const TransactionsPage: React.FC = () => {
   const [appliedFilters, setAppliedFilters] = useState<TransactionFilters>({})
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; show: boolean }>({ id: '', show: false })
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   // Date range state
   const [startDate, setStartDate] = useState(() => {
@@ -307,6 +309,19 @@ const TransactionsPage: React.FC = () => {
     }
     return categories
   }, [categories, filters.type])
+
+  // Pagination calculations
+  const totalPages = Math.ceil(transactions.length / itemsPerPage)
+  const paginatedTransactions = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return transactions.slice(startIndex, endIndex)
+  }, [transactions, currentPage, itemsPerPage])
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [appliedFilters])
 
   return (
     <MainLayout>
@@ -500,11 +515,67 @@ const TransactionsPage: React.FC = () => {
 
         {/* Transactions List */}
         <TransactionsList
-          transactions={transactions}
+          transactions={paginatedTransactions}
           onEdit={handleEditTransaction}
           onDelete={handleDeleteClick}
           loading={loading}
         />
+
+        {/* Pagination */}
+        {transactions.length > itemsPerPage && (
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-700">
+                Mostrando {((currentPage - 1) * itemsPerPage) + 1} a{' '}
+                {Math.min(currentPage * itemsPerPage, transactions.length)} de{' '}
+                {transactions.length} transações
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Anterior
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum: number
+                    if (totalPages <= 5) {
+                      pageNum = i + 1
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i
+                    } else {
+                      pageNum = currentPage - 2 + i
+                    }
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-3 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+                          currentPage === pageNum
+                            ? 'bg-indigo-600 text-white'
+                            : 'border border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    )
+                  })}
+                </div>
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Próxima
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Modal - Transaction Form */}
         {showForm && (
