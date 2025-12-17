@@ -98,6 +98,12 @@ cd C:\Users\mathe\Documents\GitHub\financial_app
 npm run dev
 ```
 
+Alternativamente, rode ambos (frontend + backend) com um único comando:
+
+```powershell
+npm run dev:all
+```
+
 Endpoints e URLs:
 - API: http://localhost:3333/api
 - Swagger (docs): http://localhost:3333/docs
