@@ -2,7 +2,8 @@ import { api } from './api'
 import type { 
   Budget, 
   CreateBudgetDto, 
-  UpdateBudgetDto
+  UpdateBudgetDto,
+  BudgetOverview
 } from '../types'
 
 export const budgetsService = {
@@ -23,6 +24,12 @@ export const budgetsService = {
 
   getMonthBudgets: (month: number, year: number) => 
     api.get<Budget[]>('/budgets', { 
+      month, 
+      year 
+    }),
+
+  getOverview: (month: number, year: number) => 
+    api.get<BudgetOverview>('/budgets/overview', { 
       month, 
       year 
     }),
