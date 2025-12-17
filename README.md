@@ -104,6 +104,46 @@ Alternativamente, rode ambos (frontend + backend) com um único comando:
 npm run dev:all
 ```
 
+Para aplicar a migration `profiles` no Supabase (local ou remoto) usando a CLI do Supabase:
+
+1) Instale a CLI (se ainda não tiver):
+
+```powershell
+# dentro de finances-api
+cd finances-api
+npm install --save-dev supabase
+# ou globalmente
+npm install -g supabase
+```
+
+2) Faça login e/ou link para seu projeto:
+
+```powershell
+# login (abrirá browser para autenticação)
+npx supabase login
+
+# (opcional) linkar ao projeto para evitar passar --project-ref
+# substitua <PROJECT_REF> pelo identificador do seu projeto (ex.: 'ziwmxrooeunzbeqyhmrl')
+npx supabase link --project-ref <PROJECT_REF>
+```
+
+3) Rodar a migration criada:
+
+```powershell
+# aplica migrations locais pendentes
+npx supabase db push
+
+# OU executar um arquivo SQL específico
+npx supabase db query --file supabase/migrations/20251217183000_create_profiles.sql
+```
+
+4) Helper: extraia automaticamente o `project-ref` da sua `.env` e aplique as migrations com um script PowerShell (rodar a partir de `finances-api`):
+
+```powershell
+cd finances-api
+pwsh ./scripts/apply-profiles-migration.ps1
+```
+
 Endpoints e URLs:
 - API: http://localhost:3333/api
 - Swagger (docs): http://localhost:3333/docs

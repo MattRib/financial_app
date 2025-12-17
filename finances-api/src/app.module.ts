@@ -8,6 +8,7 @@ import { BudgetsModule } from './modules/budgets/budgets.module';
 import { InvestmentsModule } from './modules/investments/investments.module';
 import { GoalsModule } from './modules/goals/goals.module';
 import { DebtsModule } from './modules/debts/debts.module';
+import { ProfilesModule } from './modules/profiles/profiles.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -22,6 +23,8 @@ import { AppService } from './app.service';
     InvestmentsModule,
     GoalsModule,
     DebtsModule,
+    // Profiles module for user profiles synced with Supabase Auth
+    ProfilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
