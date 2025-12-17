@@ -254,16 +254,16 @@ If you get `npm error could not determine executable to run` when running `npx t
 
 1. Use the preinstalled Tailwind PostCSS plugin (no CLI needed)
 
-  - We added `tailwind.config.cjs` and `postcss.config.cjs` already, and imported Tailwind into `src/index.css`.
-  - Vite will use PostCSS, so you can run `npm run dev` and Tailwind will work.
+- We added `tailwind.config.cjs` and `postcss.config.cjs` already, and imported Tailwind into `src/index.css`.
+- Vite will use PostCSS, so you can run `npm run dev` and Tailwind will work.
 
-2. Use the official Tailwind v3 CLI to generate files with `npx` (one-time):
+2.Use the official Tailwind v3 CLI to generate files with `npx` (one-time):
 
 ```powershell
 npx -p tailwindcss@3 tailwindcss init -p
 ```
 
-3. Install the Tailwind v3 CLI as a dev dependency (longer-term):
+3.Install the Tailwind v3 CLI as a dev dependency (longer-term):
 
 ```powershell
 npm install -D tailwindcss@3 postcss autoprefixer
@@ -370,5 +370,3 @@ const { data: session } = await supabase.auth.getSession()
 // Sign out
 await supabase.auth.signOut()
 ```
-
-
