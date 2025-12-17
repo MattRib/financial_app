@@ -46,20 +46,25 @@ const Dashboard: React.FC = () => {
   const {
     transactions,
     summary,
-    loading: transactionsLoading,
     fetchTransactions,
     fetchSummary,
   } = useTransactionsStore()
 
   const {
     budgets,
-    loading: budgetsLoading,
     fetchBudgets,
   } = useBudgetsStore()
 
   // Local state
   const [investmentsTotal, setInvestmentsTotal] = React.useState<number | null>(null)
-  const [investmentsLoading, setInvestmentsLoading] = React.useState(false)
+  const [isLoadingDashboard, setIsLoadingDashboard] = React.useState(false)
+  const [errors, setErrors] = React.useState<{
+    transactions?: string
+    summary?: string
+    budgets?: string
+    investments?: string
+    categories?: string
+  }>({})
 
   type CategoryData = {
     category_name?: string
@@ -76,55 +81,83 @@ const Dashboard: React.FC = () => {
   const startDate = new Date(currentYear, currentMonth - 1, 1).toISOString().split('T')[0]
   const endDate = new Date(currentYear, currentMonth, 0).toISOString().split('T')[0]
 
-  // Fetch transactions by category
-    const fetchTransactionsByCategory = React.useCallback(async () => {
-      try {
-        const data = await transactionsService.getByCategory(startDate, endDate) as CategoryData[]
-        setCategoryData(data)
-      } catch {
+  // Fetch all data in parallel on mount
+  useEffect(() => {
+    let mounted = true
+
+    const loadDashboardData = async () => {
+      if (!mounted) return
+
+      setIsLoadingDashboard(true)
+      setErrors({})
+
+      // Parallelize all API calls using Promise.allSettled
+      const results = await Promise.allSettled([
+        // 1. Fetch transactions for current month
+        fetchTransactions({
+          start_date: startDate,
+          end_date: endDate,
+        }),
+        
+        // 2. Fetch summary for current month
+        fetchSummary(startDate, endDate),
+        
+        // 3. Fetch budgets for current month
+        fetchBudgets(currentMonth, currentYear),
+        
+        // 4. Fetch investments total
+        investmentsService.getMonthlyTotal(currentMonth, currentYear),
+        
+        // 5. Fetch transactions by category
+        transactionsService.getByCategory(startDate, endDate),
+      ])
+
+      if (!mounted) return
+
+      // Handle results individually
+      const newErrors: typeof errors = {}
+
+      // Result 0: Transactions
+      if (results[0].status === 'rejected') {
+        newErrors.transactions = 'Erro ao carregar transações'
+      }
+
+      // Result 1: Summary
+      if (results[1].status === 'rejected') {
+        newErrors.summary = 'Erro ao carregar resumo'
+      }
+
+      // Result 2: Budgets
+      if (results[2].status === 'rejected') {
+        newErrors.budgets = 'Erro ao carregar orçamentos'
+      }
+
+      // Result 3: Investments
+      if (results[3].status === 'fulfilled') {
+        setInvestmentsTotal(results[3].value)
+      } else {
+        newErrors.investments = 'Erro ao carregar investimentos'
+        setInvestmentsTotal(0)
+      }
+
+      // Result 4: Categories
+      if (results[4].status === 'fulfilled') {
+        setCategoryData(results[4].value as CategoryData[])
+      } else {
+        newErrors.categories = 'Erro ao carregar categorias'
         setCategoryData([])
       }
-    }, [startDate, endDate])
-  
-    // Fetch data on mount
-    useEffect(() => {
-      // Fetch transactions for current month
-      fetchTransactions({
-        start_date: startDate,
-        end_date: endDate,
-      })
-  
-      // Fetch summary for current month
-      fetchSummary(startDate, endDate)
-  
-      // Fetch budgets for current month
-      fetchBudgets(currentMonth, currentYear)
-  
-    // Fetch investments total (run async to avoid synchronous setState in effect)
-          let mounted = true
-          ;(async () => {
-            // ensure the following setState runs asynchronously to avoid cascading renders
-            await Promise.resolve()
-            if (!mounted) return
-    
-            setInvestmentsLoading(true)
-            try {
-              const total = await investmentsService.getMonthlyTotal(currentMonth, currentYear)
-              if (mounted) setInvestmentsTotal(total)
-            } catch {
-              if (mounted) setInvestmentsTotal(0)
-            } finally {
-              if (mounted) setInvestmentsLoading(false)
-            }
-          })()
-    
-          // Fetch transactions by category
-          fetchTransactionsByCategory()
-    
-          return () => {
-            mounted = false
-          }
-        }, [fetchTransactions, fetchSummary, fetchBudgets, currentMonth, currentYear, startDate, endDate, fetchTransactionsByCategory])
+
+      setErrors(newErrors)
+      setIsLoadingDashboard(false)
+    }
+
+    loadDashboardData()
+
+    return () => {
+      mounted = false
+    }
+  }, [fetchTransactions, fetchSummary, fetchBudgets, currentMonth, currentYear, startDate, endDate])
 
   // Fetch transactions by category is defined above using React.useCallback
 
@@ -170,7 +203,9 @@ const Dashboard: React.FC = () => {
     })
   }, [budgets])
 
-  const isLoading = transactionsLoading || budgetsLoading || investmentsLoading
+  const isLoading = isLoadingDashboard
+  const hasTransactionsError = errors.transactions || errors.summary
+  const hasCategoriesError = errors.categories
 
   return (
     <MainLayout>
@@ -188,28 +223,28 @@ const Dashboard: React.FC = () => {
             value={summary ? formatCurrency(summary.total_income) : 'R$ 0,00'}
             icon={<TrendingUp size={24} className="text-green-600" />}
             color="bg-green-50"
-            loading={transactionsLoading}
+            loading={isLoadingDashboard}
           />
           <StatCard
             title="Despesas do mês"
             value={summary ? formatCurrency(summary.total_expense) : 'R$ 0,00'}
             icon={<TrendingDown size={24} className="text-red-600" />}
             color="bg-red-50"
-            loading={transactionsLoading}
+            loading={isLoadingDashboard}
           />
           <StatCard
             title="Saldo atual"
             value={summary ? formatCurrency(summary.balance) : 'R$ 0,00'}
             icon={<Wallet size={24} className="text-indigo-600" />}
             color="bg-indigo-50"
-            loading={transactionsLoading}
+            loading={isLoadingDashboard}
           />
           <StatCard
             title="Investimentos"
             value={investmentsTotal !== null ? formatCurrency(investmentsTotal) : 'R$ 0,00'}
             icon={<PiggyBank size={24} className="text-amber-600" />}
             color="bg-amber-50"
-            loading={investmentsLoading}
+            loading={isLoadingDashboard}
           />
         </div>
 
@@ -221,6 +256,10 @@ const Dashboard: React.FC = () => {
             {isLoading ? (
               <div className="h-64 flex items-center justify-center">
                 <div className="animate-pulse text-gray-400">Carregando gráfico...</div>
+              </div>
+            ) : hasCategoriesError ? (
+              <div className="h-64 flex items-center justify-center border-2 border-dashed border-red-200 rounded-lg">
+                <p className="text-red-400">{errors.categories}</p>
               </div>
             ) : pieChartData.length === 0 ? (
               <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg">
@@ -248,6 +287,10 @@ const Dashboard: React.FC = () => {
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="h-12 bg-gray-200 rounded animate-pulse"></div>
                 ))}
+              </div>
+            ) : hasTransactionsError ? (
+              <div className="h-64 flex items-center justify-center border-2 border-dashed border-red-200 rounded-lg">
+                <p className="text-red-400">{errors.transactions || errors.summary}</p>
               </div>
             ) : recentTransactions.length === 0 ? (
               <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg">
@@ -303,11 +346,15 @@ const Dashboard: React.FC = () => {
               <ArrowRight size={14} />
             </button>
           </div>
-          {budgetsLoading ? (
+          {isLoadingDashboard ? (
             <div className="space-y-3">
               {[1, 2].map((i) => (
                 <div key={i} className="h-16 bg-gray-200 rounded animate-pulse"></div>
               ))}
+            </div>
+          ) : errors.budgets ? (
+            <div className="h-32 flex items-center justify-center border-2 border-dashed border-red-200 rounded-lg">
+              <p className="text-red-400">{errors.budgets}</p>
             </div>
           ) : budgetAlerts.length === 0 ? (
             <div className="h-32 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg">
