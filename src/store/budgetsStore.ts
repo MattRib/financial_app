@@ -20,7 +20,7 @@ export interface BudgetsState {
   deleteBudget: (id: string) => Promise<void>
 }
 
-export const useBudgetsStore = create<BudgetsState>((set, get) => ({
+export const useBudgetsStore = create<BudgetsState>((set) => ({
   budgets: [],
   overview: null,
   loading: false,
