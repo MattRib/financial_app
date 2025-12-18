@@ -3,8 +3,8 @@ import { useAuthStore } from '../store/authStore'
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api'
 
 export class HttpError extends Error {
-  public status: number
-  public data?: unknown
+    public status: number
+    public data?: unknown
 
   constructor(status: number, message: string, data?: unknown) {
     super(message)
