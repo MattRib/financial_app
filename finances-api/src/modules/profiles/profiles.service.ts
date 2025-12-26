@@ -31,9 +31,7 @@ export class ProfilesService {
       id: userId,
       ...dto,
     };
-    const { error } = await this.supabase.from('profiles').upsert(updates, {
-      returning: 'representation',
-    });
+    const { error } = await this.supabase.from('profiles').upsert(updates);
     if (error) throw error;
 
     const profile = await this.findById(userId);
