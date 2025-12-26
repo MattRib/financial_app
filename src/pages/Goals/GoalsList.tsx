@@ -34,7 +34,7 @@ const getProgressColor = (percentage: number): string => {
   return 'bg-green-600'
 }
 
-const getDaysRemaining = (targetDate: string): { days: number; isPast: boolean; label: string; color: string } => {
+const getDaysRemaining = (targetDate: string) => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   
@@ -45,15 +45,14 @@ const getDaysRemaining = (targetDate: string): { days: number; isPast: boolean; 
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
   
   const isPast = diffDays < 0
-  const days = Math.abs(diffDays)
+  const absDays = Math.abs(diffDays)
   
-  const label = isPast
-    ? `Vencida há ${days} dia${days !== 1 ? 's' : ''}`
-    : `Faltam ${days} dia${days !== 1 ? 's' : ''}`
-  
-  const color = isPast ? 'text-red-600' : 'text-green-600'
-  
-  return { days, isPast, label, color }
+  return {
+    days: absDays,
+    isPast,
+    label: isPast ? `Vencida há ${absDays} ${absDays === 1 ? 'dia' : 'dias'}` : `Faltam ${absDays} ${absDays === 1 ? 'dia' : 'dias'}`,
+    color: isPast ? 'text-red-600' : 'text-green-600',
+  }
 }
 
 const getStatusLabel = (status: GoalStatus): string => {
@@ -125,10 +124,10 @@ const GoalItem = React.memo<{
         {/* Progresso */}
         <td className="px-4 py-3">
           <div className="flex items-center gap-2">
-            <div className="flex-1 bg-gray-200 rounded-full h-2.5 min-w-[100px]">
+            <div className="flex-1 bg-gray-200 rounded-full h-2.5 min-w-[120px]">
               <div
                 className={`h-2.5 rounded-full transition-all ${progressColor}`}
-                style={{ width: `${percentage}%` }}
+                style={{ width: `${Math.min(100, percentage)}%` }}
               />
             </div>
             <span className="text-xs font-medium text-gray-700 whitespace-nowrap">
@@ -178,7 +177,7 @@ const GoalItem = React.memo<{
             <button
               onClick={() => onDelete(goal.id)}
               className="text-red-600 hover:text-red-900 p-1"
-              title="Excluir"
+              title="Deletar"
             >
               <Trash2 size={16} />
             </button>
@@ -218,7 +217,7 @@ const GoalItem = React.memo<{
             <button
               onClick={() => onDelete(goal.id)}
               className="text-red-600 hover:text-red-900 p-1"
-              title="Excluir"
+              title="Deletar"
             >
               <Trash2 size={16} />
             </button>
@@ -234,7 +233,7 @@ const GoalItem = React.memo<{
           <div className="bg-gray-200 rounded-full h-2.5">
             <div
               className={`h-2.5 rounded-full transition-all ${progressColor}`}
-              style={{ width: `${percentage}%` }}
+              style={{ width: `${Math.min(100, percentage)}%` }}
             />
           </div>
         </div>
@@ -300,27 +299,27 @@ const GoalsList = React.memo<GoalsListProps>(
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Nome
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Progresso
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Valores
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Data Alvo
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Ações
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-gray-200">
                 {goals.map((goal) => (
                   <GoalItem
                     key={goal.id}
