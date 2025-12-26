@@ -7,8 +7,19 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Allow multiple development origins and make it configurable via env var `CORS_ORIGINS`.
+  // Example: CORS_ORIGINS='http://localhost:5173,http://localhost:5174'
+  const allowedOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:5173,http://localhost:5174')
+    .split(',')
+    .map((o) => o.trim());
+
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g., server-to-server requests or tools like curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) !== -1) return callback(null, true);
+      return callback(new Error('CORS policy: Origin not allowed'));
+    },
     credentials: true,
   });
 

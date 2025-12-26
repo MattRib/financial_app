@@ -42,6 +42,23 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 The application uses `SupabaseService` to verify access tokens from requests and to access server-side APIs.
 
+Configuração adicional (CORS / porta)
+
+- Para desenvolvimento você pode definir origens CORS e porta via variáveis de ambiente:
+
+```dotenv
+CORS_ORIGINS=http://localhost:5173,http://localhost:5174
+PORT=3333
+```
+
+- Para facilitar o start local no Windows (define as variáveis e inicia com `start:dev`):
+
+```bash
+npm run start:dev:local
+```
+
+> Nota: não comite chaves sensíveis (por exemplo `SUPABASE_SERVICE_ROLE_KEY`) no repositório; use o `.env` local e o `.env.example` como referência.
+
 ### Protecting routes
 
 To protect a route and require a valid Supabase access token, use the `SupabaseAuthGuard` in the controller:

@@ -9,17 +9,17 @@ export class ProfilesService {
   constructor(@Inject(SUPABASE_CLIENT) private supabase: SupabaseClient) {}
 
   async findById(id: string): Promise<Profile | null> {
-    const { data, error } = await this.supabase
+    const response = await this.supabase
       .from('profiles')
       .select('*')
       .eq('id', id)
       .single();
 
-    if (error) {
-      throw error;
+    if (response.error) {
+      throw response.error;
     }
 
-    return data as Profile | null;
+    return response.data as Profile | null;
   }
 
   async findByUserId(userId: string): Promise<Profile | null> {
@@ -31,8 +31,8 @@ export class ProfilesService {
       id: userId,
       ...dto,
     };
-    const { error } = await this.supabase.from('profiles').upsert(updates);
-    if (error) throw error;
+    const result = await this.supabase.from('profiles').upsert(updates);
+    if (result.error) throw result.error;
 
     const profile = await this.findById(userId);
     if (!profile) throw new NotFoundException('Profile not found after update');
