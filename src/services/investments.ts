@@ -6,9 +6,15 @@ import type {
   InvestmentType
 } from '../types'
 
+interface FilterInvestmentDto {
+  type?: InvestmentType
+  start_date?: string
+  end_date?: string
+}
+
 export const investmentsService = {
-  getAll: () => 
-    api.get<Investment[]>('/investments'),
+  getAll: (filters?: FilterInvestmentDto) => 
+    api.get<Investment[]>('/investments', filters),
 
   getById: (id: string) => 
     api.get<Investment>(`/investments/${id}`),

@@ -4,16 +4,36 @@ import type {
   Investment,
   CreateInvestmentDto,
   UpdateInvestmentDto,
+  InvestmentType,
 } from '../types'
+
+export interface FilterInvestmentDto {
+  type?: InvestmentType
+  start_date?: string
+  end_date?: string
+}
+
+export interface InvestmentSummary {
+  total_invested: number
+  by_type: {
+    type: InvestmentType
+    total: number
+    percentage: number
+    count: number
+  }[]
+  monthly_average: number
+}
 
 export interface InvestmentsState {
   investments: Investment[]
   loading: boolean
   error: string | null
   monthlyTotal: number | null
+  summary: InvestmentSummary | null
 
-  fetchInvestments: () => Promise<void>
+  fetchInvestments: (filters?: FilterInvestmentDto) => Promise<void>
   fetchMonthlyTotal: (month: number, year: number) => Promise<void>
+  fetchSummary: (startDate?: string, endDate?: string) => Promise<void>
   createInvestment: (data: CreateInvestmentDto) => Promise<void>
   updateInvestment: (id: string, data: UpdateInvestmentDto) => Promise<void>
   deleteInvestment: (id: string) => Promise<void>
@@ -24,11 +44,12 @@ export const useInvestmentsStore = create<InvestmentsState>((set) => ({
   loading: false,
   error: null,
   monthlyTotal: null,
+  summary: null,
 
-  fetchInvestments: async () => {
+  fetchInvestments: async (filters?: FilterInvestmentDto) => {
     set({ loading: true, error: null })
     try {
-      const investments = await investmentsService.getAll()
+      const investments = await investmentsService.getAll(filters)
       set({ investments, loading: false })
     } catch (err: unknown) {
       set({ error: String(err), loading: false })
@@ -36,9 +57,24 @@ export const useInvestmentsStore = create<InvestmentsState>((set) => ({
   },
 
   fetchMonthlyTotal: async (month: number, year: number) => {
+    set({ error: null })
     try {
-      const total = await investmentsService.getMonthlyTotal(month, year)
-      set({ monthlyTotal: total })
+      const monthlyTotal = await investmentsService.getMonthlyTotal(month, year)
+      set({ monthlyTotal })
+    } catch (err: unknown) {
+      set({ error: String(err) })
+    }
+  },
+
+  fetchSummary: async (startDate?: string, endDate?: string) => {
+    set({ error: null })
+    try {
+      // TODO: Implementar quando o backend tiver o endpoint /investments/summary
+      // const summary = await investmentsService.getSummary(startDate, endDate)
+      // set({ summary })
+      
+      // Por enquanto retorna null ou calcula localmente
+      set({ summary: null })
     } catch (err: unknown) {
       set({ error: String(err) })
     }
