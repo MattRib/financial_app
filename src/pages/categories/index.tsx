@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { MainLayout } from '../../components/layout'
 import { useCategoriesStore } from '../../store/categoriesStore'
-import CategoriesList from './CategoriesList'
+import CategoriesList from '../categories/CategoriesList'
 import CategoryForm from './CategoryForm'
 import type { Category, CategoryType, CreateCategoryDto, UpdateCategoryDto } from '../../types'
 import { Plus, X, TrendingUp, TrendingDown, PiggyBank, List } from 'lucide-react'
