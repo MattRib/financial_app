@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
+ 
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { SUPABASE_CLIENT } from '../../config/supabase.module';
@@ -179,8 +179,9 @@ export class TransactionsService {
 
     for (const transaction of data || []) {
       const categoryId = transaction.category_id || 'uncategorized';
-      const categoryName =
-        (transaction.categories as any)?.name || 'Sem categoria';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const categoryName = (transaction.categories as any)?.name || 'Sem categoria';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const categoryColor = (transaction.categories as any)?.color || '#6b7280';
       const amount = Number(transaction.amount);
 

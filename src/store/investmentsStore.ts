@@ -66,13 +66,13 @@ export const useInvestmentsStore = create<InvestmentsState>((set) => ({
     }
   },
 
-  fetchSummary: async (startDate?: string, endDate?: string) => {
+  fetchSummary: async () => {
     set({ error: null })
     try {
       // TODO: Implementar quando o backend tiver o endpoint /investments/summary
       // const summary = await investmentsService.getSummary(startDate, endDate)
       // set({ summary })
-      
+
       // Por enquanto retorna null ou calcula localmente
       set({ summary: null })
     } catch (err: unknown) {

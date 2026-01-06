@@ -13,7 +13,7 @@ export class SupabaseService {
     if (!url || !key) {
       this.logger.warn('SUPABASE_URL and/or SUPABASE_SERVICE_ROLE_KEY not set');
     }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+     
     this.supabase = createClient(url ?? '', key ?? '');
   }
 

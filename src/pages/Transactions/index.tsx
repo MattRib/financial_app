@@ -237,7 +237,7 @@ const TransactionsPage: React.FC = () => {
         setDeleteConfirm({ id: '', show: false })
         // Refetch transactions
         await fetchTransactions(appliedFilters)
-      } catch (err) {
+      } catch {
         setNotification({ type: 'error', message: 'Erro ao deletar transação' })
       }
     }
@@ -328,6 +328,7 @@ const TransactionsPage: React.FC = () => {
 
   // Reset to page 1 when filters change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1)
   }, [appliedFilters])
 

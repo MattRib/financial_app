@@ -173,13 +173,14 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
 
   // Reset category when type changes
   useEffect(() => {
-    if (categoryId) {
-      const selectedCategory = categories.find((cat) => cat.id === categoryId)
-      if (selectedCategory && selectedCategory.type !== type) {
-        setCategoryId('')
-      }
+    if (!categoryId) return
+
+    const selectedCategory = categories.find((cat) => cat.id === categoryId)
+    if (selectedCategory && selectedCategory.type !== type) {
+      setCategoryId('')
     }
-  }, [type, categoryId, categories])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type])
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

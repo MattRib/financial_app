@@ -13,8 +13,8 @@ interface FilterInvestmentDto {
 }
 
 export const investmentsService = {
-  getAll: (filters?: FilterInvestmentDto) => 
-    api.get<Investment[]>('/investments', filters),
+  getAll: (filters?: FilterInvestmentDto) =>
+    api.get<Investment[]>('/investments', filters as Record<string, string | number | undefined>),
 
   getById: (id: string) => 
     api.get<Investment>(`/investments/${id}`),

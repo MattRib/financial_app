@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProfilesController } from './profiles.controller';
 import { ProfilesService } from './profiles.service';

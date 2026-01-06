@@ -11,7 +11,7 @@ export const SUPABASE_CLIENT = 'SUPABASE_CLIENT';
     {
       provide: SUPABASE_CLIENT,
       useFactory: (configService: ConfigService): SupabaseClient => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+         
         return createClient(
           configService.get<string>('SUPABASE_URL') ?? '',
           configService.get<string>('SUPABASE_SERVICE_ROLE_KEY') ?? '',

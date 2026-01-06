@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
+ 
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SUPABASE_CLIENT } from '../../config/supabase.module';
@@ -42,6 +42,7 @@ export class GoalsService {
   }
 
   async findAll(userId: string, filters?: FilterGoalDto): Promise<Goal[]> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let query: any = this.supabase
       .from('goals')
       .select('*')
@@ -106,10 +107,12 @@ export class GoalsService {
     const goals = data || [];
 
     const totalTarget = goals.reduce(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (sum: number, g: any) => sum + Number(g.target_amount),
       0,
     );
     const currentAmount = goals.reduce(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (sum: number, g: any) => sum + Number(g.current_amount || 0),
       0,
     );

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProfilesService } from './profiles.service';
 import { SUPABASE_CLIENT } from '../../config/supabase.module';

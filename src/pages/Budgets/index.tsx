@@ -118,7 +118,7 @@ const BudgetsPage: React.FC = () => {
         // Refetch data
         await fetchBudgets(currentMonth, currentYear)
         await fetchBudgetOverview(currentMonth, currentYear)
-      } catch (err) {
+      } catch {
         setNotification({ type: 'error', message: 'Erro ao deletar orçamento' })
       }
     }

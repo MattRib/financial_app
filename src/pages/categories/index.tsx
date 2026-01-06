@@ -63,7 +63,7 @@ const CategoriesPage: React.FC = () => {
         setDeleteConfirm({ id: '', show: false })
         // Refetch categories
         await fetchCategories()
-      } catch (err) {
+      } catch {
         setNotification({ type: 'error', message: 'Erro ao deletar categoria' })
       }
     }

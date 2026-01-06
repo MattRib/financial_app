@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(test:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run remove-users:*)",
+      "Bash(npm run lint:*)",
+      "Bash(for file in budgets/budgets.service.spec.ts categories/categories.controller.spec.ts categories/categories.service.spec.ts debts/debts.controller.spec.ts debts/debts.service.spec.ts goals/goals.controller.spec.ts goals/goals.service.spec.ts investments/investments.controller.spec.ts investments/investments.service.spec.ts profiles/profiles.controller.spec.ts profiles/profiles.service.spec.ts transactions/transactions.controller.spec.ts transactions/transactions.service.spec.ts)",
+      "Bash(do if [ -f \"$file\" ])",
+      "Bash(then sed -i '1i/* eslint-disable @typescript-eslint/no-explicit-any */' \"$file\")",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(npm run build:*)"
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
+ 
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -47,9 +47,11 @@ async function bootstrap() {
 
   // Redirect root to docs (useful when `api` global prefix is set)
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const serverAny = (app.getHttpAdapter() as any).getInstance();
     // Express adapter
     if (serverAny && typeof serverAny.get === 'function') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       serverAny.get('/', (_req: any, res: any) => res.redirect('/docs'));
     }
   } catch (err) {

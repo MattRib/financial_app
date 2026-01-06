@@ -21,7 +21,7 @@ export interface TransactionsState {
   deleteTransaction: (id: string) => Promise<void>
 }
 
-export const useTransactionsStore = create<TransactionsState>((set, get) => ({
+export const useTransactionsStore = create<TransactionsState>((set) => ({
   transactions: [],
   summary: null,
   loading: false,

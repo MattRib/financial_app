@@ -9,7 +9,7 @@ export class CategoriesService {
   constructor(@Inject(SUPABASE_CLIENT) private supabase: SupabaseClient) {}
 
   async create(userId: string, dto: CreateCategoryDto): Promise<Category> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+     
     const { data, error } = await this.supabase
       .from('categories')
       .insert({
@@ -50,7 +50,7 @@ export class CategoriesService {
   }
 
   async findOne(userId: string, id: string): Promise<Category> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+     
     const { data, error } = await this.supabase
       .from('categories')
       .select('*')
@@ -71,7 +71,7 @@ export class CategoriesService {
   ): Promise<Category> {
     await this.findOne(userId, id);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+     
     const { data, error } = await this.supabase
       .from('categories')
       .update({
