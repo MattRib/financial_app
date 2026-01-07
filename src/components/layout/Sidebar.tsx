@@ -1,9 +1,9 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { 
-  LayoutDashboard, 
-  ArrowLeftRight, 
-  Tags, 
+import {
+  LayoutDashboard,
+  ArrowLeftRight,
+  Tags,
   Wallet,
   TrendingUp,
   Target,

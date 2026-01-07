@@ -12,6 +12,7 @@ export interface CategoriesState {
   createCategory: (data: CreateCategoryDto) => Promise<void>
   updateCategory: (id: string, data: UpdateCategoryDto) => Promise<void>
   deleteCategory: (id: string) => Promise<void>
+  createDefaultCategories: () => Promise<void>
   setSelectedCategory: (category: Category | null) => void
 }
 
@@ -75,6 +76,21 @@ export const useCategoriesStore = create<CategoriesState>((set) => ({
       }))
     } catch (err: unknown) {
       set({ error: String(err), loading: false })
+      throw err
+    }
+  },
+
+  createDefaultCategories: async () => {
+    set({ loading: true, error: null })
+    try {
+      const newCategories = await categoriesService.createDefaults()
+      set((state) => ({
+        categories: [...state.categories, ...newCategories],
+        loading: false,
+      }))
+    } catch (err: unknown) {
+      set({ error: String(err), loading: false })
+      throw err
     }
   },
 

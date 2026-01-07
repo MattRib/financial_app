@@ -36,6 +36,19 @@ export class CategoriesController {
     return this.categoriesService.findAll(user.id);
   }
 
+  @Post('defaults')
+  createDefaults(@CurrentUser() user: User) {
+    return this.categoriesService.createDefaultCategories(user.id);
+  }
+
+  @Get(':id/stats')
+  getUsageStats(
+    @CurrentUser() user: User,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.categoriesService.getCategoryUsageStats(user.id, id);
+  }
+
   @Get(':id')
   findOne(@CurrentUser() user: User, @Param('id', ParseUUIDPipe) id: string) {
     return this.categoriesService.findOne(user.id, id);
