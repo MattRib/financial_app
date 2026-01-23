@@ -12,7 +12,9 @@
       "Bash(then sed -i '1i/* eslint-disable @typescript-eslint/no-explicit-any */' \"$file\")",
       "Bash(fi)",
       "Bash(done)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)"
     ]
   }
 }
