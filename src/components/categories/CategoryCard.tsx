@@ -1,6 +1,5 @@
 import React from 'react'
-import { motion } from 'framer-motion'
-import { Edit2, Trash2 } from 'lucide-react'
+import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react'
 import type { Category } from '../../types'
 import { CATEGORY_TYPE_CONFIG } from '../../constants/categories'
 
@@ -13,120 +12,130 @@ interface CategoryCardProps {
 
 export const CategoryCard: React.FC<CategoryCardProps> = ({
   category,
-  index = 0,
   onEdit,
   onDelete,
 }) => {
+  const [showActions, setShowActions] = React.useState(false)
   const typeConfig = CATEGORY_TYPE_CONFIG[category.type]
   const TypeIcon = typeConfig.icon
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{
-        duration: 0.4,
-        delay: index * 0.05,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      }}
-      whileHover={{ scale: 1.02 }}
+    <div
       className="
+        flex items-center gap-4 p-4
         bg-white dark:bg-slate-900
         border border-slate-200 dark:border-slate-800
-        rounded-xl p-6
-        transition-colors duration-200
+        rounded-2xl
+        hover:border-slate-300 dark:hover:border-slate-700
+        transition-colors duration-150
       "
     >
-      <div className="flex flex-col items-center text-center space-y-4">
-        {/* Icon */}
-        <div
-          className="w-14 h-14 rounded-full flex items-center justify-center text-2xl"
-          style={{
-            backgroundColor: `${category.color}20`,
-          }}
-        >
-          <span style={{ color: category.color }}>{category.icon || '📁'}</span>
-        </div>
+      {/* Left: Icon with color accent */}
+      <div
+        className="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0"
+        style={{
+          backgroundColor: `${category.color}15`,
+        }}
+      >
+        <span style={{ color: category.color }}>{category.icon || '📁'}</span>
+      </div>
 
-        {/* Name */}
-        <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 line-clamp-1">
+      {/* Center: Name + Type */}
+      <div className="flex-1 min-w-0">
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
           {category.name}
         </h3>
-
-        {/* Type Badge */}
-        <span
-          className={`
-            inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
-            ${typeConfig.bgColor} ${typeConfig.textColor}
-          `}
-        >
-          <TypeIcon size={14} />
-          {typeConfig.label}
-        </span>
-
-        {/* Actions */}
-        <div className="flex items-center gap-2 pt-3 border-t border-slate-200 dark:border-slate-800 w-full justify-center">
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => onEdit(category)}
-            className="
-              p-2 rounded-lg
-              text-slate-500 dark:text-slate-400
-              hover:text-slate-700 dark:hover:text-slate-300
-              hover:bg-slate-100 dark:hover:bg-slate-800
-              transition-colors duration-200
-            "
-            title="Editar categoria"
-          >
-            <Edit2 size={18} />
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => onDelete(category.id)}
-            className="
-              p-2 rounded-lg
-              text-slate-500 dark:text-slate-400
-              hover:text-red-600 dark:hover:text-red-400
-              hover:bg-red-50 dark:hover:bg-red-900/20
-              transition-colors duration-200
-            "
-            title="Excluir categoria"
-          >
-            <Trash2 size={18} />
-          </motion.button>
+        <div className="flex items-center gap-1.5 mt-1">
+          <TypeIcon size={12} className={typeConfig.iconColor} />
+          <span className={`text-xs font-medium ${typeConfig.textColor}`}>
+            {typeConfig.label}
+          </span>
         </div>
       </div>
-    </motion.div>
+
+      {/* Right: Actions */}
+      <div className="relative">
+        <button
+          onClick={() => setShowActions(!showActions)}
+          onBlur={() => setTimeout(() => setShowActions(false), 150)}
+          className="
+            p-2 rounded-lg
+            text-slate-400 dark:text-slate-500
+            hover:text-slate-600 dark:hover:text-slate-300
+            hover:bg-slate-100 dark:hover:bg-slate-800
+            transition-colors
+          "
+        >
+          <MoreHorizontal size={18} />
+        </button>
+
+        {/* Dropdown Menu */}
+        {showActions && (
+          <div
+            className="
+              absolute right-0 top-full mt-1 z-10
+              bg-white dark:bg-slate-800
+              border border-slate-200 dark:border-slate-700
+              rounded-xl shadow-lg
+              py-1 min-w-[140px]
+              animate-in fade-in zoom-in-95 duration-150
+            "
+          >
+            <button
+              onClick={() => {
+                setShowActions(false)
+                onEdit(category)
+              }}
+              className="
+                w-full flex items-center gap-2.5 px-3 py-2
+                text-sm text-slate-700 dark:text-slate-300
+                hover:bg-slate-50 dark:hover:bg-slate-700
+                transition-colors
+              "
+            >
+              <Edit2 size={15} />
+              Editar
+            </button>
+            <button
+              onClick={() => {
+                setShowActions(false)
+                onDelete(category.id)
+              }}
+              className="
+                w-full flex items-center gap-2.5 px-3 py-2
+                text-sm text-red-600 dark:text-red-400
+                hover:bg-red-50 dark:hover:bg-red-900/20
+                transition-colors
+              "
+            >
+              <Trash2 size={15} />
+              Excluir
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
 // Skeleton for loading state
-export const CategoryCardSkeleton: React.FC<{ index?: number }> = ({ index = 0 }) => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ duration: 0.3, delay: index * 0.05 }}
+export const CategoryCardSkeleton: React.FC<{ index?: number }> = () => (
+  <div
     className="
+      flex items-center gap-4 p-4
       bg-white dark:bg-slate-900
       border border-slate-200 dark:border-slate-800
-      rounded-xl p-6
+      rounded-2xl
     "
   >
-    <div className="flex flex-col items-center text-center space-y-4">
-      {/* Icon skeleton */}
-      <div className="w-14 h-14 rounded-full bg-slate-200 dark:bg-slate-800 animate-pulse" />
-      {/* Name skeleton */}
-      <div className="w-24 h-5 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
-      {/* Badge skeleton */}
-      <div className="w-20 h-6 bg-slate-200 dark:bg-slate-800 rounded-full animate-pulse" />
-      {/* Actions skeleton */}
-      <div className="flex gap-2 pt-3 border-t border-slate-200 dark:border-slate-800 w-full justify-center">
-        <div className="w-9 h-9 bg-slate-200 dark:bg-slate-800 rounded-lg animate-pulse" />
-        <div className="w-9 h-9 bg-slate-200 dark:bg-slate-800 rounded-lg animate-pulse" />
-      </div>
+    {/* Icon skeleton */}
+    <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse shrink-0" />
+    {/* Content skeleton */}
+    <div className="flex-1 space-y-2">
+      <div className="w-28 h-4 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+      <div className="w-16 h-3 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
     </div>
-  </motion.div>
+    {/* Action skeleton */}
+    <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" />
+  </div>
 )

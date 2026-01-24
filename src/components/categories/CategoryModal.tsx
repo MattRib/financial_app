@@ -100,8 +100,6 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     }
   }
 
-  const typeConfig = CATEGORY_TYPE_CONFIG[formType]
-
   return (
     <AnimatePresence>
       {isOpen && (

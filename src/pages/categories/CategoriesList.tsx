@@ -19,8 +19,37 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.1,
+      staggerChildren: 0.06,
+      delayChildren: 0.05,
+    },
+  },
+  exit: {
+    opacity: 0,
+    transition: {
+      staggerChildren: 0.03,
+      staggerDirection: -1,
+    },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.4,
+      ease: [0.25, 0.46, 0.45, 0.94] as const,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: -10,
+    scale: 0.95,
+    transition: {
+      duration: 0.25,
+      ease: [0.4, 0, 1, 1] as const,
     },
   },
 }
@@ -36,8 +65,8 @@ const CategoriesList: React.FC<CategoriesListProps> = ({
   // Loading skeleton
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {Array.from({ length: 8 }).map((_, index) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+        {Array.from({ length: 6 }).map((_, index) => (
           <CategoryCardSkeleton key={index} index={index} />
         ))}
       </div>
@@ -101,17 +130,25 @@ const CategoriesList: React.FC<CategoriesListProps> = ({
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+      className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"
     >
       <AnimatePresence mode="popLayout">
         {categories.map((category, index) => (
-          <CategoryCard
+          <motion.div
             key={category.id}
-            category={category}
-            index={index}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            layout
+          >
+            <CategoryCard
+              category={category}
+              index={index}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          </motion.div>
         ))}
       </AnimatePresence>
     </motion.div>
