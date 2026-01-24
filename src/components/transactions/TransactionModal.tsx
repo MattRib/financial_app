@@ -65,15 +65,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   onSubmit,
 }) => {
   // Form state
-  const [formDate, setFormDate] = useState<string>(() => new Date().toISOString().split('T')[0])
-  const [formType, setFormType] = useState<TransactionType>('expense')
-  const [formCategoryId, setFormCategoryId] = useState<string>('')
-  const [formAmount, setFormAmount] = useState<string>('')
-  const [formDescription, setFormDescription] = useState<string>('')
-  const [formTags, setFormTags] = useState<string[]>([])
-  const [formTagInput, setFormTagInput] = useState<string>('')
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
-  const [submitError, setSubmitError] = useState<string | null>(null)
+    const [formDate, setFormDate] = useState<string>(() => new Date().toISOString().split('T')[0])
+    const [formType, setFormType] = useState<TransactionType>('expense')
+    const [formCategoryId, setFormCategoryId] = useState<string>('')
+    const [formAmount, setFormAmount] = useState<string>('')
+    const [formDescription, setFormDescription] = useState<string>('')
+    const [formTags, setFormTags] = useState<string[]>([])
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+    const [submitError, setSubmitError] = useState<string | null>(null)
 
   // Track previous isOpen to detect when modal opens
   const prevIsOpenRef = useRef(isOpen)
@@ -110,7 +109,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           setFormDescription('')
           setFormTags([])
         }
-        setFormTagInput('')
         setFormErrors({})
         setSubmitError(null)
       }, 0)
@@ -129,6 +127,23 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     }
   }, [isOpen])
 
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape)
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isOpen, onClose])
+
   // Handle amount change with currency mask
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value
@@ -145,22 +160,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     if (formErrors.amount) {
       setFormErrors((prev) => ({ ...prev, amount: '' }))
     }
-  }
-
-  // Handle tag input
-  const handleTagKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      const tag = formTagInput.trim().toLowerCase()
-      if (tag && !formTags.includes(tag) && formTags.length < 10) {
-        setFormTags([...formTags, tag])
-        setFormTagInput('')
-      }
-    }
-  }
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setFormTags(formTags.filter((tag) => tag !== tagToRemove))
   }
 
   // Validate form
@@ -194,7 +193,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         category_id: formCategoryId || undefined,
         amount: parseCurrency(formAmount),
         description: formDescription.trim() || undefined,
-        tags: formTags.length > 0 ? formTags : undefined,
+        tags: formTags.length ? formTags : undefined,
       })
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Erro ao salvar transação')
@@ -230,30 +229,30 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               relative bg-white dark:bg-slate-900
               border border-slate-200 dark:border-slate-800
               rounded-2xl shadow-2xl
-              w-full max-w-lg max-h-[90vh] overflow-y-auto
+              w-full max-w-md
             "
           >
             <form onSubmit={handleSubmit}>
               {/* Header */}
-              <div className="sticky top-0 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 px-5 py-4 flex items-center justify-between z-10">
+              <div className="p-5 pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                   {transaction ? 'Editar Transação' : 'Nova Transação'}
                 </h3>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   <X size={18} />
                 </button>
               </div>
 
               {/* Form Content */}
-              <div className="p-5 space-y-5">
+              <div className="px-5 py-4 space-y-4">
                 {/* Date & Type Row */}
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Date */}
-                  <div>
+                <div className="grid grid-cols-3 gap-3">
+                  {/* Date - Takes 1 column */}
+                  <div className="col-span-1">
                     <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">
                       <Calendar size={14} />
                       Data
@@ -268,19 +267,19 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       className={`
                         w-full px-3 py-2.5 rounded-xl
                         bg-slate-50 dark:bg-slate-800
-                        border ${formErrors.date ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'}
+                        border ${formErrors.date ? 'border-red-600' : 'border-slate-200 dark:border-slate-700'}
                         text-slate-900 dark:text-slate-100 text-sm
                         focus:outline-none focus:ring-2 focus:ring-slate-400 dark:focus:ring-slate-500
-                        transition-colors
+                        transition-colors cursor-pointer
                       `}
                     />
                     {formErrors.date && (
-                      <p className="text-xs text-red-500 mt-1">{formErrors.date}</p>
+                      <p className="text-xs text-red-600 mt-1">{formErrors.date}</p>
                     )}
                   </div>
 
-                  {/* Type Toggle */}
-                  <div>
+                  {/* Type Toggle - Takes 2 columns for prominence */}
+                  <div className="col-span-2">
                     <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2 block">
                       Tipo
                     </label>
@@ -289,26 +288,28 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         const Icon = type.icon
                         const isSelected = formType === type.id
                         return (
-                          <button
+                          <motion.button
                             key={type.id}
                             type="button"
                             onClick={() => {
                               setFormType(type.id)
                               setFormCategoryId('') // Reset category when type changes
                             }}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                             className={`
-                              flex-1 px-3 py-2.5 rounded-xl text-xs font-medium transition-all
-                              flex items-center justify-center gap-1.5
-                              border-2
+                              flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all
+                              flex items-center justify-center gap-2
+                              border-2 cursor-pointer
                               ${isSelected
                                 ? `${type.selectedBg} ${type.textColor} ${type.borderColor}`
                                 : 'border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
                               }
                             `}
                           >
-                            <Icon size={14} />
+                            <Icon size={16} />
                             {type.label}
-                          </button>
+                          </motion.button>
                         )
                       })}
                     </div>
@@ -317,61 +318,84 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
                 {/* Amount */}
                 <div>
-                  <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2 block">
+                  <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
+                    <span className="text-base">💰</span>
                     Valor
                   </label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="R$ 0,00"
-                    value={formAmount}
-                    onChange={handleAmountChange}
-                    className={`
-                      w-full px-4 py-3 rounded-xl
-                      bg-slate-50 dark:bg-slate-800
-                      border ${formErrors.amount ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'}
-                      text-slate-900 dark:text-slate-100 text-xl font-semibold
-                      focus:outline-none focus:ring-2 focus:ring-slate-400 dark:focus:ring-slate-500
-                      transition-colors
-                    `}
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="R$ 0,00"
+                      value={formAmount}
+                      onChange={handleAmountChange}
+                      className={`
+                        w-full px-4 py-3.5 rounded-xl
+                        bg-slate-50 dark:bg-slate-800
+                        border-2 ${formErrors.amount ? 'border-red-600' : 'border-slate-200 dark:border-slate-700'}
+                        text-slate-900 dark:text-slate-100 text-3xl font-bold tracking-tight
+                        focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-slate-400 dark:focus:ring-slate-500 focus:border-transparent
+                        transition-all cursor-text
+                        placeholder:text-slate-300 dark:placeholder:text-slate-600
+                      `}
+                    />
+                  </div>
                   {formErrors.amount && (
-                    <p className="text-xs text-red-500 mt-1">{formErrors.amount}</p>
+                    <motion.p
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-xs text-red-600 mt-1.5 flex items-center gap-1"
+                    >
+                      <span>⚠️</span>
+                      {formErrors.amount}
+                    </motion.p>
                   )}
                 </div>
 
                 {/* Category */}
                 <div>
-                  <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2 block">
-                    Categoria
+                  <label className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
+                    <span className="flex items-center gap-1.5">
+                      <Tag size={14} />
+                      Categoria
+                    </span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">
+                      {filteredCategories.length} disponíveis
+                    </span>
                   </label>
                   {filteredCategories.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-3 gap-2">
                       {/* "None" option */}
-                      <button
+                      <motion.button
                         type="button"
                         onClick={() => setFormCategoryId('')}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         className={`
-                          px-3 py-2 rounded-xl text-sm font-medium transition-all
+                          px-2 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer
+                          flex items-center justify-center gap-1.5
                           ${!formCategoryId
                             ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 ring-2 ring-slate-900 dark:ring-slate-100'
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                           }
                         `}
                       >
-                        Nenhuma
-                      </button>
+                        <span className="text-sm">📋</span>
+                        <span className="text-xs">Nenhuma</span>
+                      </motion.button>
                       {filteredCategories.map((cat) => (
-                        <button
+                        <motion.button
                           key={cat.id}
                           type="button"
                           onClick={() => setFormCategoryId(cat.id)}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.98 }}
                           className={`
-                            px-3 py-2 rounded-xl text-sm font-medium transition-all
-                            flex items-center gap-1.5
+                            px-2 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer
+                            flex items-center justify-center gap-1.5
                             ${formCategoryId === cat.id
                               ? 'ring-2 ring-slate-900 dark:ring-slate-100'
-                              : 'hover:scale-105'
+                              : ''
                             }
                           `}
                           style={{
@@ -379,22 +403,24 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                             color: cat.color,
                           }}
                         >
-                          <span>{cat.icon}</span>
-                          {cat.name}
-                        </button>
+                          <span className="text-sm">{cat.icon}</span>
+                          <span className="truncate text-xs">{cat.name}</span>
+                        </motion.button>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-slate-400 dark:text-slate-500 italic">
-                      Nenhuma categoria disponível para {formType === 'income' ? 'entradas' : 'saídas'}
-                    </p>
+                    <div className="px-4 py-6 text-center bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                      <p className="text-sm text-slate-400 dark:text-slate-500 italic">
+                        Nenhuma categoria disponível para {formType === 'income' ? 'entradas' : 'saídas'}
+                      </p>
+                    </div>
                   )}
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2 block">
-                    Descrição
+                  <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">
+                    Descrição (opcional)
                   </label>
                   <input
                     type="text"
@@ -407,74 +433,18 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     }}
                     maxLength={255}
                     className="
-                      w-full px-3 py-2.5 rounded-xl
+                      w-full px-3 py-2 rounded-xl
                       bg-slate-50 dark:bg-slate-800
                       border border-slate-200 dark:border-slate-700
                       text-slate-900 dark:text-slate-100 text-sm
                       placeholder-slate-400 dark:placeholder-slate-500
                       focus:outline-none focus:ring-2 focus:ring-slate-400 dark:focus:ring-slate-500
-                      transition-colors
+                      transition-colors cursor-text
                     "
                   />
-                  <div className="mt-1 flex justify-end">
-                    <p className={`text-xs ${formDescription.length >= 240 ? 'text-amber-600' : 'text-slate-400 dark:text-slate-500'}`}>
-                      {formDescription.length}/255
-                    </p>
-                  </div>
                 </div>
 
-                {/* Tags */}
-                <div>
-                  <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">
-                    <Tag size={14} />
-                    Tags
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Digite e pressione Enter"
-                    value={formTagInput}
-                    onChange={(e) => setFormTagInput(e.target.value)}
-                    onKeyPress={handleTagKeyPress}
-                    className="
-                      w-full px-3 py-2.5 rounded-xl
-                      bg-slate-50 dark:bg-slate-800
-                      border border-slate-200 dark:border-slate-700
-                      text-slate-900 dark:text-slate-100 text-sm
-                      placeholder-slate-400 dark:placeholder-slate-500
-                      focus:outline-none focus:ring-2 focus:ring-slate-400 dark:focus:ring-slate-500
-                      transition-colors
-                    "
-                  />
-                  {formTags.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {formTags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="
-                            inline-flex items-center gap-1 px-2 py-1
-                            bg-slate-100 dark:bg-slate-800
-                            text-slate-700 dark:text-slate-300
-                            rounded-lg text-xs font-medium
-                          "
-                        >
-                          #{tag}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveTag(tag)}
-                            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                          >
-                            <X size={12} />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-                    Máximo de 10 tags ({formTags.length}/10)
-                  </p>
-                </div>
-
-                {/* Preview */}
+                {/* Submit Error */}
                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
                   <p className="text-xs font-medium text-slate-400 dark:text-slate-500 mb-3">Preview</p>
                   <div className="flex items-center justify-between">
@@ -527,7 +497,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               </div>
 
               {/* Actions */}
-              <div className="sticky bottom-0 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex gap-3 px-5 py-4">
+              <div className="flex gap-3 px-5 pb-4 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={onClose}
@@ -537,8 +507,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     border border-slate-200 dark:border-slate-700
                     text-slate-600 dark:text-slate-400
                     hover:bg-slate-50 dark:hover:bg-slate-800
-                    text-sm font-medium transition-colors
-                    disabled:opacity-50
+                    text-sm font-medium transition-colors cursor-pointer
+                    disabled:opacity-50 disabled:cursor-not-allowed
                   "
                 >
                   Cancelar
@@ -549,10 +519,18 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   className="
                     flex-1 px-4 py-2.5 rounded-xl
                     bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600
-                    text-white text-sm font-medium transition-colors
-                    disabled:opacity-50
+                    text-white text-sm font-medium transition-colors cursor-pointer
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    flex items-center justify-center gap-2
                   "
                 >
+                  {loading && (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                    />
+                  )}
                   {loading ? 'Salvando...' : transaction ? 'Atualizar' : 'Criar'}
                 </button>
               </div>
