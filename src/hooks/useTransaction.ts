@@ -195,11 +195,17 @@ export function useTransaction(options: UseTransactionOptions = {}) {
         await deleteTransaction(deleteConfirm.id)
         setNotification({ type: 'success', message: 'Transação excluída com sucesso!' })
         setDeleteConfirm({ id: '', show: false })
+        
+        // Refresh summary after deletion
+        const now = new Date()
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+        fetchSummary(startOfMonth, endOfMonth)
       } catch {
         setNotification({ type: 'error', message: 'Erro ao excluir transação' })
       }
     }
-  }, [deleteConfirm.id, deleteTransaction])
+  }, [deleteConfirm.id, deleteTransaction, fetchSummary])
 
   const handleSubmitTransaction = useCallback(async (data: {
     date: string
