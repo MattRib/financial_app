@@ -52,7 +52,10 @@ export const InvestmentFilters: React.FC<InvestmentFiltersProps> = ({
                 }
               `}
             >
-              <Icon size={16} />
+              <Icon 
+                size={16} 
+                className={isSelected && 'colorClass' in tab && tab.colorClass ? tab.colorClass : ''} 
+              />
               <span className="hidden sm:inline">{tab.label}</span>
             </motion.button>
           )

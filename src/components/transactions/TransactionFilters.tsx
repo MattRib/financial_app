@@ -23,10 +23,10 @@ interface TransactionFiltersProps {
   onClearFilters: () => void
 }
 
-const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
+const tabs: { id: TabId; label: string; icon: React.ElementType; colorClass?: string }[] = [
   { id: 'all', label: 'Todos', icon: List },
-  { id: 'income', label: 'Entradas', icon: TrendingUp },
-  { id: 'expense', label: 'Saídas', icon: TrendingDown },
+  { id: 'income', label: 'Entradas', icon: TrendingUp, colorClass: 'text-emerald-500' },
+  { id: 'expense', label: 'Saídas', icon: TrendingDown, colorClass: 'text-red-500' },
 ]
 
 export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
@@ -76,7 +76,10 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
                   }
                 `}
               >
-                <Icon size={16} />
+                <Icon 
+                  size={16} 
+                  className={isActive && tab.colorClass ? tab.colorClass : ''} 
+                />
                 {tab.label}
                 <span
                   className={`

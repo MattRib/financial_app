@@ -94,6 +94,7 @@ const CategoriesList: React.FC<CategoriesListProps> = ({
                 text-white font-medium text-sm
                 rounded-xl
                 transition-colors duration-200
+                cursor-pointer
               "
             >
               <Plus size={18} />
@@ -114,6 +115,7 @@ const CategoriesList: React.FC<CategoriesListProps> = ({
                 rounded-xl
                 hover:bg-slate-50 dark:hover:bg-slate-800/80
                 transition-colors duration-200
+                cursor-pointer
               "
             >
               <Plus size={18} />

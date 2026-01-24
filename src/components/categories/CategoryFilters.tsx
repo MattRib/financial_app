@@ -16,11 +16,11 @@ interface CategoryFiltersProps {
   onTabChange: (tab: TabId) => void
 }
 
-const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
+const tabs: { id: TabId; label: string; icon: React.ElementType; colorClass?: string }[] = [
   { id: 'all', label: 'Todos', icon: List },
-  { id: 'income', label: 'Receitas', icon: TrendingUp },
-  { id: 'expense', label: 'Despesas', icon: TrendingDown },
-  { id: 'investment', label: 'Investimentos', icon: PiggyBank },
+  { id: 'income', label: 'Receitas', icon: TrendingUp, colorClass: 'text-emerald-500' },
+  { id: 'expense', label: 'Despesas', icon: TrendingDown, colorClass: 'text-red-500' },
+  { id: 'investment', label: 'Investimentos', icon: PiggyBank, colorClass: 'text-blue-500' },
 ]
 
 export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
@@ -59,7 +59,10 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
                   }
                 `}
               >
-                <Icon size={16} />
+                <Icon 
+                  size={16} 
+                  className={isActive && tab.colorClass ? tab.colorClass : ''} 
+                />
                 {tab.label}
                 <span
                   className={`

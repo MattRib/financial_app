@@ -179,6 +179,7 @@ const CategoriesPage: React.FC = () => {
               text-white font-medium text-sm
               rounded-xl
               transition-colors duration-200
+              cursor-pointer
             "
           >
             <Plus size={18} />
@@ -250,7 +251,7 @@ const CategoriesPage: React.FC = () => {
               <p className="text-sm">{notification.message}</p>
               <button
                 onClick={() => setNotification(null)}
-                className="p-1 hover:bg-black/5 dark:hover:bg-white/5 rounded transition-colors"
+                className="p-1 hover:bg-black/5 dark:hover:bg-white/5 rounded transition-colors cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -354,6 +355,7 @@ const CategoriesPage: React.FC = () => {
                           hover:bg-slate-50 dark:hover:bg-slate-700
                           font-medium text-sm
                           transition-colors duration-200
+                          cursor-pointer
                         "
                       >
                         Cancelar
@@ -367,6 +369,7 @@ const CategoriesPage: React.FC = () => {
                           bg-red-600 hover:bg-red-700
                           text-white font-medium text-sm
                           transition-colors duration-200
+                          cursor-pointer
                         "
                       >
                         Excluir

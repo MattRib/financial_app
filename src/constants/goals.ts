@@ -90,12 +90,14 @@ export const GOAL_STATUS_CONFIG: Record<
   },
 }
 
+import { List, Target, CheckCircle, XCircle } from 'lucide-react'
+
 // Filter tabs for goals
 export const GOAL_TABS = [
-  { id: 'all' as const, label: 'Todas' },
-  { id: 'active' as const, label: 'Ativas' },
-  { id: 'completed' as const, label: 'Concluídas' },
-  { id: 'cancelled' as const, label: 'Canceladas' },
+  { id: 'all' as const, label: 'Todas', icon: List },
+  { id: 'active' as const, label: 'Ativas', icon: Target, colorClass: 'text-emerald-500' },
+  { id: 'completed' as const, label: 'Concluídas', icon: CheckCircle, colorClass: 'text-blue-500' },
+  { id: 'cancelled' as const, label: 'Canceladas', icon: XCircle, colorClass: 'text-slate-500' },
 ]
 
 export type GoalTabId = (typeof GOAL_TABS)[number]['id']

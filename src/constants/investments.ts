@@ -57,10 +57,10 @@ export const INVESTMENT_TYPE_CONFIG = {
 // Tabs configuration for investment filtering
 export const INVESTMENT_TABS = [
   { id: 'all' as const, label: 'Todos', icon: List },
-  { id: 'renda_fixa' as const, label: 'Renda Fixa', icon: Landmark },
-  { id: 'renda_variavel' as const, label: 'Renda Variável', icon: TrendingUp },
-  { id: 'cripto' as const, label: 'Cripto', icon: Bitcoin },
-  { id: 'outros' as const, label: 'Outros', icon: Briefcase },
+  { id: 'renda_fixa' as const, label: 'Renda Fixa', icon: Landmark, colorClass: 'text-blue-500' },
+  { id: 'renda_variavel' as const, label: 'Renda Variável', icon: TrendingUp, colorClass: 'text-emerald-500' },
+  { id: 'cripto' as const, label: 'Cripto', icon: Bitcoin, colorClass: 'text-orange-500' },
+  { id: 'outros' as const, label: 'Outros', icon: Briefcase, colorClass: 'text-slate-500' },
 ] as const
 
 export type InvestmentTabId = (typeof INVESTMENT_TABS)[number]['id']
