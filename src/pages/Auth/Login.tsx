@@ -333,6 +333,7 @@ const LoginPage = () => {
                 shadow-lg shadow-slate-900/10 dark:shadow-white/10
                 hover:shadow-xl hover:shadow-slate-900/20 dark:hover:shadow-white/20
                 flex items-center justify-center gap-2
+                cursor-pointer
               `}
             >
               {loading ? (
@@ -376,7 +377,7 @@ const LoginPage = () => {
                   <button
                     type="button"
                     onClick={() => setMode('signup')}
-                    className="text-slate-900 dark:text-white font-semibold hover:underline underline-offset-4 transition-all"
+                    className="text-slate-900 dark:text-white font-semibold hover:underline underline-offset-4 transition-all cursor-pointer"
                   >
                     Cadastre-se gratuitamente
                   </button>
@@ -387,7 +388,7 @@ const LoginPage = () => {
                   <button
                     type="button"
                     onClick={() => setMode('signin')}
-                    className="text-slate-900 dark:text-white font-semibold hover:underline underline-offset-4 transition-all"
+                    className="text-slate-900 dark:text-white font-semibold hover:underline underline-offset-4 transition-all cursor-pointer"
                   >
                     Fazer login
                   </button>

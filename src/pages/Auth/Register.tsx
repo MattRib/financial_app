@@ -287,7 +287,7 @@ const RegisterPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
                   tabIndex={-1}
                 >
                   {showPassword ? (
@@ -356,7 +356,7 @@ const RegisterPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
                   tabIndex={-1}
                 >
                   {showConfirmPassword ? (
@@ -401,6 +401,7 @@ const RegisterPage = () => {
                 shadow-lg shadow-slate-900/10 dark:shadow-white/10
                 hover:shadow-xl hover:shadow-slate-900/20 dark:hover:shadow-white/20
                 flex items-center justify-center gap-2
+                cursor-pointer
               `}
             >
               {loading ? (
@@ -425,14 +426,14 @@ const RegisterPage = () => {
             Ao criar uma conta, você concorda com nossos{' '}
             <Link
               to="/terms"
-              className="text-slate-900 dark:text-white font-medium hover:underline underline-offset-2"
+              className="text-slate-900 dark:text-white font-medium hover:underline underline-offset-2 cursor-pointer"
             >
               Termos de Serviço
             </Link>{' '}
             e{' '}
             <Link
               to="/privacy"
-              className="text-slate-900 dark:text-white font-medium hover:underline underline-offset-2"
+              className="text-slate-900 dark:text-white font-medium hover:underline underline-offset-2 cursor-pointer"
             >
               Política de Privacidade
             </Link>
@@ -462,7 +463,7 @@ const RegisterPage = () => {
               Já possui uma conta?{' '}
               <Link
                 to="/auth/login"
-                className="text-slate-900 dark:text-white font-semibold hover:underline underline-offset-4 transition-all"
+                className="text-slate-900 dark:text-white font-semibold hover:underline underline-offset-4 transition-all cursor-pointer"
               >
                 Fazer login
               </Link>
