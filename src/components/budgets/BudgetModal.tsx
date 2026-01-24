@@ -153,6 +153,17 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose()
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
   // Handle amount input
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatCurrencyInput(e.target.value)
@@ -236,7 +247,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                   <button
                     type="button"
                     onClick={onClose}
-                    className="p-1.5 -mr-1.5 -mt-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    className="p-1.5 -mr-1.5 -mt-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                   >
                     <X size={18} />
                   </button>
@@ -251,7 +262,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setBudgetType('general')}
-                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                         budgetType === 'general'
                           ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
                           : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -263,7 +274,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setBudgetType('category')}
-                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                         budgetType === 'category'
                           ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
                           : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -291,7 +302,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                           border ${formErrors.category ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'}
                           text-slate-900 dark:text-slate-100
                           flex items-center justify-between
-                          transition-colors
+                          transition-colors cursor-pointer
                         `}
                       >
                         {selectedCategory ? (
@@ -340,7 +351,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                                   className={`
                                     w-full px-4 py-2.5 flex items-center gap-3 text-left
                                     hover:bg-slate-50 dark:hover:bg-slate-700
-                                    transition-colors
+                                    transition-colors cursor-pointer
                                     ${categoryId === cat.id ? 'bg-slate-50 dark:bg-slate-700' : ''}
                                   `}
                                 >
@@ -385,7 +396,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                           border border-slate-200 dark:border-slate-700
                           text-slate-900 dark:text-slate-100
                           flex items-center justify-between
-                          transition-colors
+                          transition-colors cursor-pointer
                         "
                       >
                         <span>{MONTHS.find((m) => m.value === month)?.label}</span>
@@ -417,7 +428,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                                 className={`
                                   w-full px-4 py-2.5 text-left text-sm
                                   hover:bg-slate-50 dark:hover:bg-slate-700
-                                  transition-colors
+                                  transition-colors cursor-pointer
                                   ${month === m.value ? 'bg-slate-50 dark:bg-slate-700 font-medium' : ''}
                                   text-slate-700 dark:text-slate-300
                                 `}
@@ -446,7 +457,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                           border border-slate-200 dark:border-slate-700
                           text-slate-900 dark:text-slate-100
                           flex items-center justify-between
-                          transition-colors
+                          transition-colors cursor-pointer
                         "
                       >
                         <span>{year}</span>
@@ -478,7 +489,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                                 className={`
                                   w-full px-4 py-2.5 text-left text-sm
                                   hover:bg-slate-50 dark:hover:bg-slate-700
-                                  transition-colors
+                                  transition-colors cursor-pointer
                                   ${year === y ? 'bg-slate-50 dark:bg-slate-700 font-medium' : ''}
                                   text-slate-700 dark:text-slate-300
                                 `}
@@ -585,7 +596,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                     text-slate-600 dark:text-slate-400
                     hover:bg-slate-50 dark:hover:bg-slate-800
                     text-sm font-medium transition-colors
-                    disabled:opacity-50
+                    disabled:opacity-50 cursor-pointer
                   "
                 >
                   Cancelar
@@ -598,7 +609,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                     bg-slate-900 hover:bg-slate-800
                     dark:bg-slate-700 dark:hover:bg-slate-600
                     text-white text-sm font-medium
-                    transition-colors disabled:opacity-50
+                    transition-colors disabled:opacity-50 cursor-pointer
                   "
                 >
                   {loading ? 'Salvando...' : budget ? 'Salvar' : 'Criar'}

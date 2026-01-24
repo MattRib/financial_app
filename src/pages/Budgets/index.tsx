@@ -105,7 +105,7 @@ const BudgetsPage: React.FC = () => {
               dark:bg-slate-700 dark:hover:bg-slate-600
               text-white rounded-xl
               text-sm font-medium
-              transition-colors
+              transition-colors cursor-pointer
             "
           >
             <Plus size={18} />
