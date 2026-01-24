@@ -49,7 +49,7 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
 
   return (
     <AnimatedCard>
-      <div className="p-6 cursor-pointer">
+      <div className="p-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
             <User size={20} className="text-slate-600 dark:text-slate-400" />
@@ -143,6 +143,7 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
                 px-6 py-2.5 rounded-lg
                 bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600
                 text-white text-sm font-medium
+                cursor-pointer
                 disabled:opacity-50 disabled:cursor-not-allowed
                 transition-colors
                 flex items-center justify-center gap-2

@@ -64,6 +64,7 @@ export function NotificationsSection({
               className={`
                 relative inline-flex h-6 w-11 items-center rounded-full
                 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2
+                cursor-pointer
                 disabled:opacity-50 disabled:cursor-not-allowed
                 ${
                   profile?.email_notifications
@@ -102,6 +103,7 @@ export function NotificationsSection({
               className={`
                 relative inline-flex h-6 w-11 items-center rounded-full
                 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2
+                cursor-pointer
                 disabled:opacity-50 disabled:cursor-not-allowed
                 ${
                   profile?.push_notifications

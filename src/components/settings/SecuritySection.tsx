@@ -44,6 +44,7 @@ export function SecuritySection({ onChangePassword }: SecuritySectionProps) {
                   bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600
                   text-white text-sm font-medium
                   transition-colors
+                  cursor-pointer
                 "
               >
                 Alterar senha
