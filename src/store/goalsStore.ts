@@ -2,45 +2,26 @@ import { create } from 'zustand'
 import { goalsService } from '../services/goals'
 import type {
   Goal,
+  GoalWithProgress,
+  GoalSummary,
+  FilterGoalDto,
   CreateGoalDto,
   UpdateGoalDto,
   GoalStatus,
 } from '../types'
-
-export interface FilterGoalDto {
-  status?: GoalStatus
-  start_date?: string
-  end_date?: string
-}
-
-export interface GoalSummary {
-  total_target: number
-  current_amount: number
-  remaining: number
-  by_status: {
-    active: {
-      count: number
-      total: number
-    }
-    completed: {
-      count: number
-      total: number
-    }
-    cancelled: {
-      count: number
-      total: number
-    }
-  }
-}
 
 export interface GoalsState {
   goals: Goal[]
   loading: boolean
   error: string | null
   summary: GoalSummary | null
+  atRiskGoals: GoalWithProgress[]
+  nearCompletionGoals: GoalWithProgress[]
 
   fetchGoals: (filters?: FilterGoalDto) => Promise<void>
   fetchSummary: () => Promise<void>
+  fetchAtRisk: () => Promise<void>
+  fetchNearCompletion: () => Promise<void>
   createGoal: (data: CreateGoalDto) => Promise<void>
   updateGoal: (id: string, data: UpdateGoalDto) => Promise<void>
   deleteGoal: (id: string) => Promise<void>
@@ -53,29 +34,14 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
   loading: false,
   error: null,
   summary: null,
+  atRiskGoals: [],
+  nearCompletionGoals: [],
 
   fetchGoals: async (filters?: FilterGoalDto) => {
     set({ loading: true, error: null })
     try {
-      const goals = await goalsService.getAll()
-      
-      // Apply filters locally if provided
-      let filteredGoals = goals
-      if (filters?.status) {
-        filteredGoals = filteredGoals.filter((goal) => goal.status === filters.status)
-      }
-      if (filters?.start_date) {
-        filteredGoals = filteredGoals.filter(
-          (goal) => new Date(goal.target_date) >= new Date(filters.start_date!)
-        )
-      }
-      if (filters?.end_date) {
-        filteredGoals = filteredGoals.filter(
-          (goal) => new Date(goal.target_date) <= new Date(filters.end_date!)
-        )
-      }
-      
-      set({ goals: filteredGoals, loading: false })
+      const goals = await goalsService.getAll(filters)
+      set({ goals, loading: false })
     } catch (err: unknown) {
       set({ error: String(err), loading: false })
     }
@@ -84,39 +50,28 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
   fetchSummary: async () => {
     set({ error: null })
     try {
-      // Calculate summary locally from goals
-      const { goals } = get()
-      
-      const summary: GoalSummary = {
-        total_target: 0,
-        current_amount: 0,
-        remaining: 0,
-        by_status: {
-          active: { count: 0, total: 0 },
-          completed: { count: 0, total: 0 },
-          cancelled: { count: 0, total: 0 },
-        },
-      }
-
-      goals.forEach((goal) => {
-        summary.total_target += goal.target_amount
-        summary.current_amount += goal.current_amount
-
-        if (goal.status === 'active') {
-          summary.by_status.active.count++
-          summary.by_status.active.total += goal.target_amount
-        } else if (goal.status === 'completed') {
-          summary.by_status.completed.count++
-          summary.by_status.completed.total += goal.target_amount
-        } else if (goal.status === 'cancelled') {
-          summary.by_status.cancelled.count++
-          summary.by_status.cancelled.total += goal.target_amount
-        }
-      })
-
-      summary.remaining = summary.total_target - summary.current_amount
-
+      const summary = await goalsService.getSummary()
       set({ summary })
+    } catch (err: unknown) {
+      set({ error: String(err) })
+    }
+  },
+
+  fetchAtRisk: async () => {
+    set({ error: null })
+    try {
+      const atRiskGoals = await goalsService.getAtRisk()
+      set({ atRiskGoals })
+    } catch (err: unknown) {
+      set({ error: String(err) })
+    }
+  },
+
+  fetchNearCompletion: async () => {
+    set({ error: null })
+    try {
+      const nearCompletionGoals = await goalsService.getNearCompletion()
+      set({ nearCompletionGoals })
     } catch (err: unknown) {
       set({ error: String(err) })
     }
@@ -167,7 +122,7 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
   markAsCompleted: async (id: string) => {
     set({ loading: true, error: null })
     try {
-      const updatedGoal = await goalsService.update(id, { status: 'completed' })
+      const updatedGoal = await goalsService.markAsCompleted(id)
       set((state) => ({
         goals: state.goals.map((goal) => (goal.id === id ? updatedGoal : goal)),
         loading: false,

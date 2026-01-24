@@ -17,7 +17,7 @@ describe('GoalsService', () => {
     current_amount: 5000,
     target_date: '2026-01-01',
     status: 'active',
-    category: 'veículos',
+    category: 'purchase',
     notes: 'Meta de longo prazo',
     created_at: new Date(),
   };
@@ -61,7 +61,7 @@ describe('GoalsService', () => {
         current_amount: 5000,
         target_date: '2026-01-01',
         status: 'active',
-        category: 'veículos',
+        category: 'purchase',
         notes: 'Meta de longo prazo',
       };
 

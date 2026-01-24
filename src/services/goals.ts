@@ -1,13 +1,16 @@
 import { api } from './api'
 import type { 
   Goal, 
+  GoalWithProgress,
+  GoalSummary,
   CreateGoalDto, 
-  UpdateGoalDto
+  UpdateGoalDto,
+  FilterGoalDto,
 } from '../types'
 
 export const goalsService = {
-  getAll: () => 
-    api.get<Goal[]>('/goals'),
+  getAll: (filters?: FilterGoalDto) => 
+    api.get<Goal[]>('/goals', filters),
 
   getById: (id: string) => 
     api.get<Goal>(`/goals/${id}`),
@@ -22,8 +25,18 @@ export const goalsService = {
     api.delete<void>(`/goals/${id}`),
 
   getActiveGoals: () => 
-    api.get<Goal[]>('/goals', { 
-      status: 'active' 
-    }),
+    api.get<Goal[]>('/goals', { status: 'active' }),
+
+  getSummary: () =>
+    api.get<GoalSummary>('/goals/summary'),
+
+  markAsCompleted: (id: string) =>
+    api.patch<Goal>(`/goals/${id}/complete`),
+
+  getAtRisk: () =>
+    api.get<GoalWithProgress[]>('/goals/at-risk'),
+
+  getNearCompletion: () =>
+    api.get<GoalWithProgress[]>('/goals/near-completion'),
 }
 

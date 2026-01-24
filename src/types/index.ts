@@ -159,6 +159,19 @@ export interface UpdateInvestmentDto {
 // Goal
 export type GoalStatus = 'active' | 'completed' | 'cancelled'
 
+export const GoalCategoryValues = [
+  'emergency_fund',
+  'travel',
+  'purchase',
+  'debt_payoff',
+  'investment',
+  'education',
+  'retirement',
+  'other',
+] as const
+
+export type GoalCategory = (typeof GoalCategoryValues)[number]
+
 export interface Goal {
   id: string
   user_id: string
@@ -167,16 +180,42 @@ export interface Goal {
   current_amount: number
   target_date: string
   status: GoalStatus
-  category?: string
+  category?: GoalCategory
   notes?: string
   created_at: string
+}
+
+export interface GoalWithProgress extends Goal {
+  progress_percentage: number
+  days_remaining: number
+}
+
+export interface GoalSummary {
+  total_target: number
+  current_amount: number
+  remaining: number
+  progress_percentage: number
+  by_status: {
+    active: { count: number; total: number }
+    completed: { count: number; total: number }
+    cancelled: { count: number; total: number }
+  }
+}
+
+export interface FilterGoalDto {
+  status?: GoalStatus
+  target_date_start?: string
+  target_date_end?: string
+  category?: GoalCategory
 }
 
 export interface CreateGoalDto {
   name: string
   target_amount: number
+  current_amount?: number
   target_date: string
-  category?: string
+  status?: GoalStatus
+  category?: GoalCategory
   notes?: string
 }
 
@@ -186,7 +225,7 @@ export interface UpdateGoalDto {
   current_amount?: number
   target_date?: string
   status?: GoalStatus
-  category?: string
+  category?: GoalCategory
   notes?: string
 }
 
