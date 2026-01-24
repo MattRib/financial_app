@@ -269,12 +269,14 @@ const Dashboard: React.FC = () => {
                 icon={PieChart}
                 title="Erro ao carregar dados"
                 description={errors.categories}
+                minHeight={250}
               />
             ) : barChartData.length === 0 ? (
               <PremiumEmptyState
                 icon={PieChart}
                 title="Nenhum gasto registrado"
                 description="Seus gastos por categoria aparecerão aqui"
+                minHeight={250}
               />
             ) : (
               <CategoryBarChart data={barChartData} height={250} />
@@ -304,6 +306,7 @@ const Dashboard: React.FC = () => {
                 icon={Receipt}
                 title="Erro ao carregar transacoes"
                 description={errors.transactions || errors.summary}
+                minHeight={250}
               />
             ) : recentTransactions.length === 0 ? (
               <PremiumEmptyState
@@ -314,6 +317,7 @@ const Dashboard: React.FC = () => {
                   label: 'Adicionar transacao',
                   onClick: () => navigate('/transactions'),
                 }}
+                minHeight={250}
               />
             ) : (
               <div className="space-y-1">

@@ -10,6 +10,7 @@ interface PremiumEmptyStateProps {
     label: string
     onClick: () => void
   }
+  minHeight?: number
 }
 
 export const PremiumEmptyState: React.FC<PremiumEmptyStateProps> = ({
@@ -17,6 +18,7 @@ export const PremiumEmptyState: React.FC<PremiumEmptyStateProps> = ({
   title,
   description,
   action,
+  minHeight,
 }) => {
   return (
     <motion.div
@@ -28,6 +30,7 @@ export const PremiumEmptyState: React.FC<PremiumEmptyStateProps> = ({
         border border-dashed border-slate-200 dark:border-slate-700
         rounded-xl text-center
       "
+      style={minHeight ? { minHeight } : undefined}
     >
       {Icon && (
         <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
