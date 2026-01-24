@@ -2,13 +2,11 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MainLayout } from '../../components/layout'
 import { useCategoriesStore } from '../../store/categoriesStore'
-import { AnimatedCard } from '../../components/ui/AnimatedCard'
 import { StatCard } from '../../components/dashboard/StatCard'
-import { CategoryModal } from '../../components/categories'
+import { CategoryModal, CategoryFilters } from '../../components/categories'
 import CategoriesList from './CategoriesList'
 import type { Category, CategoryType } from '../../types'
-import { Plus, TrendingUp, TrendingDown, PiggyBank, X, AlertTriangle } from 'lucide-react'
-import { CATEGORY_TABS, type CategoryTabId } from '../../constants/categories'
+import { Plus, X, AlertTriangle, TrendingUp, TrendingDown, PiggyBank } from 'lucide-react'
 
 // Animation variants
 const containerVariants = {
@@ -47,7 +45,7 @@ const CategoriesPage: React.FC = () => {
   // Local state
   const [showModal, setShowModal] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
-  const [selectedTab, setSelectedTab] = useState<CategoryTabId>('all')
+  const [selectedTab, setSelectedTab] = useState<'all' | CategoryType>('all')
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; show: boolean }>({ id: '', show: false })
 
@@ -76,8 +74,9 @@ const CategoriesPage: React.FC = () => {
     return categories.filter((cat) => cat.type === selectedTab)
   }, [categories, selectedTab])
 
-  // Category counts by type
+  // Category counts by type (including 'all')
   const categoryCounts = useMemo(() => ({
+    all: categories.length,
     income: categories.filter((c) => c.type === 'income').length,
     expense: categories.filter((c) => c.type === 'expense').length,
     investment: categories.filter((c) => c.type === 'investment').length,
@@ -213,61 +212,11 @@ const CategoriesPage: React.FC = () => {
         </motion.div>
 
         {/* Tabs/Filters */}
-        <AnimatedCard delay={0.2} padding="none">
-          <div className="p-2">
-            <nav className="flex gap-2 relative" aria-label="Tabs">
-              {CATEGORY_TABS.map((tab) => {
-                const Icon = tab.icon
-                const isActive = selectedTab === tab.id
-                const count = tab.id === 'all' 
-                  ? categories.length 
-                  : categories.filter((cat) => cat.type === tab.id).length
-
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setSelectedTab(tab.id)}
-                    className={`
-                      relative flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg
-                      transition-colors duration-200 z-10
-                      ${isActive
-                        ? 'text-slate-900 dark:text-slate-50'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
-                      }
-                    `}
-                  >
-                    {/* Animated background */}
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeTabBackground"
-                        className="absolute inset-0 bg-slate-100 dark:bg-slate-800 rounded-lg"
-                        transition={{ 
-                          type: 'spring', 
-                          stiffness: 380, 
-                          damping: 30,
-                          mass: 0.8
-                        }}
-                      />
-                    )}
-                    <Icon size={16} className="relative z-10" />
-                    <span className="hidden sm:inline relative z-10">{tab.label}</span>
-                    <span
-                      className={`
-                        relative z-10 ml-1 px-2 py-0.5 rounded-full text-xs font-medium
-                        ${isActive
-                          ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-50'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
-                        }
-                      `}
-                    >
-                      {count}
-                    </span>
-                  </button>
-                )
-              })}
-            </nav>
-          </div>
-        </AnimatedCard>
+        <CategoryFilters
+          selectedTab={selectedTab}
+          categoryCounts={categoryCounts}
+          onTabChange={setSelectedTab}
+        />
 
         {/* Error Message */}
         <AnimatePresence>
@@ -310,7 +259,12 @@ const CategoriesPage: React.FC = () => {
         </AnimatePresence>
 
         {/* Categories List */}
-        <AnimatedCard delay={0.3}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+          className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6"
+        >
           <CategoriesList
             categories={filteredCategories}
             loading={loading}
@@ -319,7 +273,7 @@ const CategoriesPage: React.FC = () => {
             onCreateFirst={handleNewCategory}
             onCreateDefaults={handleCreateDefaults}
           />
-        </AnimatedCard>
+        </motion.div>
 
         {/* Category Modal */}
         <CategoryModal
