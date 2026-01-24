@@ -53,6 +53,7 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
                 onClick={() => onTabChange(tab.id)}
                 className={`
                   relative flex items-center gap-2 px-5 py-3.5 text-sm font-medium transition-colors
+                  cursor-pointer
                   ${isActive
                     ? 'text-slate-900 dark:text-slate-100'
                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'

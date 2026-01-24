@@ -189,27 +189,35 @@ const CategoriesPage: React.FC = () => {
 
         {/* Stats Cards */}
         <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard
-            title="Receitas"
-            value={categoryCounts.income.toString()}
-            icon={<TrendingUp size={24} />}
-            loading={loading}
-            index={0}
-          />
-          <StatCard
-            title="Despesas"
-            value={categoryCounts.expense.toString()}
-            icon={<TrendingDown size={24} />}
-            loading={loading}
-            index={1}
-          />
-          <StatCard
-            title="Investimentos"
-            value={categoryCounts.investment.toString()}
-            icon={<PiggyBank size={24} />}
-            loading={loading}
-            index={2}
-          />
+          <div className="cursor-pointer">
+            <StatCard
+              title="Receitas"
+              value={categoryCounts.income.toString()}
+              icon={<TrendingUp size={24} />}
+              loading={loading}
+              index={0}
+            />
+          </div>
+
+          <div className="cursor-pointer">
+            <StatCard
+              title="Despesas"
+              value={categoryCounts.expense.toString()}
+              icon={<TrendingDown size={24} />}
+              loading={loading}
+              index={1}
+            />
+          </div>
+
+          <div className="cursor-pointer">
+            <StatCard
+              title="Investimentos"
+              value={categoryCounts.investment.toString()}
+              icon={<PiggyBank size={24} />}
+              loading={loading}
+              index={2}
+            />
+          </div>
         </motion.div>
 
         {/* Tabs/Filters */}
