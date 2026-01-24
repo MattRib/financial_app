@@ -49,7 +49,9 @@ export class CategoriesService {
     if (error) throw error;
 
     const duplicate = (data ?? []).find(
-      (cat) => cat.id !== excludeId && cat.name.toLowerCase() === name.trim().toLowerCase(),
+      (cat) =>
+        cat.id !== excludeId &&
+        cat.name.toLowerCase() === name.trim().toLowerCase(),
     );
 
     if (duplicate) {
@@ -83,7 +85,6 @@ export class CategoriesService {
   }
 
   async findOne(userId: string, id: string): Promise<Category> {
-     
     const { data, error } = await this.supabase
       .from('categories')
       .select('*')
@@ -196,10 +197,8 @@ export class CategoriesService {
     if (txError) throw txError;
 
     const transactionCount = transactions?.length ?? 0;
-    const totalAmount = transactions?.reduce(
-      (sum, tx) => sum + Number(tx.amount),
-      0,
-    ) ?? 0;
+    const totalAmount =
+      transactions?.reduce((sum, tx) => sum + Number(tx.amount), 0) ?? 0;
 
     // Count budgets
     const { data: budgets, error: budgetError } = await this.supabase
@@ -221,25 +220,100 @@ export class CategoriesService {
   async createDefaultCategories(userId: string): Promise<Category[]> {
     const defaultCategories = [
       // Expense categories
-      { name: 'Alimentação', type: 'expense' as CategoryType, color: '#ef4444', icon: '🍽️' },
-      { name: 'Transporte', type: 'expense' as CategoryType, color: '#3b82f6', icon: '🚗' },
-      { name: 'Moradia', type: 'expense' as CategoryType, color: '#8b5cf6', icon: '🏠' },
-      { name: 'Saúde', type: 'expense' as CategoryType, color: '#10b981', icon: '⚕️' },
-      { name: 'Educação', type: 'expense' as CategoryType, color: '#f59e0b', icon: '📚' },
-      { name: 'Lazer', type: 'expense' as CategoryType, color: '#ec4899', icon: '🎮' },
-      { name: 'Compras', type: 'expense' as CategoryType, color: '#06b6d4', icon: '🛍️' },
-      { name: 'Contas', type: 'expense' as CategoryType, color: '#6366f1', icon: '📄' },
+      {
+        name: 'Alimentação',
+        type: 'expense' as CategoryType,
+        color: '#ef4444',
+        icon: '🍽️',
+      },
+      {
+        name: 'Transporte',
+        type: 'expense' as CategoryType,
+        color: '#3b82f6',
+        icon: '🚗',
+      },
+      {
+        name: 'Moradia',
+        type: 'expense' as CategoryType,
+        color: '#8b5cf6',
+        icon: '🏠',
+      },
+      {
+        name: 'Saúde',
+        type: 'expense' as CategoryType,
+        color: '#10b981',
+        icon: '⚕️',
+      },
+      {
+        name: 'Educação',
+        type: 'expense' as CategoryType,
+        color: '#f59e0b',
+        icon: '📚',
+      },
+      {
+        name: 'Lazer',
+        type: 'expense' as CategoryType,
+        color: '#ec4899',
+        icon: '🎮',
+      },
+      {
+        name: 'Compras',
+        type: 'expense' as CategoryType,
+        color: '#06b6d4',
+        icon: '🛍️',
+      },
+      {
+        name: 'Contas',
+        type: 'expense' as CategoryType,
+        color: '#6366f1',
+        icon: '📄',
+      },
 
       // Income categories
-      { name: 'Salário', type: 'income' as CategoryType, color: '#22c55e', icon: '💰' },
-      { name: 'Freelance', type: 'income' as CategoryType, color: '#84cc16', icon: '💼' },
-      { name: 'Investimentos', type: 'income' as CategoryType, color: '#14b8a6', icon: '📈' },
-      { name: 'Outros', type: 'income' as CategoryType, color: '#a3e635', icon: '💵' },
+      {
+        name: 'Salário',
+        type: 'income' as CategoryType,
+        color: '#22c55e',
+        icon: '💰',
+      },
+      {
+        name: 'Freelance',
+        type: 'income' as CategoryType,
+        color: '#84cc16',
+        icon: '💼',
+      },
+      {
+        name: 'Investimentos',
+        type: 'income' as CategoryType,
+        color: '#14b8a6',
+        icon: '📈',
+      },
+      {
+        name: 'Outros',
+        type: 'income' as CategoryType,
+        color: '#a3e635',
+        icon: '💵',
+      },
 
       // Investment categories
-      { name: 'Ações', type: 'investment' as CategoryType, color: '#0ea5e9', icon: '📊' },
-      { name: 'Renda Fixa', type: 'investment' as CategoryType, color: '#6366f1', icon: '🏦' },
-      { name: 'Fundos', type: 'investment' as CategoryType, color: '#8b5cf6', icon: '💎' },
+      {
+        name: 'Ações',
+        type: 'investment' as CategoryType,
+        color: '#0ea5e9',
+        icon: '📊',
+      },
+      {
+        name: 'Renda Fixa',
+        type: 'investment' as CategoryType,
+        color: '#6366f1',
+        icon: '🏦',
+      },
+      {
+        name: 'Fundos',
+        type: 'investment' as CategoryType,
+        color: '#8b5cf6',
+        icon: '💎',
+      },
     ];
 
     const createdCategories: Category[] = [];
@@ -250,7 +324,10 @@ export class CategoriesService {
         createdCategories.push(created);
       } catch (error) {
         // Skip if category already exists
-        console.error(`Failed to create default category ${category.name}:`, error);
+        console.error(
+          `Failed to create default category ${category.name}:`,
+          error,
+        );
       }
     }
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { useInvestmentsStore } from '../store/investmentsStore'
+import { useInvestmentsStore, type MonthlyEvolution } from '../store/investmentsStore'
 import type { Investment, CreateInvestmentDto, UpdateInvestmentDto, InvestmentType } from '../types'
 import { INVESTMENT_TYPE_CONFIG, type InvestmentTabId } from '../constants/investments'
 
@@ -47,6 +47,10 @@ interface UseInvestmentReturn {
   loading: boolean
   error: string | null
   
+  // Evolution
+  evolution: MonthlyEvolution[]
+  evolutionLoading: boolean
+  
   // Computed summaries
   totalInvested: number
   monthlyTotal: number
@@ -75,8 +79,11 @@ export const useInvestment = (): UseInvestmentReturn => {
     loading,
     error,
     monthlyTotal,
+    evolution,
+    evolutionLoading,
     fetchInvestments,
     fetchMonthlyTotal,
+    fetchEvolution,
     createInvestment,
     updateInvestment,
     deleteInvestment,
@@ -95,6 +102,11 @@ export const useInvestment = (): UseInvestmentReturn => {
     fetchInvestments({ start_date: startDate, end_date: endDate })
     fetchMonthlyTotal(month, year)
   }, [month, year, fetchInvestments, fetchMonthlyTotal, getDateRange])
+  
+  // Fetch evolution data when year changes
+  useEffect(() => {
+    fetchEvolution(year)
+  }, [year, fetchEvolution])
   
   // Filter investments by selected type
   const filteredInvestments = useMemo(() => {
@@ -254,6 +266,10 @@ export const useInvestment = (): UseInvestmentReturn => {
     filteredInvestments,
     loading,
     error,
+    
+    // Evolution
+    evolution,
+    evolutionLoading,
     
     // Computed
     totalInvested,

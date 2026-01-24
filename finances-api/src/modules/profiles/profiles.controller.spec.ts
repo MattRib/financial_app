@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProfilesController } from './profiles.controller';
 import { ProfilesService } from './profiles.service';
@@ -10,8 +9,12 @@ describe('ProfilesController', () => {
 
   beforeEach(async () => {
     mockService = {
-      findByUserId: jest.fn().mockResolvedValue({ id: 'user-1', username: 'me' }),
-      updateProfile: jest.fn().mockResolvedValue({ id: 'user-1', username: 'me' }),
+      findByUserId: jest
+        .fn()
+        .mockResolvedValue({ id: 'user-1', username: 'me' }),
+      updateProfile: jest
+        .fn()
+        .mockResolvedValue({ id: 'user-1', username: 'me' }),
     };
 
     const module: TestingModule = await Test.createTestingModule({

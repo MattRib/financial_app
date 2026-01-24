@@ -13,7 +13,7 @@ export class SupabaseService {
     if (!url || !key) {
       this.logger.warn('SUPABASE_URL and/or SUPABASE_SERVICE_ROLE_KEY not set');
     }
-     
+
     this.supabase = createClient(url ?? '', key ?? '');
   }
 

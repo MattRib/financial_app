@@ -1,4 +1,3 @@
- 
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -9,7 +8,9 @@ async function bootstrap() {
 
   // Allow multiple development origins and make it configurable via env var `CORS_ORIGINS`.
   // Example: CORS_ORIGINS='http://localhost:5173,http://localhost:5174'
-  const allowedOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:5173,http://localhost:5174')
+  const allowedOrigins = (
+    process.env.CORS_ORIGINS ?? 'http://localhost:5173,http://localhost:5174'
+  )
     .split(',')
     .map((o) => o.trim());
 
@@ -47,11 +48,9 @@ async function bootstrap() {
 
   // Redirect root to docs (useful when `api` global prefix is set)
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const serverAny = (app.getHttpAdapter() as any).getInstance();
     // Express adapter
     if (serverAny && typeof serverAny.get === 'function') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       serverAny.get('/', (_req: any, res: any) => res.redirect('/docs'));
     }
   } catch (err) {

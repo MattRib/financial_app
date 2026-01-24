@@ -63,7 +63,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
             text-slate-400 dark:text-slate-500
             hover:text-slate-600 dark:hover:text-slate-300
             hover:bg-slate-100 dark:hover:bg-slate-800
-            transition-colors
+            transition-colors cursor-pointer
           "
         >
           <MoreHorizontal size={18} />
@@ -90,7 +90,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                 w-full flex items-center gap-2.5 px-3 py-2
                 text-sm text-slate-700 dark:text-slate-300
                 hover:bg-slate-50 dark:hover:bg-slate-700
-                transition-colors
+                transition-colors cursor-pointer
               "
             >
               <Edit2 size={15} />
@@ -105,7 +105,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                 w-full flex items-center gap-2.5 px-3 py-2
                 text-sm text-red-600 dark:text-red-400
                 hover:bg-red-50 dark:hover:bg-red-900/20
-                transition-colors
+                transition-colors cursor-pointer
               "
             >
               <Trash2 size={15} />

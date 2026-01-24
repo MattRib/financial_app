@@ -201,7 +201,7 @@ const GoalItem = React.memo<{
             {goal.status === 'active' && onComplete && (
               <button
                 onClick={() => onComplete(goal.id)}
-                className="text-green-600 hover:text-green-900 p-1"
+                className="text-green-600 hover:text-green-900 p-1 cursor-pointer"
                 title="Marcar como concluída"
               >
                 <CheckCircle size={16} />
@@ -209,14 +209,14 @@ const GoalItem = React.memo<{
             )}
             <button
               onClick={() => onEdit(goal)}
-              className="text-indigo-600 hover:text-indigo-900 p-1"
+              className="text-indigo-600 hover:text-indigo-900 p-1 cursor-pointer"
               title="Editar"
             >
               <Edit2 size={16} />
             </button>
             <button
               onClick={() => onDelete(goal.id)}
-              className="text-red-600 hover:text-red-900 p-1"
+              className="text-red-600 hover:text-red-900 p-1 cursor-pointer"
               title="Deletar"
             >
               <Trash2 size={16} />

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
- 
 import { Test, TestingModule } from '@nestjs/testing';
 import { InvestmentsController } from './investments.controller';
 import { InvestmentsService } from './investments.service';

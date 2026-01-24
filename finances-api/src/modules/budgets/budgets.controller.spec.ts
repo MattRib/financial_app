@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Test, TestingModule } from '@nestjs/testing';
 import { BudgetsController } from './budgets.controller';
 import { BudgetsService } from './budgets.service';

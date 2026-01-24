@@ -15,6 +15,8 @@ import {
   InvestmentTableSkeleton,
   InvestmentModal,
   InvestmentFilters,
+  InvestmentEvolutionChart,
+  InvestmentEvolutionChartSkeleton,
 } from '../../components/investments'
 import { useInvestment } from '../../hooks/useInvestment'
 import { formatCurrency } from '../../hooks/useTransaction'
@@ -75,6 +77,8 @@ const InvestmentsPage: React.FC = () => {
     // Data
     filteredInvestments,
     loading,
+    evolution,
+    evolutionLoading,
     
     // Computed
     totalInvested,
@@ -184,6 +188,24 @@ const InvestmentsPage: React.FC = () => {
             </AnimatedCard>
           </motion.div>
         )}
+
+        {/* Evolution Chart */}
+        <motion.div variants={itemVariants}>
+          <AnimatedCard delay={0.3}>
+            <SectionHeader title={`Evolução Mensal - ${year}`} />
+            <div className="mt-4">
+              {evolutionLoading ? (
+                <InvestmentEvolutionChartSkeleton height={200} />
+              ) : evolution.length > 0 ? (
+                <InvestmentEvolutionChart data={evolution} height={200} />
+              ) : (
+                <div className="h-[200px] flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                  Nenhum dado de evolução disponível para {year}
+                </div>
+              )}
+            </div>
+          </AnimatedCard>
+        </motion.div>
 
         {/* Investments Section */}
         <motion.div variants={itemVariants}>

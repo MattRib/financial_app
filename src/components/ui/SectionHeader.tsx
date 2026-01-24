@@ -24,7 +24,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({ title, action }) =
             text-sm text-slate-500 dark:text-slate-400
             hover:text-slate-700 dark:hover:text-slate-200
             flex items-center gap-1
-            transition-colors duration-200
+            transition-colors duration-200 cursor-pointer
           "
         >
           {action.label}

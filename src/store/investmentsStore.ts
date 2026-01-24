@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { investmentsService } from '../services/investments'
+import { investmentsService, type InvestmentSummary, type MonthlyEvolution } from '../services/investments'
 import type {
   Investment,
   CreateInvestmentDto,
@@ -13,16 +13,7 @@ export interface FilterInvestmentDto {
   end_date?: string
 }
 
-export interface InvestmentSummary {
-  total_invested: number
-  by_type: {
-    type: InvestmentType
-    total: number
-    percentage: number
-    count: number
-  }[]
-  monthly_average: number
-}
+export type { InvestmentSummary, MonthlyEvolution }
 
 export interface InvestmentsState {
   investments: Investment[]
@@ -30,10 +21,13 @@ export interface InvestmentsState {
   error: string | null
   monthlyTotal: number | null
   summary: InvestmentSummary | null
+  evolution: MonthlyEvolution[]
+  evolutionLoading: boolean
 
   fetchInvestments: (filters?: FilterInvestmentDto) => Promise<void>
   fetchMonthlyTotal: (month: number, year: number) => Promise<void>
   fetchSummary: (startDate?: string, endDate?: string) => Promise<void>
+  fetchEvolution: (year: number) => Promise<void>
   createInvestment: (data: CreateInvestmentDto) => Promise<void>
   updateInvestment: (id: string, data: UpdateInvestmentDto) => Promise<void>
   deleteInvestment: (id: string) => Promise<void>
@@ -45,6 +39,8 @@ export const useInvestmentsStore = create<InvestmentsState>((set) => ({
   error: null,
   monthlyTotal: null,
   summary: null,
+  evolution: [],
+  evolutionLoading: false,
 
   fetchInvestments: async (filters?: FilterInvestmentDto) => {
     set({ loading: true, error: null })
@@ -66,17 +62,23 @@ export const useInvestmentsStore = create<InvestmentsState>((set) => ({
     }
   },
 
-  fetchSummary: async () => {
+  fetchSummary: async (startDate?: string, endDate?: string) => {
     set({ error: null })
     try {
-      // TODO: Implementar quando o backend tiver o endpoint /investments/summary
-      // const summary = await investmentsService.getSummary(startDate, endDate)
-      // set({ summary })
-
-      // Por enquanto retorna null ou calcula localmente
-      set({ summary: null })
+      const summary = await investmentsService.getSummary(startDate, endDate)
+      set({ summary })
     } catch (err: unknown) {
       set({ error: String(err) })
+    }
+  },
+
+  fetchEvolution: async (year: number) => {
+    set({ evolutionLoading: true, error: null })
+    try {
+      const evolution = await investmentsService.getEvolution(year)
+      set({ evolution, evolutionLoading: false })
+    } catch (err: unknown) {
+      set({ error: String(err), evolutionLoading: false })
     }
   },
 

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
- 
 import { Test, TestingModule } from '@nestjs/testing';
 import { GoalsController } from './goals.controller';
 import { GoalsService } from './goals.service';

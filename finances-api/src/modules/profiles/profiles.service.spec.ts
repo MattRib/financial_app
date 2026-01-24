@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProfilesService } from './profiles.service';
 import { SUPABASE_CLIENT } from '../../config/supabase.module';
@@ -44,7 +43,10 @@ describe('ProfilesService', () => {
   it('updateProfile upserts and returns updated profile', async () => {
     const dto = { username: 'new' };
     mockSupabase.upsert.mockResolvedValue({ data: [], error: null });
-    mockSupabase.single.mockResolvedValue({ data: { id: 'user-1', username: 'new' }, error: null });
+    mockSupabase.single.mockResolvedValue({
+      data: { id: 'user-1', username: 'new' },
+      error: null,
+    });
 
     const result = await service.updateProfile('user-1', dto);
 

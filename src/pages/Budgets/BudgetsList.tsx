@@ -94,14 +94,14 @@ const BudgetItem = React.memo<{
           <div className="flex items-center justify-center gap-2">
             <button
               onClick={() => onEdit(budget)}
-              className="text-indigo-600 hover:text-indigo-900 p-1"
+              className="text-indigo-600 hover:text-indigo-900 p-1 cursor-pointer"
               title="Editar"
             >
               <Edit2 size={16} />
             </button>
             <button
               onClick={() => onDelete(budget.id)}
-              className="text-red-600 hover:text-red-900 p-1"
+              className="text-red-600 hover:text-red-900 p-1 cursor-pointer"
               title="Deletar"
             >
               <Trash2 size={16} />

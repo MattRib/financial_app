@@ -12,6 +12,23 @@ interface FilterInvestmentDto {
   end_date?: string
 }
 
+export interface InvestmentSummary {
+  total_invested: number
+  by_type: {
+    type: InvestmentType
+    total: number
+    percentage: number
+    count: number
+  }[]
+  monthly_average: number
+}
+
+export interface MonthlyEvolution {
+  month: number
+  year: number
+  total: number
+}
+
 export const investmentsService = {
   getAll: (filters?: FilterInvestmentDto) =>
     api.get<Investment[]>('/investments', filters as Record<string, string | number | undefined>),
@@ -38,5 +55,15 @@ export const investmentsService = {
       month, 
       year 
     }),
+
+  getSummary: (startDate?: string, endDate?: string) => {
+    const params: Record<string, string> = {}
+    if (startDate) params.start_date = startDate
+    if (endDate) params.end_date = endDate
+    return api.get<InvestmentSummary>('/investments/summary', params)
+  },
+
+  getEvolution: (year: number) =>
+    api.get<MonthlyEvolution[]>('/investments/evolution', { year }),
 }
 
