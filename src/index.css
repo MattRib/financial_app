@@ -173,6 +173,12 @@
 /* ========================================
    BASE STYLES
    ======================================== */
+
+/* Scroll suave em todo o projeto */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-primary);
