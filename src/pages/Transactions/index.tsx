@@ -117,6 +117,7 @@ const TransactionsPage: React.FC = () => {
               rounded-xl font-medium text-sm
               hover:bg-slate-800 dark:hover:bg-slate-200
               transition-colors shadow-sm
+              cursor-pointer
             "
           >
             <Plus size={18} />

@@ -1,4 +1,10 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { SUPABASE_CLIENT } from '../../config/supabase.module';
 import type { Profile } from './entities/profile.entity';
@@ -37,5 +43,38 @@ export class ProfilesService {
     const profile = await this.findById(userId);
     if (!profile) throw new NotFoundException('Profile not found after update');
     return profile;
+  }
+
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
+    // 1. Buscar email do usuário
+    const profile = await this.findById(userId);
+    if (!profile?.email) {
+      throw new NotFoundException('Email não encontrado');
+    }
+
+    // 2. Validar senha atual
+    const { error: signInError } =
+      await this.supabase.auth.signInWithPassword({
+        email: profile.email,
+        password: currentPassword,
+      });
+
+    if (signInError) {
+      throw new UnauthorizedException('Senha atual incorreta');
+    }
+
+    // 3. Atualizar senha via Admin API
+    const { error: updateError } = await this.supabase.auth.admin.updateUserById(
+      userId,
+      { password: newPassword },
+    );
+
+    if (updateError) {
+      throw new InternalServerErrorException('Erro ao atualizar senha');
+    }
   }
 }

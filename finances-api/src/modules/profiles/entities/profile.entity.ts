@@ -5,6 +5,11 @@ export interface Profile {
   email?: string | null;
   avatar_url?: string | null;
   role?: string | null;
+  currency?: string | null;
+  locale?: string | null;
+  date_format?: string | null;
+  email_notifications?: boolean | null;
+  push_notifications?: boolean | null;
   created_at?: string | null;
   updated_at?: string | null;
 }

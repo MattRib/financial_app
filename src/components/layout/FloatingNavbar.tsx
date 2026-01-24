@@ -13,7 +13,6 @@ import {
   LogOut,
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
-import { ThemeToggle } from '../ui/ThemeToggle'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -216,17 +215,6 @@ const FloatingNavbar: React.FC = () => {
         const isActive = location.pathname === item.href
         return <NavItem key={item.name} item={item} isActive={isActive} />
       })}
-
-      {/* Divider */}
-      <motion.div
-        variants={itemVariants}
-        className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1.5"
-      />
-
-      {/* Theme Toggle */}
-      <motion.div variants={itemVariants}>
-        <ThemeToggle />
-      </motion.div>
 
       {/* Divider */}
       <motion.div

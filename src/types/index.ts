@@ -243,12 +243,32 @@ export interface Debt {
   creditor?: string
   notes?: string
   created_at: string
+  updated_at?: string
+}
+
+export interface DebtSummary {
+  total_debt: number
+  total_paid: number
+  remaining: number
+  by_status: {
+    pending: { count: number; total: number }
+    paid: { count: number; total: number }
+    overdue: { count: number; total: number }
+  }
+}
+
+export interface FilterDebtDto {
+  status?: DebtStatus
+  due_date_start?: string
+  due_date_end?: string
 }
 
 export interface CreateDebtDto {
   name: string
   amount: number
   due_date: string
+  status?: DebtStatus
+  amount_paid?: number
   creditor?: string
   notes?: string
 }
@@ -261,4 +281,37 @@ export interface UpdateDebtDto {
   amount_paid?: number
   creditor?: string
   notes?: string
+}
+
+// Profile & Settings
+export interface Profile {
+  id: string
+  username?: string | null
+  full_name?: string | null
+  email?: string | null
+  avatar_url?: string | null
+  role?: string | null
+  currency?: string | null
+  locale?: string | null
+  date_format?: string | null
+  email_notifications?: boolean | null
+  push_notifications?: boolean | null
+  created_at?: string | null
+  updated_at?: string | null
+}
+
+export interface UpdateProfileDto {
+  username?: string
+  full_name?: string
+  avatar_url?: string
+  currency?: string
+  locale?: string
+  date_format?: string
+  email_notifications?: boolean
+  push_notifications?: boolean
+}
+
+export interface ChangePasswordDto {
+  currentPassword: string
+  newPassword: string
 }

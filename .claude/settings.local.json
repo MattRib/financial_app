@@ -17,7 +17,10 @@
       "Bash(findstr:*)",
       "Bash(find:*)",
       "Bash(powershell -Command \"Get-Content ''C:\\Users\\mathe\\Documents\\GitHub\\financial_app\\src\\pages\\Goals\\index.tsx'' | Measure-Object -Line\")",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(git log:*)",
+      "Bash(npx supabase db push:*)",
+      "Bash(npm run start:dev:*)"
     ]
   }
 }

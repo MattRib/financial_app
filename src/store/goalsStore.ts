@@ -7,7 +7,6 @@ import type {
   FilterGoalDto,
   CreateGoalDto,
   UpdateGoalDto,
-  GoalStatus,
 } from '../types'
 
 export interface GoalsState {

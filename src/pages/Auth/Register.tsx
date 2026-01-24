@@ -24,7 +24,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: [0.22, 1, 0.36, 1],
+      ease: [0.22, 1, 0.36, 1] as const,
     },
   },
 }
@@ -37,7 +37,7 @@ const logoVariants = {
     rotate: 0,
     transition: {
       duration: 0.8,
-      ease: [0.22, 1, 0.36, 1],
+      ease: [0.22, 1, 0.36, 1] as const,
     },
   },
 }
@@ -76,8 +76,6 @@ const RegisterPage = () => {
 
   // Password strength
   const hasMinLength = password.length >= 6
-  const hasUpperCase = /[A-Z]/.test(password)
-  const hasLowerCase = /[a-z]/.test(password)
   const hasNumber = /[0-9]/.test(password)
 
   useEffect(() => {

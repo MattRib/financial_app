@@ -1,0 +1,5 @@
+export { ProfileSection } from './ProfileSection'
+export { PreferencesSection } from './PreferencesSection'
+export { NotificationsSection } from './NotificationsSection'
+export { SecuritySection } from './SecuritySection'
+export { ChangePasswordModal } from './ChangePasswordModal'

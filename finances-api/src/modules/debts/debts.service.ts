@@ -20,6 +20,34 @@ export interface DebtSummary {
 export class DebtsService {
   constructor(@Inject(SUPABASE_CLIENT) private supabase: SupabaseClient) {}
 
+  /**
+   * Updates all pending debts that are past their due date to 'overdue' status.
+   * This is called automatically when fetching debts to ensure status is always accurate.
+   */
+  private async updateOverdueStatuses(userId: string): Promise<void> {
+    const today = new Date().toISOString().split('T')[0];
+
+    await this.supabase
+      .from('debts')
+      .update({ status: 'overdue' })
+      .eq('user_id', userId)
+      .eq('status', 'pending')
+      .lt('due_date', today);
+  }
+
+  /**
+   * Updates overdue statuses for ALL users. Used by the scheduler.
+   */
+  async updateAllOverdueStatuses(): Promise<void> {
+    const today = new Date().toISOString().split('T')[0];
+
+    await this.supabase
+      .from('debts')
+      .update({ status: 'overdue' })
+      .eq('status', 'pending')
+      .lt('due_date', today);
+  }
+
   async create(userId: string, dto: CreateDebtDto): Promise<Debt> {
     const { data, error } = await this.supabase
       .from('debts')
@@ -41,6 +69,9 @@ export class DebtsService {
   }
 
   async findAll(userId: string, filters?: FilterDebtDto): Promise<Debt[]> {
+    // First, update any pending debts that are now overdue
+    await this.updateOverdueStatuses(userId);
+
     let query = this.supabase.from('debts').select('*').eq('user_id', userId);
 
     if (filters?.status) {
@@ -106,6 +137,9 @@ export class DebtsService {
   }
 
   async getSummary(userId: string): Promise<DebtSummary> {
+    // First, update any pending debts that are now overdue
+    await this.updateOverdueStatuses(userId);
+
     const query = this.supabase
       .from('debts')
       .select('status, amount, amount_paid')

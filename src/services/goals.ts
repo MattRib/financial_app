@@ -10,7 +10,7 @@ import type {
 
 export const goalsService = {
   getAll: (filters?: FilterGoalDto) => 
-    api.get<Goal[]>('/goals', filters),
+    api.get<Goal[]>('/goals', filters as Record<string, string | number | undefined>),
 
   getById: (id: string) => 
     api.get<Goal>(`/goals/${id}`),
@@ -31,7 +31,7 @@ export const goalsService = {
     api.get<GoalSummary>('/goals/summary'),
 
   markAsCompleted: (id: string) =>
-    api.patch<Goal>(`/goals/${id}/complete`),
+    api.patch<Goal>(`/goals/${id}/complete`, {}),
 
   getAtRisk: () =>
     api.get<GoalWithProgress[]>('/goals/at-risk'),
