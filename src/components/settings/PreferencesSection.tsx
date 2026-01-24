@@ -39,7 +39,7 @@ export function PreferencesSection({ profile, onUpdate }: PreferencesSectionProp
 
   return (
     <AnimatedCard delay={0.1}>
-      <div className="p-6">
+      <div className="p-6 cursor-pointer">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
             <Settings
