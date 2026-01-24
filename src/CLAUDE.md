@@ -2,12 +2,25 @@
 
 Documentação específica do frontend React para o Claude Code.
 
+> **IMPORTANTE**: Para alterações de UI, LEIA PRIMEIRO `src/DESIGN_SYSTEM.md`
+
+## Design System
+
+**Arquivo: `src/DESIGN_SYSTEM.md`** - Contém:
+- Paleta de cores (Slate/Blue)
+- Padrões de dark mode
+- Componentes base (AnimatedCard, StatCard, etc.)
+- Animações com Framer Motion
+- Tipografia e espaçamento
+- Checklist para novos componentes
+
 ## Stack Tecnológica
 
 - **React 19** + **TypeScript**
 - **Vite** (rolldown-vite@7.2.5)
 - **Zustand** (state management)
 - **Tailwind CSS v4** (PostCSS plugin)
+- **Framer Motion** (animações)
 - **React Router v7**
 - **Recharts** (gráficos)
 - **Lucide React** (ícones)
@@ -244,6 +257,9 @@ VITE_API_URL=http://localhost:3333/api
 ## Notas Importantes
 
 - **React 19**: Usar novas features como `use()` hook quando apropriado
-- **Tailwind v4**: Classes utilitárias, evitar CSS custom
+- **Tailwind v4**: Classes utilitárias, cores definidas em `index.css` via `@theme`
+- **Dark Mode**: Via classe `.dark` - sempre usar `dark:` variants
+- **Animações**: Framer Motion - ver exemplos em `DESIGN_SYSTEM.md`
+- **Gradients**: PROIBIDO - usar apenas cores sólidas
 - **Vite**: Hot reload rápido, usar `import.meta.env` para env vars
 - **Types**: Manter sincronizado com DTOs do backend

@@ -10,9 +10,11 @@ import Debts from './pages/Debts'
 import Settings from './pages/settings'
 import NotFound from './pages/404/notFound'
 import PrivateRoute from './components/layout/PrivateRoute'
+import { ThemeProvider } from './components/providers'
 
 function App() {
   return (
+    <ThemeProvider>
     <BrowserRouter>
       <Routes>
         {/* Public routes */}
@@ -92,6 +94,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
+    </ThemeProvider>
   )
 }
 

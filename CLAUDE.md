@@ -111,3 +111,30 @@ Component → Zustand Store → Service → API Client → Backend API → Supab
 
 - Frontend: `src/CLAUDE.md`
 - Backend: `finances-api/CLAUDE.md`
+- **Design System: `src/DESIGN_SYSTEM.md`** (OBRIGATÓRIO para alterações de UI)
+
+## Design System (IMPORTANTE)
+
+**Antes de qualquer alteração no frontend, LEIA `src/DESIGN_SYSTEM.md`**
+
+Este arquivo contém:
+- Paleta de cores (Slate/Blue)
+- Padrões de dark mode
+- Componentes base e como usá-los
+- Animações com Framer Motion
+- Tipografia e espaçamento
+- Checklist para novos componentes
+
+### Resumo Rápido do Design
+
+| Aspecto | Padrão |
+|---------|--------|
+| Cores Base | `slate-*` (50-950) |
+| Accent | `primary-*` / `accent-*` (azul) |
+| Sucesso | `emerald-*` / `green-*` |
+| Erro | `rose-*` / `red-*` |
+| Alerta | `amber-*` / `yellow-*` |
+| Dark Mode | Classe `.dark` no `<html>` |
+| Animações | Framer Motion (sutis) |
+| Cards | `AnimatedCard` component |
+| Gradients | **PROIBIDO** - usar cores sólidas |

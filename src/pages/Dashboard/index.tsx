@@ -1,59 +1,55 @@
 import React, { useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { MainLayout } from '../../components/layout'
 import { useTransactionsStore } from '../../store/transactionsStore'
 import { useBudgetsStore } from '../../store/budgetsStore'
 import { investmentsService } from '../../services/investments'
 import { transactionsService } from '../../services/transactions'
-import PieChart from '../../components/charts/PieChart'
-import { TrendingUp, TrendingDown, Wallet, PiggyBank, AlertTriangle, ArrowRight } from 'lucide-react'
+import { CategoryBarChart } from '../../components/charts/CategoryBarChart'
+import { StatCard, TransactionItem, BudgetAlert } from '../../components/dashboard'
+import { AnimatedCard } from '../../components/ui/AnimatedCard'
+import { SectionHeader } from '../../components/ui/SectionHeader'
+import { PremiumEmptyState } from '../../components/common/PremiumEmptyState'
+import {
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  PiggyBank,
+  Receipt,
+  PieChart,
+  AlertTriangle,
+} from 'lucide-react'
 
-const StatCard: React.FC<{
-  title: string
-  value: string
-  icon: React.ReactNode
-  trend?: { value: number; positive: boolean }
-  color: string
-  loading?: boolean
-}> = ({ title, value, icon, trend, color, loading }) => (
-  <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-sm text-gray-500 mb-1">{title}</p>
-        {loading ? (
-          <div className="h-8 w-32 bg-gray-200 rounded animate-pulse"></div>
-        ) : (
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
-        )}
-        {trend && !loading && (
-          <p className={`text-sm mt-1 flex items-center gap-1 ${trend.positive ? 'text-green-600' : 'text-red-600'}`}>
-            {trend.positive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-            {trend.value}% vs mês anterior
-          </p>
-        )}
-      </div>
-      <div className={`p-3 rounded-lg ${color}`}>
-        {icon}
-      </div>
-    </div>
-  </div>
-)
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  },
+}
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate()
 
   // Stores
-  const {
-    transactions,
-    summary,
-    fetchTransactions,
-    fetchSummary,
-  } = useTransactionsStore()
+  const { transactions, summary, fetchTransactions, fetchSummary } =
+    useTransactionsStore()
 
-  const {
-    budgets,
-    fetchBudgets,
-  } = useBudgetsStore()
+  const { budgets, fetchBudgets } = useBudgetsStore()
 
   // Local state
   const [investmentsTotal, setInvestmentsTotal] = React.useState<number | null>(null)
@@ -98,16 +94,16 @@ const Dashboard: React.FC = () => {
           start_date: startDate,
           end_date: endDate,
         }),
-        
+
         // 2. Fetch summary for current month
         fetchSummary(startDate, endDate),
-        
+
         // 3. Fetch budgets for current month
         fetchBudgets(currentMonth, currentYear),
-        
+
         // 4. Fetch investments total
         investmentsService.getMonthlyTotal(currentMonth, currentYear),
-        
+
         // 5. Fetch transactions by category
         transactionsService.getByCategory(startDate, endDate),
       ])
@@ -119,7 +115,7 @@ const Dashboard: React.FC = () => {
 
       // Result 0: Transactions
       if (results[0].status === 'rejected') {
-        newErrors.transactions = 'Erro ao carregar transações'
+        newErrors.transactions = 'Erro ao carregar transacoes'
       }
 
       // Result 1: Summary
@@ -129,7 +125,7 @@ const Dashboard: React.FC = () => {
 
       // Result 2: Budgets
       if (results[2].status === 'rejected') {
-        newErrors.budgets = 'Erro ao carregar orçamentos'
+        newErrors.budgets = 'Erro ao carregar orcamentos'
       }
 
       // Result 3: Investments
@@ -159,8 +155,6 @@ const Dashboard: React.FC = () => {
     }
   }, [fetchTransactions, fetchSummary, fetchBudgets, currentMonth, currentYear, startDate, endDate])
 
-  // Fetch transactions by category is defined above using React.useCallback
-
   // Format currency
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -169,17 +163,12 @@ const Dashboard: React.FC = () => {
     }).format(value)
   }
 
-  // Format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR')
-  }
-
-  // Prepare pie chart data
-  const pieChartData = useMemo(() => {
+  // Prepare bar chart data
+  const barChartData = useMemo(() => {
     return categoryData.map((item) => ({
       name: item.category_name || 'Sem categoria',
       value: item.total,
-      color: item.category_color || '#6b7280',
+      color: item.category_color || '#64748b',
     }))
   }, [categoryData])
 
@@ -194,11 +183,12 @@ const Dashboard: React.FC = () => {
   // Get budget alerts (> 80%)
   const budgetAlerts = useMemo(() => {
     return budgets.filter((budget) => {
-      const percentage = budget.percentage !== undefined 
-        ? budget.percentage 
-        : budget.spent && budget.amount 
-          ? (budget.spent / budget.amount) * 100 
-          : 0
+      const percentage =
+        budget.percentage !== undefined
+          ? budget.percentage
+          : budget.spent && budget.amount
+            ? (budget.spent / budget.amount) * 100
+            : 0
       return percentage > 80
     })
   }, [budgets])
@@ -209,190 +199,203 @@ const Dashboard: React.FC = () => {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <motion.div
+        className="space-y-8"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {/* Page header */}
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-500">Visão geral das suas finanças</p>
-        </div>
+        <motion.div variants={itemVariants}>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
+            Dashboard
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+            Visao geral das suas financas
+          </p>
+        </motion.div>
 
-        {/* Stats grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Stats grid - horizontal cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            title="Receitas do mês"
+            title="Receitas do mes"
             value={summary ? formatCurrency(summary.total_income) : 'R$ 0,00'}
-            icon={<TrendingUp size={24} className="text-green-600" />}
-            color="bg-green-50"
+            icon={<TrendingUp size={24} />}
             loading={isLoadingDashboard}
+            index={0}
           />
           <StatCard
-            title="Despesas do mês"
+            title="Despesas do mes"
             value={summary ? formatCurrency(summary.total_expense) : 'R$ 0,00'}
-            icon={<TrendingDown size={24} className="text-red-600" />}
-            color="bg-red-50"
+            icon={<TrendingDown size={24} />}
             loading={isLoadingDashboard}
+            index={1}
           />
           <StatCard
             title="Saldo atual"
             value={summary ? formatCurrency(summary.balance) : 'R$ 0,00'}
-            icon={<Wallet size={24} className="text-indigo-600" />}
-            color="bg-indigo-50"
+            icon={<Wallet size={24} />}
             loading={isLoadingDashboard}
+            index={2}
           />
           <StatCard
             title="Investimentos"
             value={investmentsTotal !== null ? formatCurrency(investmentsTotal) : 'R$ 0,00'}
-            icon={<PiggyBank size={24} className="text-amber-600" />}
-            color="bg-amber-50"
+            icon={<PiggyBank size={24} />}
             loading={isLoadingDashboard}
+            index={3}
           />
         </div>
 
         {/* Chart and Recent Transactions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Chart */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Gastos por categoria</h3>
+          {/* Bar Chart */}
+          <AnimatedCard delay={0.3}>
+            <SectionHeader title="Gastos por categoria" />
             {isLoading ? (
-              <div className="h-64 flex items-center justify-center">
-                <div className="animate-pulse text-gray-400">Carregando gráfico...</div>
+              <div className="space-y-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="flex justify-between">
+                      <div className="h-4 w-24 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
+                      <div className="h-4 w-16 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
+                    </div>
+                    <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded-full animate-pulse" />
+                  </div>
+                ))}
               </div>
             ) : hasCategoriesError ? (
-              <div className="h-64 flex items-center justify-center border-2 border-dashed border-red-200 rounded-lg">
-                <p className="text-red-400">{errors.categories}</p>
-              </div>
-            ) : pieChartData.length === 0 ? (
-              <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg">
-                <p className="text-gray-400">Nenhum gasto registrado este mês</p>
-              </div>
+              <PremiumEmptyState
+                icon={PieChart}
+                title="Erro ao carregar dados"
+                description={errors.categories}
+              />
+            ) : barChartData.length === 0 ? (
+              <PremiumEmptyState
+                icon={PieChart}
+                title="Nenhum gasto registrado"
+                description="Seus gastos por categoria aparecerão aqui"
+              />
             ) : (
-              <PieChart data={pieChartData} height={250} />
+              <CategoryBarChart data={barChartData} height={250} />
             )}
-          </div>
+          </AnimatedCard>
 
           {/* Recent transactions */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Transações recentes</h3>
-              <button
-                onClick={() => navigate('/transactions')}
-                className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
-              >
-                Ver todas
-                <ArrowRight size={14} />
-              </button>
-            </div>
+          <AnimatedCard delay={0.4}>
+            <SectionHeader
+              title="Transacoes recentes"
+              action={{
+                label: 'Ver todas',
+                onClick: () => navigate('/transactions'),
+              }}
+            />
             {isLoading ? (
               <div className="space-y-3">
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="h-12 bg-gray-200 rounded animate-pulse"></div>
+                  <div
+                    key={i}
+                    className="h-14 bg-slate-200 dark:bg-slate-800 rounded-lg animate-pulse"
+                  />
                 ))}
               </div>
             ) : hasTransactionsError ? (
-              <div className="h-64 flex items-center justify-center border-2 border-dashed border-red-200 rounded-lg">
-                <p className="text-red-400">{errors.transactions || errors.summary}</p>
-              </div>
+              <PremiumEmptyState
+                icon={Receipt}
+                title="Erro ao carregar transacoes"
+                description={errors.transactions || errors.summary}
+              />
             ) : recentTransactions.length === 0 ? (
-              <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg">
-                <p className="text-gray-400">Nenhuma transação recente</p>
-              </div>
+              <PremiumEmptyState
+                icon={Receipt}
+                title="Nenhuma transacao recente"
+                description="Suas transacoes aparecerão aqui"
+                action={{
+                  label: 'Adicionar transacao',
+                  onClick: () => navigate('/transactions'),
+                }}
+              />
             ) : (
-              <div className="space-y-3">
-                {recentTransactions.map((transaction) => (
-                  <div
+              <div className="space-y-1">
+                {recentTransactions.map((transaction, index) => (
+                  <TransactionItem
                     key={transaction.id}
-                    className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm text-gray-500">{formatDate(transaction.date)}</span>
-                        {transaction.categories && (
-                          <span
-                            className="text-xs px-2 py-0.5 rounded"
-                            style={{
-                              backgroundColor: `${transaction.categories.color}20`,
-                              color: transaction.categories.color,
-                            }}
-                          >
-                            {transaction.categories.icon} {transaction.categories.name}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-900">
-                        {transaction.description || 'Sem descrição'}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-red-600">
-                        -{formatCurrency(transaction.amount)}
-                      </p>
-                    </div>
-                  </div>
+                    date={transaction.date}
+                    description={transaction.description || ''}
+                    amount={transaction.amount}
+                    category={
+                      transaction.categories
+                        ? {
+                            name: transaction.categories.name,
+                            color: transaction.categories.color,
+                            icon: transaction.categories.icon,
+                          }
+                        : undefined
+                    }
+                    index={index}
+                  />
                 ))}
               </div>
             )}
-          </div>
+          </AnimatedCard>
         </div>
 
         {/* Budget alerts */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Alertas de orçamento</h3>
-            <button
-              onClick={() => navigate('/budgets')}
-              className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
-            >
-              Gerenciar
-              <ArrowRight size={14} />
-            </button>
-          </div>
+        <AnimatedCard delay={0.5}>
+          <SectionHeader
+            title="Alertas de orcamento"
+            action={{
+              label: 'Gerenciar',
+              onClick: () => navigate('/budgets'),
+            }}
+          />
           {isLoadingDashboard ? (
             <div className="space-y-3">
               {[1, 2].map((i) => (
-                <div key={i} className="h-16 bg-gray-200 rounded animate-pulse"></div>
+                <div
+                  key={i}
+                  className="h-16 bg-slate-200 dark:bg-slate-800 rounded-lg animate-pulse"
+                />
               ))}
             </div>
           ) : errors.budgets ? (
-            <div className="h-32 flex items-center justify-center border-2 border-dashed border-red-200 rounded-lg">
-              <p className="text-red-400">{errors.budgets}</p>
-            </div>
+            <PremiumEmptyState
+              icon={AlertTriangle}
+              title="Erro ao carregar orcamentos"
+              description={errors.budgets}
+            />
           ) : budgetAlerts.length === 0 ? (
-            <div className="h-32 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg">
-              <p className="text-gray-400">Nenhum alerta de orçamento</p>
-            </div>
+            <PremiumEmptyState
+              icon={AlertTriangle}
+              title="Nenhum alerta de orcamento"
+              description="Voce sera notificado quando seus gastos ultrapassarem 80% do orcamento"
+            />
           ) : (
             <div className="space-y-3">
-              {budgetAlerts.map((budget) => {
-                const percentage = budget.percentage !== undefined
-                  ? budget.percentage
-                  : budget.spent && budget.amount
-                    ? Math.round((budget.spent / budget.amount) * 100)
-                    : 0
-                const categoryName = budget.category?.name || 'Orçamento Geral'
+              {budgetAlerts.map((budget, index) => {
+                const percentage =
+                  budget.percentage !== undefined
+                    ? budget.percentage
+                    : budget.spent && budget.amount
+                      ? Math.round((budget.spent / budget.amount) * 100)
+                      : 0
+                const categoryName = budget.category?.name || 'Orcamento Geral'
 
                 return (
-                  <div
+                  <BudgetAlert
                     key={budget.id}
-                    className="flex items-center gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg"
-                  >
-                    <div className="p-2 bg-yellow-100 rounded-full">
-                      <AlertTriangle size={20} className="text-yellow-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">
-                        Você usou {percentage}% do orçamento de {categoryName}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {formatCurrency(budget.spent || 0)} de {formatCurrency(budget.amount)}
-                      </p>
-                    </div>
-                  </div>
+                    categoryName={categoryName}
+                    percentage={percentage}
+                    spent={budget.spent || 0}
+                    total={budget.amount}
+                    index={index}
+                  />
                 )
               })}
             </div>
           )}
-        </div>
-      </div>
+        </AnimatedCard>
+      </motion.div>
     </MainLayout>
   )
 }

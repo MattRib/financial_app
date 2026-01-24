@@ -7,12 +7,12 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
       {/* Floating Dock Navbar */}
       <FloatingNavbar />
 
       {/* Main content - with bottom padding for dock navbar */}
-      <main className="min-h-screen px-4 lg:px-8 pt-6 pb-24">
+      <main className="min-h-screen px-4 lg:px-8 xl:px-16 pt-8 pb-28 max-w-7xl mx-auto">
         {children}
       </main>
     </div>
