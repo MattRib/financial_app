@@ -193,6 +193,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                         className={`
                           flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all
                           flex items-center justify-center gap-1.5
+                          cursor-pointer
                           ${isSelected
                             ? `${config.bgColor} ${config.textColor}`
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -220,7 +221,8 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                         onClick={() => setFormColor(color)}
                         className={`
                           w-7 h-7 rounded-full transition-all flex items-center justify-center
-                          ${formColor === color ? 'ring-2 ring-offset-2 ring-slate-900 dark:ring-slate-100 dark:ring-offset-slate-900' : 'hover:scale-110'}
+                            ${formColor === color ? 'ring-2 ring-offset-2 ring-slate-900 dark:ring-slate-100 dark:ring-offset-slate-900' : 'hover:scale-110'}
+                            cursor-pointer
                         `}
                         style={{ backgroundColor: color }}
                       >
@@ -241,6 +243,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                         onClick={() => setFormIcon(icon)}
                         className={`
                           w-9 h-9 rounded-lg text-base flex items-center justify-center transition-all
+                          cursor-pointer
                           ${formIcon === icon
                             ? 'bg-slate-200 dark:bg-slate-700 ring-2 ring-slate-900 dark:ring-slate-100'
                             : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -273,7 +276,8 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                     text-slate-600 dark:text-slate-400
                     hover:bg-slate-50 dark:hover:bg-slate-800
                     text-sm font-medium transition-colors
-                    disabled:opacity-50
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    cursor-pointer
                   "
                 >
                   Cancelar
@@ -285,7 +289,8 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                     flex-1 px-4 py-2.5 rounded-xl
                     bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600
                     text-white text-sm font-medium transition-colors
-                    disabled:opacity-50
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    cursor-pointer
                   "
                 >
                   {loading ? 'Salvando...' : category ? 'Salvar' : 'Criar'}
