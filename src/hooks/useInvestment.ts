@@ -1,0 +1,264 @@
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useInvestmentsStore } from '../store/investmentsStore'
+import type { Investment, CreateInvestmentDto, UpdateInvestmentDto, InvestmentType } from '../types'
+import { INVESTMENT_TYPE_CONFIG, type InvestmentTabId } from '../constants/investments'
+
+interface InvestmentSummaryByType {
+  type: InvestmentType
+  total: number
+  count: number
+  percentage: number
+}
+
+interface UseInvestmentReturn {
+  // Period state
+  month: number
+  year: number
+  
+  // Filter state
+  selectedType: InvestmentTabId
+  
+  // Navigation
+  goToPrevMonth: () => void
+  goToNextMonth: () => void
+  goToMonth: (month: number, year: number) => void
+  setSelectedType: (type: InvestmentTabId) => void
+  
+  // Modal state
+  isModalOpen: boolean
+  isDeleteModalOpen: boolean
+  selectedInvestment: Investment | null
+  investmentToDelete: string | null
+  
+  // Modal actions
+  openCreateModal: () => void
+  openEditModal: (investment: Investment) => void
+  closeModal: () => void
+  openDeleteModal: (id: string) => void
+  closeDeleteModal: () => void
+  
+  // CRUD operations
+  handleSubmit: (data: CreateInvestmentDto | UpdateInvestmentDto) => Promise<void>
+  handleDelete: () => Promise<void>
+  
+  // Data from store
+  investments: Investment[]
+  filteredInvestments: Investment[]
+  loading: boolean
+  error: string | null
+  
+  // Computed summaries
+  totalInvested: number
+  monthlyTotal: number
+  summaryByType: InvestmentSummaryByType[]
+  chartData: { name: string; value: number; color: string }[]
+}
+
+export const useInvestment = (): UseInvestmentReturn => {
+  // Current period state
+  const now = new Date()
+  const [month, setMonth] = useState(now.getMonth() + 1)
+  const [year, setYear] = useState(now.getFullYear())
+  
+  // Filter state
+  const [selectedType, setSelectedType] = useState<InvestmentTabId>('all')
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedInvestment, setSelectedInvestment] = useState<Investment | null>(null)
+  const [investmentToDelete, setInvestmentToDelete] = useState<string | null>(null)
+  
+  // Store
+  const {
+    investments,
+    loading,
+    error,
+    monthlyTotal,
+    fetchInvestments,
+    fetchMonthlyTotal,
+    createInvestment,
+    updateInvestment,
+    deleteInvestment,
+  } = useInvestmentsStore()
+  
+  // Compute date range for current month
+  const getDateRange = useCallback((m: number, y: number) => {
+    const startDate = new Date(y, m - 1, 1).toISOString().split('T')[0]
+    const endDate = new Date(y, m, 0).toISOString().split('T')[0]
+    return { startDate, endDate }
+  }, [])
+  
+  // Fetch data when period changes
+  useEffect(() => {
+    const { startDate, endDate } = getDateRange(month, year)
+    fetchInvestments({ start_date: startDate, end_date: endDate })
+    fetchMonthlyTotal(month, year)
+  }, [month, year, fetchInvestments, fetchMonthlyTotal, getDateRange])
+  
+  // Filter investments by selected type
+  const filteredInvestments = useMemo(() => {
+    if (selectedType === 'all') return investments
+    return investments.filter(inv => inv.type === selectedType)
+  }, [investments, selectedType])
+  
+  // Calculate total invested (all time - fetch without date filter)
+  const totalInvested = useMemo(() => {
+    return investments.reduce((sum, inv) => sum + inv.amount, 0)
+  }, [investments])
+  
+  // Calculate summary by type
+  const summaryByType = useMemo((): InvestmentSummaryByType[] => {
+    const types: InvestmentType[] = ['renda_fixa', 'renda_variavel', 'cripto', 'outros']
+    const total = investments.reduce((sum, inv) => sum + inv.amount, 0)
+    
+    return types.map(type => {
+      const typeInvestments = investments.filter(inv => inv.type === type)
+      const typeTotal = typeInvestments.reduce((sum, inv) => sum + inv.amount, 0)
+      
+      return {
+        type,
+        total: typeTotal,
+        count: typeInvestments.length,
+        percentage: total > 0 ? (typeTotal / total) * 100 : 0,
+      }
+    })
+  }, [investments])
+  
+  // Chart data for CategoryBarChart
+  const chartData = useMemo(() => {
+    return summaryByType
+      .filter(item => item.total > 0)
+      .map(item => ({
+        name: INVESTMENT_TYPE_CONFIG[item.type].label,
+        value: item.total,
+        color: INVESTMENT_TYPE_CONFIG[item.type].chartColor,
+      }))
+      .sort((a, b) => b.value - a.value)
+  }, [summaryByType])
+  
+  // Navigation
+  const goToPrevMonth = () => {
+    setMonth((currentMonth) => {
+      if (currentMonth === 1) {
+        setYear((y) => y - 1)
+        return 12
+      }
+      return currentMonth - 1
+    })
+  }
+  
+  const goToNextMonth = () => {
+    setMonth((currentMonth) => {
+      if (currentMonth === 12) {
+        setYear((y) => y + 1)
+        return 1
+      }
+      return currentMonth + 1
+    })
+  }
+  
+  const goToMonth = (newMonth: number, newYear: number) => {
+    setMonth(newMonth)
+    setYear(newYear)
+  }
+  
+  // Modal actions
+  const openCreateModal = useCallback(() => {
+    setSelectedInvestment(null)
+    setIsModalOpen(true)
+  }, [])
+  
+  const openEditModal = useCallback((investment: Investment) => {
+    setSelectedInvestment(investment)
+    setIsModalOpen(true)
+  }, [])
+  
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false)
+    setSelectedInvestment(null)
+  }, [])
+  
+  const openDeleteModal = useCallback((id: string) => {
+    setInvestmentToDelete(id)
+    setIsDeleteModalOpen(true)
+  }, [])
+  
+  const closeDeleteModal = useCallback(() => {
+    setIsDeleteModalOpen(false)
+    setInvestmentToDelete(null)
+  }, [])
+  
+  // CRUD operations
+  const handleSubmit = useCallback(async (data: CreateInvestmentDto | UpdateInvestmentDto) => {
+    if (selectedInvestment) {
+      await updateInvestment(selectedInvestment.id, data)
+    } else {
+      await createInvestment(data as CreateInvestmentDto)
+    }
+    
+    // Refresh data
+    const { startDate, endDate } = getDateRange(month, year)
+    await fetchInvestments({ start_date: startDate, end_date: endDate })
+    await fetchMonthlyTotal(month, year)
+    
+    closeModal()
+  }, [selectedInvestment, updateInvestment, createInvestment, fetchInvestments, fetchMonthlyTotal, month, year, closeModal, getDateRange])
+  
+  const handleDelete = useCallback(async () => {
+    if (!investmentToDelete) return
+    
+    await deleteInvestment(investmentToDelete)
+    
+    // Refresh data
+    const { startDate, endDate } = getDateRange(month, year)
+    await fetchInvestments({ start_date: startDate, end_date: endDate })
+    await fetchMonthlyTotal(month, year)
+    
+    closeDeleteModal()
+  }, [investmentToDelete, deleteInvestment, fetchInvestments, fetchMonthlyTotal, month, year, closeDeleteModal, getDateRange])
+  
+  return {
+    // Period
+    month,
+    year,
+    
+    // Filter
+    selectedType,
+    
+    // Navigation
+    goToPrevMonth,
+    goToNextMonth,
+    goToMonth,
+    setSelectedType,
+    
+    // Modal state
+    isModalOpen,
+    isDeleteModalOpen,
+    selectedInvestment,
+    investmentToDelete,
+    
+    // Modal actions
+    openCreateModal,
+    openEditModal,
+    closeModal,
+    openDeleteModal,
+    closeDeleteModal,
+    
+    // CRUD
+    handleSubmit,
+    handleDelete,
+    
+    // Data
+    investments,
+    filteredInvestments,
+    loading,
+    error,
+    
+    // Computed
+    totalInvested,
+    monthlyTotal: monthlyTotal ?? 0,
+    summaryByType,
+    chartData,
+  }
+}

@@ -1,0 +1,195 @@
+import React, { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { MoreHorizontal, Pencil, Trash2, Calendar } from 'lucide-react'
+import type { Investment } from '../../types'
+import { INVESTMENT_TYPE_CONFIG } from '../../constants/investments'
+import { formatCurrency } from '../../hooks/useTransaction'
+
+interface InvestmentCardProps {
+  investment: Investment
+  index?: number
+  onEdit?: (investment: Investment) => void
+  onDelete?: (id: string) => void
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (index: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      delay: index * 0.1,
+      ease: [0.25, 0.46, 0.45, 0.94] as const,
+    },
+  }),
+}
+
+export const InvestmentCard: React.FC<InvestmentCardProps> = ({
+  investment,
+  index = 0,
+  onEdit,
+  onDelete,
+}) => {
+  const [showActions, setShowActions] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const typeConfig = INVESTMENT_TYPE_CONFIG[investment.type]
+  const TypeIcon = typeConfig.icon
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowActions(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Format date
+  const formattedDate = new Date(investment.date).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+  })
+
+  return (
+    <motion.div
+      variants={itemVariants}
+      initial="hidden"
+      animate="visible"
+      custom={index}
+      whileHover={{ scale: 1.02 }}
+      className="
+        bg-white dark:bg-slate-900
+        border border-slate-200 dark:border-slate-800
+        rounded-xl p-4
+        transition-shadow hover:shadow-md
+      "
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-3">
+          {/* Type Icon */}
+          <div
+            className={`w-10 h-10 rounded-lg flex items-center justify-center ${typeConfig.bgColor}`}
+          >
+            <TypeIcon size={20} className={typeConfig.iconColor} />
+          </div>
+          
+          {/* Name & Type */}
+          <div className="min-w-0 flex-1">
+            <h3 className="font-medium text-slate-900 dark:text-slate-100 truncate">
+              {investment.name}
+            </h3>
+            <span className={`text-xs font-medium ${typeConfig.textColor}`}>
+              {typeConfig.label}
+            </span>
+          </div>
+        </div>
+
+        {/* Actions Dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowActions(!showActions)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          >
+            <MoreHorizontal size={18} />
+          </motion.button>
+
+          <AnimatePresence>
+            {showActions && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -5 }}
+                transition={{ duration: 0.15 }}
+                className="
+                  absolute right-0 top-full mt-1 z-10
+                  bg-white dark:bg-slate-800
+                  border border-slate-200 dark:border-slate-700
+                  rounded-lg shadow-lg
+                  py-1 min-w-[120px]
+                "
+              >
+                <button
+                  onClick={() => {
+                    setShowActions(false)
+                    onEdit?.(investment)
+                  }}
+                  className="w-full px-3 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <Pencil size={14} />
+                  Editar
+                </button>
+                <button
+                  onClick={() => {
+                    setShowActions(false)
+                    onDelete?.(investment.id)
+                  }}
+                  className="w-full px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <Trash2 size={14} />
+                  Excluir
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Amount & Date */}
+      <div className="flex items-center justify-between">
+        <span className="text-lg font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
+          {formatCurrency(investment.amount)}
+        </span>
+        <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+          <Calendar size={14} />
+          <span className="text-xs">{formattedDate}</span>
+        </div>
+      </div>
+
+      {/* Notes (if exists) */}
+      {investment.notes && (
+        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+          {investment.notes}
+        </p>
+      )}
+    </motion.div>
+  )
+}
+
+// Skeleton for loading state
+export const InvestmentCardSkeleton: React.FC<{ index?: number }> = ({ index = 0 }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.4, delay: index * 0.1 }}
+    className="
+      bg-white dark:bg-slate-900
+      border border-slate-200 dark:border-slate-800
+      rounded-xl p-4
+    "
+  >
+    {/* Header skeleton */}
+    <div className="flex items-start justify-between mb-3">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse" />
+        <div className="space-y-2">
+          <div className="w-28 h-4 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+          <div className="w-16 h-3 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+        </div>
+      </div>
+      <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" />
+    </div>
+    
+    {/* Amount & Date skeleton */}
+    <div className="flex items-center justify-between">
+      <div className="w-24 h-6 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+      <div className="w-16 h-4 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+    </div>
+  </motion.div>
+)

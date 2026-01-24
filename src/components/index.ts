@@ -12,3 +12,9 @@ export * from './charts'
 
 // Dashboard
 export * from './dashboard'
+
+// Budgets
+export * from './budgets'
+
+// Investments
+export * from './investments'
