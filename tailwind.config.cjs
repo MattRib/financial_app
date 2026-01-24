@@ -8,6 +8,20 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Base UI - Slate (padrão para todo o projeto)
+        // Já incluído no Tailwind por padrão, mas documentado aqui:
+        // slate-50:  #f8fafc  (fundos claros)
+        // slate-100: #f1f5f9
+        // slate-200: #e2e8f0  (bordas/skeleton light)
+        // slate-400: #94a3b8  (texto terciário)
+        // slate-500: #64748b  (texto secundário)
+        // slate-600: #475569  (ícones neutros)
+        // slate-700: #334155
+        // slate-800: #1e293b  (bordas/skeleton dark)
+        // slate-900: #0f172a  (fundos dark)
+        // slate-950: #020617
+
+        // Primary - Azul (acentos e ações principais)
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',
@@ -20,6 +34,7 @@ module.exports = {
           800: '#1e40af',
           900: '#1e3a8a',
         },
+        // Accent - Alias para Primary (compatibilidade)
         accent: {
           50: '#eff6ff',
           100: '#dbeafe',

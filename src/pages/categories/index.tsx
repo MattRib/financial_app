@@ -1,22 +1,35 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { MainLayout } from '../../components/layout'
 import { useCategoriesStore } from '../../store/categoriesStore'
-import CategoriesList from '../categories/CategoriesList'
+import { AnimatedCard } from '../../components/ui/AnimatedCard'
+import { StatCard } from '../../components/dashboard/StatCard'
+import { CategoryModal } from '../../components/categories'
+import CategoriesList from './CategoriesList'
 import type { Category, CategoryType } from '../../types'
-import { Plus, X, TrendingUp, TrendingDown, PiggyBank, List } from 'lucide-react'
+import { Plus, TrendingUp, TrendingDown, PiggyBank, X, AlertTriangle } from 'lucide-react'
+import { CATEGORY_TABS, type CategoryTabId } from '../../constants/categories'
 
-// Predefined colors
-const COLORS = [
-  '#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', '#10b981',
-  '#06b6d4', '#3b82f6', '#6366f1', '#a855f7', '#ec4899', '#64748b',
-]
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
+}
 
-// Predefined icons
-const ICONS = [
-  '💰', '💵', '💳', '🏦', '📈', '📊', '🏠', '🚗', '🚌', '✈️',
-  '🍔', '🍽️', '🍕', '☕', '🏥', '💊', '💪', '📚', '✏️', '💻',
-  '📱', '🎮', '🎬', '🎵', '⚽', '👕', '🛍️', '🎁', '👨‍👩‍👧‍👦', '🐶',
-]
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  },
+}
 
 const CategoriesPage: React.FC = () => {
   // Store
@@ -34,17 +47,9 @@ const CategoriesPage: React.FC = () => {
   // Local state
   const [showModal, setShowModal] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
-  const [selectedTab, setSelectedTab] = useState<'all' | CategoryType>('all')
+  const [selectedTab, setSelectedTab] = useState<CategoryTabId>('all')
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; show: boolean }>({ id: '', show: false })
-
-  // Form state
-  const [formName, setFormName] = useState('')
-  const [formType, setFormType] = useState<CategoryType>('expense')
-  const [formColor, setFormColor] = useState('#ef4444')
-  const [formIcon, setFormIcon] = useState('💰')
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
-  const [submitError, setSubmitError] = useState<string | null>(null)
 
   // Fetch categories on mount
   useEffect(() => {
@@ -71,31 +76,21 @@ const CategoriesPage: React.FC = () => {
     return categories.filter((cat) => cat.type === selectedTab)
   }, [categories, selectedTab])
 
-  // Reset form
-  const resetForm = () => {
-    setFormName('')
-    setFormType('expense')
-    setFormColor('#ef4444')
-    setFormIcon('💰')
-    setFormErrors({})
-    setSubmitError(null)
-  }
+  // Category counts by type
+  const categoryCounts = useMemo(() => ({
+    income: categories.filter((c) => c.type === 'income').length,
+    expense: categories.filter((c) => c.type === 'expense').length,
+    investment: categories.filter((c) => c.type === 'investment').length,
+  }), [categories])
 
   // Handle new category
   const handleNewCategory = () => {
-    resetForm()
     setEditingCategory(null)
     setShowModal(true)
   }
 
   // Handle edit category
   const handleEditCategory = useCallback((category: Category) => {
-    setFormName(category.name)
-    setFormType(category.type)
-    setFormColor(category.color)
-    setFormIcon(category.icon || '💰')
-    setFormErrors({})
-    setSubmitError(null)
     setEditingCategory(category)
     setShowModal(true)
   }, [])
@@ -118,73 +113,24 @@ const CategoriesPage: React.FC = () => {
     }
   }
 
-  // Validate form
-  const validateForm = (): boolean => {
-    const errors: Record<string, string> = {}
-
-    if (!formName.trim()) {
-      errors.name = 'Nome é obrigatório'
-    } else if (formName.trim().length < 2) {
-      errors.name = 'Nome deve ter pelo menos 2 caracteres'
-    } else if (formName.length > 50) {
-      errors.name = 'Nome deve ter no máximo 50 caracteres'
+  // Handle form submit from modal
+  const handleFormSubmit = async (data: { name: string; type: CategoryType; color: string; icon: string }) => {
+    if (editingCategory) {
+      await updateCategory(editingCategory.id, data)
+      setNotification({ type: 'success', message: 'Categoria atualizada com sucesso!' })
+    } else {
+      await createCategory(data)
+      setNotification({ type: 'success', message: 'Categoria criada com sucesso!' })
     }
-
-    if (!formType) {
-      errors.type = 'Tipo é obrigatório'
-    }
-
-    if (!formColor) {
-      errors.color = 'Cor é obrigatória'
-    }
-
-    if (!formIcon) {
-      errors.icon = 'Ícone é obrigatório'
-    }
-
-    setFormErrors(errors)
-    return Object.keys(errors).length === 0
-  }
-
-  // Handle form submit
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSubmitError(null)
-
-    if (!validateForm()) {
-      return
-    }
-
-    try {
-      const data = {
-        name: formName.trim(),
-        type: formType,
-        color: formColor,
-        icon: formIcon,
-      }
-
-      if (editingCategory) {
-        await updateCategory(editingCategory.id, data)
-        setNotification({ type: 'success', message: 'Categoria atualizada com sucesso!' })
-      } else {
-        await createCategory(data)
-        setNotification({ type: 'success', message: 'Categoria criada com sucesso!' })
-      }
-      setShowModal(false)
-      setEditingCategory(null)
-      resetForm()
-      await fetchCategories()
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao salvar categoria'
-      setSubmitError(errorMessage)
-    }
+    setShowModal(false)
+    setEditingCategory(null)
+    await fetchCategories()
   }
 
   // Handle modal close
   const handleModalClose = () => {
     setShowModal(false)
     setEditingCategory(null)
-    resetForm()
   }
 
   // Handle creating default categories
@@ -206,51 +152,71 @@ const CategoriesPage: React.FC = () => {
     }
   }, [notification])
 
-  // Get type info helper
-  const getTypeInfo = (type: CategoryType) => {
-    switch (type) {
-      case 'income':
-        return { label: 'Entrada', icon: <TrendingUp size={18} />, bgColor: 'bg-green-100', textColor: 'text-green-700' }
-      case 'expense':
-        return { label: 'Saída', icon: <TrendingDown size={18} />, bgColor: 'bg-red-100', textColor: 'text-red-700' }
-      case 'investment':
-        return { label: 'Investimento', icon: <PiggyBank size={18} />, bgColor: 'bg-blue-100', textColor: 'text-blue-700' }
-      default:
-        return { label: type, icon: null, bgColor: 'bg-gray-100', textColor: 'text-gray-700' }
-    }
-  }
-
-  // Tab configuration
-  const tabs = [
-    { id: 'all' as const, label: 'Todos', icon: List },
-    { id: 'income' as const, label: 'Receitas', icon: TrendingUp },
-    { id: 'expense' as const, label: 'Despesas', icon: TrendingDown },
-    { id: 'investment' as const, label: 'Investimentos', icon: PiggyBank },
-  ]
-
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <motion.div
+        className="space-y-8"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Categorias</h1>
-            <p className="text-gray-500">Organize suas categorias de transações</p>
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
+              Categorias
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+              Organize suas categorias de transações
+            </p>
           </div>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleNewCategory}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="
+              inline-flex items-center gap-2 px-5 py-2.5
+              bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600
+              text-white font-medium text-sm
+              rounded-xl
+              transition-colors duration-200
+            "
           >
-            <Plus size={20} />
+            <Plus size={18} />
             Nova Categoria
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
+
+        {/* Stats Cards */}
+        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <StatCard
+            title="Receitas"
+            value={categoryCounts.income.toString()}
+            icon={<TrendingUp size={24} />}
+            loading={loading}
+            index={0}
+          />
+          <StatCard
+            title="Despesas"
+            value={categoryCounts.expense.toString()}
+            icon={<TrendingDown size={24} />}
+            loading={loading}
+            index={1}
+          />
+          <StatCard
+            title="Investimentos"
+            value={categoryCounts.investment.toString()}
+            icon={<PiggyBank size={24} />}
+            loading={loading}
+            index={2}
+          />
+        </motion.div>
 
         {/* Tabs/Filters */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="border-b border-gray-200">
-            <nav className="flex -mb-px" aria-label="Tabs">
-              {tabs.map((tab) => {
+        <AnimatedCard delay={0.2} padding="none">
+          <div className="border-b border-slate-200 dark:border-slate-800">
+            <nav className="flex -mb-px relative" aria-label="Tabs">
+              {CATEGORY_TABS.map((tab) => {
                 const Icon = tab.icon
                 const isActive = selectedTab === tab.id
                 const count = tab.id === 'all' 
@@ -262,325 +228,197 @@ const CategoriesPage: React.FC = () => {
                     key={tab.id}
                     onClick={() => setSelectedTab(tab.id)}
                     className={`
-                      flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors
-                      ${
-                        isActive
-                          ? 'border-indigo-500 text-indigo-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      relative flex items-center gap-2 px-4 py-3.5 text-sm font-medium transition-colors
+                      ${isActive
+                        ? 'text-slate-900 dark:text-slate-50'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
                       }
                     `}
                   >
                     <Icon size={16} />
-                    {tab.label}
+                    <span className="hidden sm:inline">{tab.label}</span>
                     <span
                       className={`
-                        ml-1 px-2 py-0.5 rounded-full text-xs
-                        ${
-                          isActive
-                            ? 'bg-indigo-100 text-indigo-600'
-                            : 'bg-gray-100 text-gray-600'
+                        ml-1 px-2 py-0.5 rounded-full text-xs font-medium
+                        ${isActive
+                          ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-50'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                         }
                       `}
                     >
                       {count}
                     </span>
+                    {/* Active indicator */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeTabIndicator"
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900 dark:bg-slate-50"
+                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                      />
+                    )}
                   </button>
                 )
               })}
             </nav>
           </div>
-        </div>
+        </AnimatedCard>
 
         {/* Error Message */}
-        {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-600">{error}</p>
-          </div>
-        )}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl"
+            >
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Notification */}
-        {notification && (
-          <div
-            className={`p-4 rounded-md ${
-              notification.type === 'success'
-                ? 'bg-green-50 border border-green-200 text-green-600'
-                : 'bg-red-50 border border-red-200 text-red-600'
-            }`}
-          >
-            <p className="text-sm">{notification.message}</p>
-          </div>
-        )}
+        <AnimatePresence>
+          {notification && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className={`
+                p-4 rounded-xl flex items-center justify-between
+                ${notification.type === 'success'
+                  ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400'
+                }
+              `}
+            >
+              <p className="text-sm">{notification.message}</p>
+              <button
+                onClick={() => setNotification(null)}
+                className="p-1 hover:bg-black/5 dark:hover:bg-white/5 rounded transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Categories List */}
-        <CategoriesList
-          categories={filteredCategories}
+        <AnimatedCard delay={0.3}>
+          <CategoriesList
+            categories={filteredCategories}
+            loading={loading}
+            onEdit={handleEditCategory}
+            onDelete={handleDeleteClick}
+            onCreateFirst={handleNewCategory}
+            onCreateDefaults={handleCreateDefaults}
+          />
+        </AnimatedCard>
+
+        {/* Category Modal */}
+        <CategoryModal
+          isOpen={showModal}
+          category={editingCategory}
           loading={loading}
-          onEdit={handleEditCategory}
-          onDelete={handleDeleteClick}
-          onCreateFirst={handleNewCategory}
-          onCreateDefaults={handleCreateDefaults}
+          onClose={handleModalClose}
+          onSubmit={handleFormSubmit}
         />
 
-        {/* Modal - Create/Edit Category */}
-        {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
-            {/* Background overlay with blur */}
-            <div
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm transition-all"
-              onClick={handleModalClose}
-            />
-
-            {/* Modal panel */}
-            <div className="relative bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden px-6 py-6">
-              {/* Modal Header */}
-              <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-medium text-gray-900">
-                      {editingCategory ? 'Editar Categoria' : 'Nova Categoria'}
-                    </h3>
-                    <button
-                      onClick={handleModalClose}
-                      className="text-gray-400 hover:text-gray-500 transition-colors"
-                    >
-                      <X size={24} />
-                    </button>
-                  </div>
-
-                  {/* Form */}
-                  <form onSubmit={handleFormSubmit} className="space-y-5">
-                    {/* Name Field */}
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                        Nome da Categoria <span className="text-red-600">*</span>
-                      </label>
-                      <input
-                        id="name"
-                        type="text"
-                        required
-                        value={formName}
-                        onChange={(e) => {
-                          if (e.target.value.length <= 50) {
-                            setFormName(e.target.value)
-                            if (formErrors.name) {
-                              setFormErrors((prev) => ({ ...prev, name: '' }))
-                            }
-                          }
-                        }}
-                        placeholder="Ex: Alimentação, Salário, Investimentos..."
-                        maxLength={50}
-                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                          formErrors.name ? 'border-red-600' : 'border-gray-300'
-                        }`}
-                      />
-                      <div className="mt-1 flex justify-between items-center">
-                        {formErrors.name ? (
-                          <p className="text-sm text-red-600">{formErrors.name}</p>
-                        ) : (
-                          <p className="text-sm text-gray-500">Escolha um nome descritivo</p>
-                        )}
-                        <p className={`text-xs ${formName.length >= 45 ? 'text-orange-600' : 'text-gray-400'}`}>
-                          {formName.length}/50
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Type Field */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Tipo de Transação <span className="text-red-600">*</span>
-                      </label>
-                      <div className="grid grid-cols-3 gap-3">
-                        {(['expense', 'income', 'investment'] as CategoryType[]).map((type) => {
-                          const info = getTypeInfo(type)
-                          const isSelected = formType === type
-                          return (
-                            <button
-                              key={type}
-                              type="button"
-                              onClick={() => {
-                                setFormType(type)
-                                if (formErrors.type) {
-                                  setFormErrors((prev) => ({ ...prev, type: '' }))
-                                }
-                              }}
-                              className={`px-3 py-3 rounded-md border transition-colors ${
-                                isSelected
-                                  ? `${info.bgColor} border-current ${info.textColor}`
-                                  : 'border-gray-300 hover:border-gray-400 bg-white text-gray-700'
-                              }`}
-                            >
-                              <div className="flex flex-col items-center gap-1.5">
-                                {info.icon}
-                                <span className="text-xs font-medium">{info.label}</span>
-                              </div>
-                            </button>
-                          )
-                        })}
-                      </div>
-                      {formErrors.type && <p className="mt-1 text-sm text-red-600">{formErrors.type}</p>}
-                    </div>
-
-                    {/* Preview */}
-                    <div className="bg-white rounded-lg p-4 border border-gray-200">
-                      <p className="text-xs font-medium text-gray-500 mb-3">Preview</p>
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
-                          style={{
-                            backgroundColor: `${formColor}20`,
-                            color: formColor,
-                          }}
-                        >
-                          {formIcon || '📁'}
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">
-                            {formName || 'Nome da categoria'}
-                          </p>
-                          <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${getTypeInfo(formType).bgColor} ${getTypeInfo(formType).textColor}`}>
-                            {getTypeInfo(formType).icon}
-                            {getTypeInfo(formType).label}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Color Field */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Cor <span className="text-red-600">*</span>
-                      </label>
-                      <div className="grid grid-cols-6 sm:grid-cols-12 gap-2">
-                        {COLORS.map((color) => (
-                          <button
-                            key={color}
-                            type="button"
-                            onClick={() => {
-                              setFormColor(color)
-                              if (formErrors.color) {
-                                setFormErrors((prev) => ({ ...prev, color: '' }))
-                              }
-                            }}
-                            className={`relative w-full aspect-square rounded-md border transition-all ${
-                              formColor === color
-                                ? 'ring-2 ring-indigo-500 ring-offset-2 scale-105'
-                                : 'border-gray-300 hover:border-gray-400'
-                            }`}
-                            style={{ backgroundColor: color }}
-                          >
-                            {formColor === color && (
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-white text-lg font-bold">✓</span>
-                              </div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                      {formErrors.color && <p className="mt-1 text-sm text-red-600">{formErrors.color}</p>}
-                    </div>
-
-                    {/* Icon Field */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Ícone <span className="text-red-600">*</span>
-                      </label>
-                      <div className="grid grid-cols-6 sm:grid-cols-10 gap-2">
-                        {ICONS.map((icon) => (
-                          <button
-                            key={icon}
-                            type="button"
-                            onClick={() => {
-                              setFormIcon(icon)
-                              if (formErrors.icon) {
-                                setFormErrors((prev) => ({ ...prev, icon: '' }))
-                              }
-                            }}
-                            className={`relative w-full aspect-square rounded-md border transition-all flex items-center justify-center text-xl ${
-                              formIcon === icon
-                                ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500 ring-offset-1'
-                                : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-                            }`}
-                          >
-                            {icon}
-                          </button>
-                        ))}
-                      </div>
-                      {formErrors.icon && <p className="mt-1 text-sm text-red-600">{formErrors.icon}</p>}
-                    </div>
-
-                    {/* Submit Error */}
-                    {submitError && (
-                      <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                        <p className="text-sm text-red-600">{submitError}</p>
-                      </div>
-                    )}
-
-                    {/* Form Actions */}
-                    <div className="flex gap-3 pt-4">
-                      <button
-                        type="button"
-                        onClick={handleModalClose}
-                        disabled={loading}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        className="flex-1 px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {loading ? 'Salvando...' : editingCategory ? 'Atualizar' : 'Criar'}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-        )}
-
         {/* Delete Confirmation Modal */}
-        {deleteConfirm.show && (
-          <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex items-center justify-center min-h-screen px-4 py-6">
-              <div
-                className="fixed inset-0 bg-black/20 backdrop-blur-sm transition-all"
+        <AnimatePresence>
+          {deleteConfirm.show && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 bg-black/30 backdrop-blur-sm"
                 onClick={() => setDeleteConfirm({ id: '', show: false })}
               />
-              <div className="relative bg-white rounded-xl shadow-2xl max-w-lg w-full">
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
-                    Confirmar exclusão
-                  </h3>
-                  <p className="text-sm text-gray-500 mb-6">
-                    Tem certeza que deseja excluir esta categoria? Esta ação não pode ser desfeita.
+
+              {/* Modal */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+                className="
+                  relative bg-white dark:bg-slate-900
+                  border border-slate-200 dark:border-slate-800
+                  rounded-2xl shadow-2xl
+                  max-w-md w-full p-6
+                "
+              >
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                    <AlertTriangle size={20} className="text-red-600 dark:text-red-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                      Confirmar exclusão
+                    </h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+                      Tem certeza que deseja excluir esta categoria?
+                    </p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                      Esta ação não pode ser desfeita.
+                    </p>
                     {(() => {
                       const category = categories.find((c) => c.id === deleteConfirm.id)
                       return category ? (
-                        <span className="block mt-2 font-medium text-gray-900">
-                          Categoria: {category.name}
-                        </span>
+                        <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl mb-4">
+                          <div
+                            className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
+                            style={{ backgroundColor: `${category.color}20` }}
+                          >
+                            <span style={{ color: category.color }}>{category.icon}</span>
+                          </div>
+                          <span className="font-medium text-slate-900 dark:text-slate-100">
+                            {category.name}
+                          </span>
+                        </div>
                       ) : null
                     })()}
-                  </p>
-                  <div className="flex gap-3 justify-end">
-                    <button
-                      onClick={() => setDeleteConfirm({ id: '', show: false })}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      onClick={handleDeleteConfirm}
-                      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600"
-                    >
-                      Excluir
-                    </button>
+                    <div className="flex gap-3">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setDeleteConfirm({ id: '', show: false })}
+                        className="
+                          flex-1 px-4 py-2.5 rounded-xl
+                          border border-slate-200 dark:border-slate-700
+                          text-slate-700 dark:text-slate-300
+                          bg-white dark:bg-slate-800
+                          hover:bg-slate-50 dark:hover:bg-slate-700
+                          font-medium text-sm
+                          transition-colors duration-200
+                        "
+                      >
+                        Cancelar
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleDeleteConfirm}
+                        className="
+                          flex-1 px-4 py-2.5 rounded-xl
+                          bg-red-600 hover:bg-red-700
+                          text-white font-medium text-sm
+                          transition-colors duration-200
+                        "
+                      >
+                        Excluir
+                      </motion.button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </MainLayout>
   )
 }

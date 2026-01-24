@@ -14,6 +14,9 @@
 
 ## Paleta de Cores
 
+> **PALETA BASE**: Slate é o padrão para todo o projeto (superfícies, bordas, texto).
+> Use cores semânticas (primary/azul, emerald/receitas, red/despesas) apenas para acentos.
+
 ### Base UI (Dashboard - Slate)
 
 Padrão de neutros usado no dashboard para superfícies, texto e skeletons (paleta Tailwind `slate`).
@@ -32,9 +35,11 @@ slate-950: #020617
 
 ### Cores Principais (Azul)
 
-Todas as cores são definidas em `src/index.css` dentro do `@theme`. Azul segue sendo a cor de acento/destaque.
+**IMPORTANTE: Azul (primary) é usado apenas para acentos muito específicos (links em texto, alguns indicadores). Use Slate para botões e elementos interativos principais.**
 
-#### Azul - Base da UI (Primary)
+Todas as cores são definidas em `tailwind.config.cjs`. 
+
+#### Azul - Acentos Específicos (Primary)
 ```
 primary-50:  #eff6ff  (backgrounds claros)
 primary-100: #dbeafe
@@ -61,10 +66,16 @@ accent-600: #2563eb
 
 #### Semânticas
 ```
-Sucesso (receitas):  emerald-500 (#10b981), green-500 (#22c55e)
-Erro (despesas):     red-600 (#dc2626)  (uso preferencial — tom mais acessível para texto e indicadores)
-Alerta:              amber-500 (#f59e0b), yellow-500 (#eab308)
+Sucesso (receitas):  emerald-500 (#10b981) ou green-500 (#22c55e)
+Erro (despesas):     red-600 (#dc2626)  (uso preferencial — tom mais acessível)
+Alerta:              amber-500 (#f59e0b) ou yellow-500 (#eab308)
 ```
+
+**Nota**: Usamos cores nativas do Tailwind (emerald, red, amber, purple) ao invés de paletas customizadas.
+- **Receitas/Success**: `emerald-{50-900}` ou `green-{50-900}`
+- **Despesas/Erros**: `red-{50-900}` (preferir red-600 para melhor contraste)
+- **Investimentos**: `purple-{50-900}`
+- **Alertas**: `amber-{50-900}` ou `yellow-{50-900}`
 
 **Diretrizes de uso para cor de erro (acessibilidade)**
 - Use `text-red-600` para mensagens de erro inline e ícones.
@@ -94,9 +105,15 @@ className="text-slate-900 dark:text-slate-50"      // primário
 className="text-slate-600 dark:text-slate-300"     // secundário
 className="text-slate-500 dark:text-slate-400"     // terciário
 
-// Acentos (usar azul para chamadas e links)
-className="text-primary-600 dark:text-primary-400"
+// Botões principais (usar slate, NÃO azul)
+className="bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white"
+
+// Botões secundários
+className="border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+
+// Hovers sutis
 className="hover:bg-slate-50 dark:hover:bg-slate-800"
+className="hover:text-slate-700 dark:hover:text-slate-300"
 ```
 
 ---
@@ -395,11 +412,95 @@ Barras horizontais animadas para comparação de categorias.
 
 ---
 
+## Componentes de Categorias
+
+### CategoryCard
+**Arquivo**: `src/components/categories/CategoryCard.tsx`
+
+Card animado para exibição de categoria com ações de edição e exclusão.
+
+```tsx
+<CategoryCard
+  category={category}
+  index={0}  // para stagger animation
+  onEdit={(category) => handleEdit(category)}
+  onDelete={(id) => handleDelete(id)}
+/>
+```
+
+**Características**:
+- Animação de entrada staggered (delay baseado no index)
+- Hover scale 1.02
+- Dark mode completo
+- Badge de tipo com cores semânticas
+- Ações com hover individual
+
+### CategoryCardSkeleton
+**Arquivo**: `src/components/categories/CategoryCard.tsx`
+
+Skeleton para loading state do CategoryCard.
+
+```tsx
+<CategoryCardSkeleton index={0} />
+```
+
+### CategoryModal
+**Arquivo**: `src/components/categories/CategoryModal.tsx`
+
+Modal animado para criar/editar categorias com AnimatePresence.
+
+```tsx
+<CategoryModal
+  isOpen={showModal}
+  category={editingCategory}  // null para criar, Category para editar
+  loading={loading}
+  onClose={() => setShowModal(false)}
+  onSubmit={async (data) => { /* save logic */ }}
+/>
+```
+
+**Características**:
+- AnimatePresence para enter/exit animations
+- Preview em tempo real da categoria
+- Grid de cores e ícones selecionáveis
+- Validação de formulário
+- Dark mode completo
+
+---
+
+## Constantes de Categorias
+
+**Arquivo**: `src/constants/categories.ts`
+
+```tsx
+import { CATEGORY_COLORS, CATEGORY_ICONS, CATEGORY_TYPE_CONFIG, CATEGORY_TABS } from '../constants/categories'
+
+// Cores predefinidas
+CATEGORY_COLORS // ['#ef4444', '#f97316', ...]
+
+// Ícones predefinidos
+CATEGORY_ICONS // ['💰', '💵', ...]
+
+// Configuração por tipo
+CATEGORY_TYPE_CONFIG.income   // { label, pluralLabel, icon, bgColor, textColor, ... }
+CATEGORY_TYPE_CONFIG.expense
+CATEGORY_TYPE_CONFIG.investment
+
+// Tabs de filtro
+CATEGORY_TABS // [{ id: 'all', label: 'Todos', icon }, ...]
+```
+
+---
+
 ## Estrutura de Arquivos
 
 ```
 src/
 ├── components/
+│   ├── categories/
+│   │   ├── CategoryCard.tsx
+│   │   ├── CategoryModal.tsx
+│   │   └── index.ts
 │   ├── charts/
 │   │   └── CategoryBarChart.tsx
 │   ├── common/
@@ -421,6 +522,9 @@ src/
 │       ├── SectionHeader.tsx
 │       ├── ThemeToggle.tsx
 │       └── ...
+├── constants/
+│   ├── categories.ts
+│   └── ...
 ├── store/
 │   └── themeStore.ts
 └── index.css (cores e tema)
@@ -547,3 +651,4 @@ export default function MyPage() {
 | 2025-01 | Dark mode via CSS custom-variant |
 | 2025-01 | Framer Motion para animações |
 | 2025-01 | FloatingNavbar redesenhada com Framer Motion |
+| 2026-01 | Página de Categorias redesenhada com novos componentes (CategoryCard, CategoryModal) |
