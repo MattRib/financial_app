@@ -240,7 +240,7 @@ const FloatingNavbar: React.FC = () => {
           onClick={handleSignOut}
           onMouseEnter={() => setIsLogoutHovered(true)}
           onMouseLeave={() => setIsLogoutHovered(false)}
-          className="relative p-3 rounded-xl text-slate-400 dark:text-slate-500"
+          className="relative p-3 rounded-xl text-slate-400 dark:text-slate-500 cursor-pointer"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           transition={{ duration: 0.2 }}
@@ -249,20 +249,18 @@ const FloatingNavbar: React.FC = () => {
           <AnimatePresence>
             {isLogoutHovered && (
               <motion.div
-                className="absolute inset-0 bg-rose-50 dark:bg-rose-950/30 rounded-xl"
+                className="absolute inset-0 bg-red-50 dark:bg-red-900/20 rounded-xl"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
+                aria-hidden
               />
             )}
           </AnimatePresence>
 
           <motion.div
-            className="relative z-10"
-            animate={{
-              color: isLogoutHovered ? '#f43f5e' : undefined,
-            }}
+            className={`relative z-10 ${isLogoutHovered ? 'text-red-600 dark:text-red-50' : 'text-slate-400 dark:text-slate-500'}`}
             transition={{ duration: 0.15 }}
           >
             <LogOut size={20} strokeWidth={2} />

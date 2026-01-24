@@ -188,7 +188,7 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
       {/* Date Field */}
       <div>
         <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-          Data <span className="text-red-500">*</span>
+          Data <span className="text-red-600">*</span>
         </label>
         <input
           id="date"
@@ -203,7 +203,7 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
           }}
           disabled={isLoading}
           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
-            errors.date ? 'border-red-500' : 'border-gray-300'
+            errors.date ? 'border-red-600' : 'border-gray-300'
           }`}
         />
         {errors.date && <p className="mt-1 text-sm text-red-600">{errors.date}</p>}
@@ -212,7 +212,7 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
       {/* Type Field */}
       <div>
         <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
-          Tipo <span className="text-red-500">*</span>
+          Tipo <span className="text-red-600">*</span>
         </label>
         <select
           id="type"
@@ -247,7 +247,7 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
       {/* Name Field */}
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-          Nome do Investimento <span className="text-red-500">*</span>
+          Nome do Investimento <span className="text-red-600">*</span>
         </label>
         <input
           id="name"
@@ -258,7 +258,7 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
           maxLength={100}
           disabled={isLoading}
           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
-            errors.name ? 'border-red-500' : 'border-gray-300'
+            errors.name ? 'border-red-600' : 'border-gray-300'
           }`}
         />
         <div className="mt-1 flex justify-between">
@@ -270,7 +270,7 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
       {/* Amount Field */}
       <div>
         <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
-          Valor <span className="text-red-500">*</span>
+          Valor <span className="text-red-600">*</span>
         </label>
         <input
           id="amount"
@@ -281,7 +281,7 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
           onChange={handleAmountChange}
           disabled={isLoading}
           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
-            errors.amount ? 'border-red-500' : 'border-gray-300'
+            errors.amount ? 'border-red-600' : 'border-gray-300'
           }`}
         />
         {errors.amount && <p className="mt-1 text-sm text-red-600">{errors.amount}</p>}
@@ -300,7 +300,7 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
           onChange={handleNotesChange}
           disabled={isLoading}
           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
-            errors.notes ? 'border-red-500' : 'border-gray-300'
+            errors.notes ? 'border-red-600' : 'border-gray-300'
           }`}
         />
         <div className="mt-1 flex justify-between">

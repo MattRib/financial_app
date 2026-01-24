@@ -19,7 +19,7 @@ import {
 // Transaction type configuration
 const TRANSACTION_TYPES = [
   { id: 'income' as const, label: 'Entrada', icon: TrendingUp, bgColor: 'bg-green-100', textColor: 'text-green-700', borderColor: 'border-green-500' },
-  { id: 'expense' as const, label: 'Saída', icon: TrendingDown, bgColor: 'bg-red-100', textColor: 'text-red-700', borderColor: 'border-red-500' },
+  { id: 'expense' as const, label: 'Saída', icon: TrendingDown, bgColor: 'bg-red-100', textColor: 'text-red-700', borderColor: 'border-red-700' },
 ]
 
 // Items per page for pagination
@@ -621,7 +621,7 @@ const TransactionsPage: React.FC = () => {
                 {/* Date Field */}
                 <div>
                   <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-                    Data <span className="text-red-500">*</span>
+                    Data <span className="text-red-600">*</span>
                   </label>
                   <input
                     id="date"
@@ -635,7 +635,7 @@ const TransactionsPage: React.FC = () => {
                       }
                     }}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                      formErrors.date ? 'border-red-500' : 'border-gray-300'
+                      formErrors.date ? 'border-red-600' : 'border-gray-300'
                     }`}
                   />
                   {formErrors.date && <p className="mt-1 text-sm text-red-600">{formErrors.date}</p>}
@@ -644,7 +644,7 @@ const TransactionsPage: React.FC = () => {
                 {/* Type Field */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Tipo <span className="text-red-500">*</span>
+                    Tipo <span className="text-red-600">*</span>
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     {TRANSACTION_TYPES.map((type) => {
@@ -710,7 +710,7 @@ const TransactionsPage: React.FC = () => {
                 {/* Amount Field */}
                 <div>
                   <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
-                    Valor <span className="text-red-500">*</span>
+                    Valor <span className="text-red-600">*</span>
                   </label>
                   <input
                     id="amount"
@@ -720,7 +720,7 @@ const TransactionsPage: React.FC = () => {
                     value={formAmount}
                     onChange={handleAmountChange}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg font-medium ${
-                      formErrors.amount ? 'border-red-500' : 'border-gray-300'
+                      formErrors.amount ? 'border-red-600' : 'border-gray-300'
                     }`}
                   />
                   {formErrors.amount && <p className="mt-1 text-sm text-red-600">{formErrors.amount}</p>}
@@ -902,7 +902,7 @@ const TransactionsPage: React.FC = () => {
                     </button>
                     <button
                       onClick={handleDeleteConfirm}
-                      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-colors"
                     >
                       Excluir
                     </button>

@@ -14,9 +14,25 @@
 
 ## Paleta de Cores
 
+### Base UI (Dashboard - Slate)
+
+Padrão de neutros usado no dashboard para superfícies, texto e skeletons (paleta Tailwind `slate`).
+```
+slate-50:  #f8fafc  (fundos claros)
+slate-100: #f1f5f9
+slate-200: #e2e8f0  (bordas/skeleton light)
+slate-400: #94a3b8  (texto terciário)
+slate-500: #64748b  (texto secundário)
+slate-600: #475569  (ícones neutros)
+slate-700: #334155
+slate-800: #1e293b  (bordas/skeleton dark)
+slate-900: #0f172a  (fundos dark)
+slate-950: #020617
+```
+
 ### Cores Principais (Azul)
 
-Todas as cores são definidas em `src/index.css` dentro do `@theme`.
+Todas as cores são definidas em `src/index.css` dentro do `@theme`. Azul segue sendo a cor de acento/destaque.
 
 #### Azul - Base da UI (Primary)
 ```
@@ -46,9 +62,16 @@ accent-600: #2563eb
 #### Semânticas
 ```
 Sucesso (receitas):  emerald-500 (#10b981), green-500 (#22c55e)
-Erro (despesas):     rose-500 (#f43f5e), red-500 (#ef4444)
+Erro (despesas):     red-600 (#dc2626)  (uso preferencial — tom mais acessível para texto e indicadores)
 Alerta:              amber-500 (#f59e0b), yellow-500 (#eab308)
 ```
+
+**Diretrizes de uso para cor de erro (acessibilidade)**
+- Use `text-red-600` para mensagens de erro inline e ícones.
+- Para maior contraste em textos importantes use `text-red-700` ou `text-red-800`.
+- Para fundos leves use `bg-red-50` ou `bg-red-100` e prefira `text-red-600` para o texto.
+- Use `focus:ring-red-600` para estados de foco e `hover:bg-red-700` para ações críticas.
+
 
 ---
 
@@ -62,21 +85,18 @@ Alerta:              amber-500 (#f59e0b), yellow-500 (#eab308)
 
 ### Padrão de Classes
 ```tsx
-// Background
-className="bg-primary-50 dark:bg-primary-900"
-className="bg-primary-100 dark:bg-primary-800"
+// Superfícies padrão (cards / containers)
+className="bg-white dark:bg-slate-900"
+className="border border-slate-200 dark:border-slate-800"
 
-// Texto
-className="text-primary-900 dark:text-primary-50"      // primário
-className="text-primary-700 dark:text-primary-200"     // secundário
-className="text-primary-500 dark:text-primary-300"     // terciário
+// Texto base
+className="text-slate-900 dark:text-slate-50"      // primário
+className="text-slate-600 dark:text-slate-300"     // secundário
+className="text-slate-500 dark:text-slate-400"     // terciário
 
-// Bordas
-className="border-primary-200 dark:border-primary-700"
-className="border-primary-300 dark:border-primary-800"
-
-// Hover
-className="hover:bg-primary-100 dark:hover:bg-primary-800"
+// Acentos (usar azul para chamadas e links)
+className="text-primary-600 dark:text-primary-400"
+className="hover:bg-slate-50 dark:hover:bg-slate-800"
 ```
 
 ---
@@ -94,8 +114,8 @@ className="hover:bg-primary-100 dark:hover:bg-primary-800"
 
 **Classes padrão**:
 ```css
-bg-primary-50 dark:bg-primary-900
-border border-primary-200 dark:border-primary-700
+bg-white dark:bg-slate-900
+border border-slate-200 dark:border-slate-800
 rounded-xl
 p-6 (padding lg)
 ```
@@ -115,7 +135,7 @@ p-6 (padding lg)
 ```
 
 **Layout**: Horizontal compacto
-- Ícone à esquerda (cor neutra: `text-primary-400`)
+- Ícone à esquerda (cor neutra: `text-slate-400 dark:text-slate-500`)
 - Conteúdo à direita (título + valor)
 - Hover: `scale: 1.02`
 
@@ -229,22 +249,22 @@ const itemVariants = {
 ### Hierarquia
 ```css
 /* Títulos de página */
-text-2xl font-semibold tracking-tight text-primary-900 dark:text-primary-50
+text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-50
 
 /* Títulos de seção */
-text-base font-semibold text-primary-900 dark:text-primary-100
+text-base font-semibold text-slate-900 dark:text-slate-100
 
 /* Labels (uppercase) */
-text-xs font-medium uppercase tracking-wider text-primary-500 dark:text-primary-400
+text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400
 
 /* Valores grandes */
 text-2xl font-semibold tracking-tight
 
 /* Corpo */
-text-sm text-primary-700 dark:text-primary-200
+text-sm text-slate-700 dark:text-slate-200
 
 /* Texto secundário */
-text-sm text-primary-500 dark:text-primary-300
+text-sm text-slate-500 dark:text-slate-400
 
 /* Números tabulares */
 tabular-nums (para alinhamento de números)
@@ -335,22 +355,22 @@ shadow-lg shadow-primary-300/40 dark:shadow-primary-700/40
 
 ### Skeleton
 ```tsx
-<div className="h-8 w-32 bg-primary-200 dark:bg-primary-800 rounded animate-pulse" />
+<div className="h-8 w-32 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
 ```
 
 ### Skeleton para Cards
 ```tsx
-<div className="h-14 bg-primary-200 dark:bg-primary-800 rounded-lg animate-pulse" />
+<div className="h-14 bg-slate-200 dark:bg-slate-800 rounded-lg animate-pulse" />
 ```
 
 ### Skeleton para Barras
 ```tsx
 <div className="space-y-2">
   <div className="flex justify-between">
-    <div className="h-4 w-24 bg-primary-200 dark:bg-primary-800 rounded animate-pulse" />
-    <div className="h-4 w-16 bg-primary-200 dark:bg-primary-800 rounded animate-pulse" />
+    <div className="h-4 w-24 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
+    <div className="h-4 w-16 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
   </div>
-  <div className="h-2 bg-primary-200 dark:bg-primary-800 rounded-full animate-pulse" />
+  <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded-full animate-pulse" />
 </div>
 ```
 
@@ -411,7 +431,7 @@ src/
 ## Checklist para Novos Componentes
 
 - [ ] Suporta dark mode (`dark:` classes)
-- [ ] Usa cores da paleta primary (azul)
+- [ ] Usa neutros slate como base e azul como acento
 - [ ] Tem animação de entrada (Framer Motion)
 - [ ] Segue hierarquia tipográfica
 - [ ] Tem loading state (skeleton)
@@ -459,10 +479,10 @@ export default function MyPage() {
       >
         {/* Header */}
         <motion.div variants={itemVariants}>
-          <h1 className="text-2xl font-semibold tracking-tight text-primary-900 dark:text-primary-50">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
             Título da Página
           </h1>
-          <p className="text-primary-500 dark:text-primary-300 text-sm mt-1">
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
             Descrição da página
           </p>
         </motion.div>
@@ -493,7 +513,8 @@ export default function MyPage() {
 
 ### Animações
 - **Entrada**: Fade + slide up com stagger nos itens
-- **Hover**: Scale 1.05 + background fade in
+- **Hover**: Scale 1.05 + background fade in (usar `bg-slate-200` / `dark:bg-slate-800/60` para contraste acessível)
+- **Logout hover**: Use um vermelho suave para indicar ação crítica — `bg-red-50` / `dark:bg-red-900/20` com `text-red-600` para o ícone (contraste acessível).
 - **Ativo**: Background animado via `layoutId`, ícone sobe 2px
 - **Tooltip**: Fade + scale com arrow
 

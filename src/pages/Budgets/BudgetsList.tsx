@@ -25,7 +25,7 @@ const calculatePercentage = (spent: number, amount: number): number => {
 const getProgressColor = (percentage: number): string => {
   if (percentage < 50) return 'bg-green-500'
   if (percentage < 80) return 'bg-yellow-500'
-  return 'bg-red-500'
+  return 'bg-red-600'
 }
 
 const getProgressTextColor = (percentage: number): string => {

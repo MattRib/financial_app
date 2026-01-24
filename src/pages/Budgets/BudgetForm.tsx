@@ -176,7 +176,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
       {/* Budget Type Toggle */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Tipo de Orçamento <span className="text-red-500">*</span>
+          Tipo de Orçamento <span className="text-red-600">*</span>
         </label>
         <div className="grid grid-cols-2 gap-3">
           <button
@@ -214,7 +214,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
       {budgetType === 'category' && (
         <div>
           <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-            Categoria <span className="text-red-500">*</span>
+            Categoria <span className="text-red-600">*</span>
           </label>
           <select
             id="category"
@@ -227,7 +227,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
               }
             }}
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
-              errors.category_id ? 'border-red-500' : 'border-gray-300'
+              errors.category_id ? 'border-red-600' : 'border-gray-300'
             }`}
           >
             <option value="">Selecione uma categoria</option>
@@ -273,7 +273,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="month" className="block text-sm font-medium text-gray-700 mb-1">
-            Mês <span className="text-red-500">*</span>
+            Mês <span className="text-red-600">*</span>
           </label>
           <select
             id="month"
@@ -286,7 +286,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
               }
             }}
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
-              errors.month ? 'border-red-500' : 'border-gray-300'
+              errors.month ? 'border-red-600' : 'border-gray-300'
             }`}
           >
             {MONTHS.map((monthOption) => (
@@ -299,7 +299,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
         </div>
         <div>
           <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
-            Ano <span className="text-red-500">*</span>
+            Ano <span className="text-red-600">*</span>
           </label>
           <select
             id="year"
@@ -312,7 +312,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
               }
             }}
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
-              errors.year ? 'border-red-500' : 'border-gray-300'
+              errors.year ? 'border-red-600' : 'border-gray-300'
             }`}
           >
             {yearOptions.map((yearOption) => (
@@ -328,7 +328,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
       {/* Amount Field */}
       <div>
         <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
-          Valor <span className="text-red-500">*</span>
+          Valor <span className="text-red-600">*</span>
         </label>
         <input
           id="amount"
@@ -338,7 +338,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
           value={amount}
           onChange={handleAmountChange}
           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
-            errors.amount ? 'border-red-500' : 'border-gray-300'
+            errors.amount ? 'border-red-600' : 'border-gray-300'
           }`}
         />
         {errors.amount && <p className="mt-1 text-sm text-red-600">{errors.amount}</p>}

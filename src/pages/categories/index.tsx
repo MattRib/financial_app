@@ -350,7 +350,7 @@ const CategoriesPage: React.FC = () => {
                     {/* Name Field */}
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                        Nome da Categoria <span className="text-red-500">*</span>
+                        Nome da Categoria <span className="text-red-600">*</span>
                       </label>
                       <input
                         id="name"
@@ -368,7 +368,7 @@ const CategoriesPage: React.FC = () => {
                         placeholder="Ex: Alimentação, Salário, Investimentos..."
                         maxLength={50}
                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                          formErrors.name ? 'border-red-500' : 'border-gray-300'
+                          formErrors.name ? 'border-red-600' : 'border-gray-300'
                         }`}
                       />
                       <div className="mt-1 flex justify-between items-center">
@@ -386,7 +386,7 @@ const CategoriesPage: React.FC = () => {
                     {/* Type Field */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Tipo de Transação <span className="text-red-500">*</span>
+                        Tipo de Transação <span className="text-red-600">*</span>
                       </label>
                       <div className="grid grid-cols-3 gap-3">
                         {(['expense', 'income', 'investment'] as CategoryType[]).map((type) => {
@@ -447,7 +447,7 @@ const CategoriesPage: React.FC = () => {
                     {/* Color Field */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Cor <span className="text-red-500">*</span>
+                        Cor <span className="text-red-600">*</span>
                       </label>
                       <div className="grid grid-cols-6 sm:grid-cols-12 gap-2">
                         {COLORS.map((color) => (
@@ -481,7 +481,7 @@ const CategoriesPage: React.FC = () => {
                     {/* Icon Field */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Ícone <span className="text-red-500">*</span>
+                        Ícone <span className="text-red-600">*</span>
                       </label>
                       <div className="grid grid-cols-6 sm:grid-cols-10 gap-2">
                         {ICONS.map((icon) => (
@@ -570,7 +570,7 @@ const CategoriesPage: React.FC = () => {
                     </button>
                     <button
                       onClick={handleDeleteConfirm}
-                      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600"
                     >
                       Excluir
                     </button>

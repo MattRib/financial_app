@@ -250,7 +250,7 @@ const GoalForm: React.FC<GoalFormProps> = ({
       {/* Name Field */}
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-          Nome da Meta <span className="text-red-500">*</span>
+          Nome da Meta <span className="text-red-600">*</span>
         </label>
         <input
           id="name"
@@ -261,7 +261,7 @@ const GoalForm: React.FC<GoalFormProps> = ({
           maxLength={100}
           disabled={isLoading}
           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm ${
-            errors.name ? 'border-red-500' : 'border-gray-300'
+            errors.name ? 'border-red-600' : 'border-gray-300'
           }`}
         />
         <div className="mt-1 flex justify-between">
@@ -273,7 +273,7 @@ const GoalForm: React.FC<GoalFormProps> = ({
       {/* Target Amount Field */}
       <div>
         <label htmlFor="targetAmount" className="block text-sm font-medium text-gray-700 mb-1">
-          Valor Alvo <span className="text-red-500">*</span>
+          Valor Alvo <span className="text-red-600">*</span>
         </label>
         <input
           id="targetAmount"
@@ -284,7 +284,7 @@ const GoalForm: React.FC<GoalFormProps> = ({
           onChange={handleAmountChange(setTargetAmount, 'targetAmount')}
           disabled={isLoading}
           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm ${
-            errors.targetAmount ? 'border-red-500' : 'border-gray-300'
+            errors.targetAmount ? 'border-red-600' : 'border-gray-300'
           }`}
         />
         {errors.targetAmount && <p className="mt-1 text-sm text-red-600">{errors.targetAmount}</p>}
@@ -303,7 +303,7 @@ const GoalForm: React.FC<GoalFormProps> = ({
           onChange={handleAmountChange(setCurrentAmount, 'currentAmount')}
           disabled={isLoading}
           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm ${
-            errors.currentAmount ? 'border-red-500' : 'border-gray-300'
+            errors.currentAmount ? 'border-red-600' : 'border-gray-300'
           }`}
         />
         {errors.currentAmount && <p className="mt-1 text-sm text-red-600">{errors.currentAmount}</p>}
@@ -328,7 +328,7 @@ const GoalForm: React.FC<GoalFormProps> = ({
       {/* Target Date Field */}
       <div>
         <label htmlFor="targetDate" className="block text-sm font-medium text-gray-700 mb-1">
-          Data Alvo <span className="text-red-500">*</span>
+          Data Alvo <span className="text-red-600">*</span>
         </label>
         <input
           id="targetDate"
@@ -343,7 +343,7 @@ const GoalForm: React.FC<GoalFormProps> = ({
           }}
           disabled={isLoading}
           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm ${
-            errors.targetDate ? 'border-red-500' : 'border-gray-300'
+            errors.targetDate ? 'border-red-600' : 'border-gray-300'
           }`}
         />
         {errors.targetDate && <p className="mt-1 text-sm text-red-600">{errors.targetDate}</p>}
