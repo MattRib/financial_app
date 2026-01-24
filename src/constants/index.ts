@@ -1,6 +1,7 @@
 // Re-export all constants
 export * from './categories'
 export * from './investments'
+export * from './goals'
 // Note: colors.ts also exports CATEGORY_COLORS but as an object with semantic keys
 // Use the one from categories.ts (array) for category selection UI
 export {

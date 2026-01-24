@@ -15,7 +15,9 @@
       "Bash(npm run build:*)",
       "Bash(dir:*)",
       "Bash(findstr:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(powershell -Command \"Get-Content ''C:\\Users\\mathe\\Documents\\GitHub\\financial_app\\src\\pages\\Goals\\index.tsx'' | Measure-Object -Line\")",
+      "Bash(npm run dev:*)"
     ]
   }
 }

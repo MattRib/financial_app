@@ -54,6 +54,7 @@ export const PremiumEmptyState: React.FC<PremiumEmptyStateProps> = ({
             rounded-lg
             hover:bg-slate-800 dark:hover:bg-slate-200
             transition-colors duration-200
+            cursor-pointer
           "
         >
           {action.label}

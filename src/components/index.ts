@@ -18,3 +18,6 @@ export * from './budgets'
 
 // Investments
 export * from './investments'
+
+// Goals
+export * from './goals'
