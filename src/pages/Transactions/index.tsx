@@ -14,8 +14,6 @@ import {
   TrendingDown,
   Wallet,
   Receipt,
-  AlertCircle,
-  CheckCircle,
   Loader2,
   Trash2,
 } from 'lucide-react'
@@ -59,7 +57,6 @@ const TransactionsPage: React.FC = () => {
     showModal,
     editingTransaction,
     deleteConfirm,
-    notification,
 
     // Filters
     selectedTab,
@@ -171,50 +168,6 @@ const TransactionsPage: React.FC = () => {
           onDateEndChange={setFilterDateEnd}
           onClearFilters={handleClearFilters}
         />
-
-        {/* Notification */}
-        <AnimatePresence>
-          {notification && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className={`
-                p-4 rounded-xl flex items-center gap-3
-                ${notification.type === 'success'
-                  ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800'
-                  : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
-                }
-              `}
-            >
-              {notification.type === 'success' ? (
-                <CheckCircle size={20} className="text-emerald-600 dark:text-emerald-400" />
-              ) : (
-                <AlertCircle size={20} className="text-red-600 dark:text-red-400" />
-              )}
-              <p className={`text-sm font-medium ${
-                notification.type === 'success'
-                  ? 'text-emerald-700 dark:text-emerald-300'
-                  : 'text-red-700 dark:text-red-300'
-              }`}>
-                {notification.message}
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Error State */}
-        {error && (
-          <motion.div
-            variants={itemVariants}
-            className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl"
-          >
-            <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
-              <AlertCircle size={16} />
-              {error}
-            </p>
-          </motion.div>
-        )}
 
         {/* Transactions List */}
         <div className="space-y-3">

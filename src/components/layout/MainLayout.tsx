@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Bell } from 'lucide-react'
 import FloatingNavbar from './FloatingNavbar'
 import { ThemeToggle } from '../ui/ThemeToggle'
+import { ToastContainer } from '../ui/ToastContainer'
 
 interface MainLayoutProps {
   children: React.ReactNode
@@ -25,6 +26,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         </motion.button>
         <ThemeToggle />
       </div>
+
+      {/* Toast Container */}
+      <ToastContainer />
 
       {/* Floating Dock Navbar */}
       <FloatingNavbar />

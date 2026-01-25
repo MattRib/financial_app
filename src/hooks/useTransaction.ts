@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useTransactionsStore } from '../store/transactionsStore'
 import { useCategoriesStore } from '../store/categoriesStore'
+import { useToast } from '../store/toastStore'
 import type { Transaction, TransactionType } from '../types'
 
 type TabId = 'all' | TransactionType
@@ -34,12 +35,12 @@ export function useTransaction(options: UseTransactionOptions = {}) {
   } = useTransactionsStore()
 
   const { categories, fetchCategories } = useCategoriesStore()
+  const toast = useToast()
 
   // UI State
   const [showModal, setShowModal] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; show: boolean }>({ id: '', show: false })
-  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   // Filter State
   const [selectedTab, setSelectedTab] = useState<TabId>('all')
@@ -56,7 +57,7 @@ export function useTransaction(options: UseTransactionOptions = {}) {
   useEffect(() => {
     fetchTransactions()
     fetchCategories()
-    
+
     // Fetch summary for current month
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
@@ -64,13 +65,12 @@ export function useTransaction(options: UseTransactionOptions = {}) {
     fetchSummary(startOfMonth, endOfMonth)
   }, [fetchTransactions, fetchCategories, fetchSummary])
 
-  // Auto-dismiss notification
+  // Show error toast when error occurs
   useEffect(() => {
-    if (notification) {
-      const timer = setTimeout(() => setNotification(null), 3000)
-      return () => clearTimeout(timer)
+    if (error) {
+      toast.error(error)
     }
-  }, [notification])
+  }, [error, toast])
 
   // Filter transactions
   const filteredTransactions = useMemo(() => {
@@ -193,19 +193,19 @@ export function useTransaction(options: UseTransactionOptions = {}) {
     if (deleteConfirm.id) {
       try {
         await deleteTransaction(deleteConfirm.id)
-        setNotification({ type: 'success', message: 'Transação excluída com sucesso!' })
+        toast.success('Transação excluída com sucesso!')
         setDeleteConfirm({ id: '', show: false })
-        
+
         // Refresh summary after deletion
         const now = new Date()
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
         fetchSummary(startOfMonth, endOfMonth)
       } catch {
-        setNotification({ type: 'error', message: 'Erro ao excluir transação' })
+        toast.error('Erro ao excluir transação')
       }
     }
-  }, [deleteConfirm.id, deleteTransaction, fetchSummary])
+  }, [deleteConfirm.id, deleteTransaction, fetchSummary, toast])
 
   const handleSubmitTransaction = useCallback(async (data: {
     date: string
@@ -217,10 +217,10 @@ export function useTransaction(options: UseTransactionOptions = {}) {
   }) => {
     if (editingTransaction) {
       await updateTransaction(editingTransaction.id, data)
-      setNotification({ type: 'success', message: 'Transação atualizada com sucesso!' })
+      toast.success('Transação atualizada com sucesso!')
     } else {
       await createTransaction(data)
-      setNotification({ type: 'success', message: 'Transação criada com sucesso!' })
+      toast.success('Transação criada com sucesso!')
     }
 
     setShowModal(false)
@@ -231,7 +231,7 @@ export function useTransaction(options: UseTransactionOptions = {}) {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
     fetchSummary(startOfMonth, endOfMonth)
-  }, [editingTransaction, createTransaction, updateTransaction, fetchSummary])
+  }, [editingTransaction, createTransaction, updateTransaction, fetchSummary, toast])
 
   const handleClearFilters = useCallback(() => {
     setFilterCategory('')
@@ -262,7 +262,6 @@ export function useTransaction(options: UseTransactionOptions = {}) {
     showModal,
     editingTransaction,
     deleteConfirm,
-    notification,
 
     // Filters
     selectedTab,
@@ -286,6 +285,5 @@ export function useTransaction(options: UseTransactionOptions = {}) {
     handleDeleteConfirm,
     handleSubmitTransaction,
     handleClearFilters,
-    setNotification,
   }
 }
