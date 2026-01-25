@@ -5,7 +5,6 @@ import type {
   Goal,
   GoalWithProgress,
   GoalSummary,
-  GoalStatus,
   GoalCategory,
   CreateGoalDto,
   UpdateGoalDto,

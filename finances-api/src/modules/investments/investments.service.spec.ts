@@ -6,7 +6,7 @@ import { CreateInvestmentDto } from './dto';
 
 describe('InvestmentsService', () => {
   let service: InvestmentsService;
-  let mockSupabase: any;
+  let mockSupabase: Record<string, jest.Mock>;
 
   const mockUserId = 'user-123';
   const mockInvestment = {
@@ -255,7 +255,7 @@ describe('InvestmentsService', () => {
       const queryThenable = {
         gte: jest.fn().mockReturnThis(),
         lte: jest.fn().mockReturnThis(),
-        then: (resolve: any) => resolve({ data: investments, error: null }),
+        then: (resolve: (value: { data: unknown[]; error: null }) => unknown) => resolve({ data: investments, error: null }),
       };
       mockSupabase.eq.mockReturnValue(queryThenable);
 
@@ -279,7 +279,7 @@ describe('InvestmentsService', () => {
       const queryThenable = {
         gte: jest.fn().mockReturnThis(),
         lte: jest.fn().mockReturnThis(),
-        then: (resolve: any) => resolve({ data: investments, error: null }),
+        then: (resolve: (value: { data: unknown[]; error: null }) => unknown) => resolve({ data: investments, error: null }),
       };
       mockSupabase.eq.mockReturnValue(queryThenable);
 

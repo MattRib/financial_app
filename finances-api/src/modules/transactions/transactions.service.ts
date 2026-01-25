@@ -180,9 +180,9 @@ export class TransactionsService {
       const categoryId = transaction.category_id || 'uncategorized';
 
       const categoryName =
-        (transaction.categories as any)?.name || 'Sem categoria';
+        (transaction.categories as { name: string } | null)?.name || 'Sem categoria';
 
-      const categoryColor = (transaction.categories as any)?.color || '#6b7280';
+      const categoryColor = (transaction.categories as { color: string } | null)?.color || '#6b7280';
       const amount = Number(transaction.amount);
 
       totalExpenses += amount;

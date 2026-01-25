@@ -29,9 +29,7 @@ export function PreferencesSection({ profile, onUpdate }: PreferencesSectionProp
   const currentCurrency =
     CURRENCY_OPTIONS.find((opt) => opt.value === (profile?.currency || 'BRL')) ||
     CURRENCY_OPTIONS[0]
-  const _currentLocale =
-    LOCALE_OPTIONS.find((opt) => opt.value === (profile?.locale || 'pt-BR')) ||
-    LOCALE_OPTIONS[0] // TODO: Use when locale selector is implemented
+  // TODO: Use locale when locale selector is fully implemented
   const currentDateFormat =
     DATE_FORMAT_OPTIONS.find(
       (opt) => opt.value === (profile?.date_format || 'DD/MM/YYYY')

@@ -6,7 +6,7 @@ import { CreateBudgetDto } from './dto';
 
 describe('BudgetsService', () => {
   let service: BudgetsService;
-  let mockSupabase: any;
+  let mockSupabase: Record<string, jest.Mock>;
 
   const mockUserId = 'user-123';
   const mockBudget = {
@@ -153,11 +153,11 @@ describe('BudgetsService', () => {
           data: [{ amount: 300 }],
           error: null,
         }),
-        then: function (resolve: any) {
+        then: function (resolve: (value: { data: { amount: number }[]; error: null }) => unknown) {
           return resolve({ data: [{ amount: 300 }], error: null });
         },
       };
-      mockSupabase.lte.mockReturnValue(thenableMock as any);
+      mockSupabase.lte.mockReturnValue(thenableMock);
 
       const result = await service.findAll(mockUserId, 1, 2024);
 
@@ -278,7 +278,7 @@ describe('BudgetsService', () => {
         eq: jest
           .fn()
           .mockResolvedValue({ data: [{ amount: 300 }], error: null }),
-        then: function (resolve: any) {
+        then: function (resolve: (value: { data: { amount: number }[]; error: null }) => unknown) {
           return resolve({ data: [{ amount: 300 }], error: null });
         },
       };
@@ -286,13 +286,13 @@ describe('BudgetsService', () => {
         eq: jest
           .fn()
           .mockResolvedValue({ data: [{ amount: 200 }], error: null }),
-        then: function (resolve: any) {
+        then: function (resolve: (value: { data: { amount: number }[]; error: null }) => unknown) {
           return resolve({ data: [{ amount: 200 }], error: null });
         },
       };
       mockSupabase.lte
-        .mockReturnValueOnce(thenableMock1 as any)
-        .mockReturnValueOnce(thenableMock2 as any);
+        .mockReturnValueOnce(thenableMock1)
+        .mockReturnValueOnce(thenableMock2);
 
       const result = await service.getOverview(mockUserId, 1, 2024);
 
@@ -336,7 +336,7 @@ describe('BudgetsService', () => {
         eq: jest
           .fn()
           .mockResolvedValue({ data: [{ amount: 90 }], error: null }),
-        then: function (resolve: any) {
+        then: function (resolve: (value: { data: { amount: number }[]; error: null }) => unknown) {
           return resolve({ data: [{ amount: 90 }], error: null });
         },
       };
@@ -344,13 +344,13 @@ describe('BudgetsService', () => {
         eq: jest
           .fn()
           .mockResolvedValue({ data: [{ amount: 100 }], error: null }),
-        then: function (resolve: any) {
+        then: function (resolve: (value: { data: { amount: number }[]; error: null }) => unknown) {
           return resolve({ data: [{ amount: 100 }], error: null });
         },
       };
       mockSupabase.lte
-        .mockReturnValueOnce(thenableMock1 as any)
-        .mockReturnValueOnce(thenableMock2 as any);
+        .mockReturnValueOnce(thenableMock1)
+        .mockReturnValueOnce(thenableMock2);
 
       const result = await service.getAlerts(mockUserId, 1, 2024);
 
@@ -373,11 +373,11 @@ describe('BudgetsService', () => {
         eq: jest
           .fn()
           .mockResolvedValue({ data: [{ amount: 100 }], error: null }),
-        then: function (resolve: any) {
+        then: function (resolve: (value: { data: { amount: number }[]; error: null }) => unknown) {
           return resolve({ data: [{ amount: 100 }], error: null });
         },
       };
-      mockSupabase.lte.mockReturnValueOnce(thenableMock as any);
+      mockSupabase.lte.mockReturnValueOnce(thenableMock);
 
       const result = await service.getAlerts(mockUserId, 1, 2024);
 

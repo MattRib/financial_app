@@ -4,7 +4,7 @@ import { SUPABASE_CLIENT } from '../../config/supabase.module';
 
 describe('ProfilesService', () => {
   let service: ProfilesService;
-  let mockSupabase: any;
+  let mockSupabase: Record<string, jest.Mock>;
 
   beforeEach(async () => {
     mockSupabase = {

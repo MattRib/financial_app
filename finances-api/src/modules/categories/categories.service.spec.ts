@@ -6,7 +6,7 @@ import { CreateCategoryDto } from './dto';
 
 describe('CategoriesService', () => {
   let service: CategoriesService;
-  let mockSupabase: any;
+  let mockSupabase: Record<string, jest.Mock>;
 
   const mockUserId = 'user-123';
   const mockCategory = {

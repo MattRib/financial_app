@@ -6,7 +6,7 @@ import { CreateTransactionDto } from './dto';
 
 describe('TransactionsService', () => {
   let service: TransactionsService;
-  let mockSupabase: any;
+  let mockSupabase: Record<string, jest.Mock>;
 
   const mockUserId = 'user-123';
   const mockTransaction = {

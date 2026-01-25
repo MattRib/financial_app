@@ -238,7 +238,7 @@ export const useInvestment = (): UseInvestmentReturn => {
     } catch {
       toast.error('Erro ao salvar investimento')
     }
-  }, [selectedInvestment, updateInvestment, createInvestment, fetchInvestments, fetchMonthlyTotal, month, year, closeModal, getDateRange, toast])
+  }, [selectedInvestment, updateInvestment, createInvestment, fetchInvestments, fetchMonthlyTotal, fetchEvolution, fetchSummary, month, year, closeModal, getDateRange, toast])
   
   const handleDelete = useCallback(async () => {
     if (!investmentToDelete) return
@@ -260,7 +260,7 @@ export const useInvestment = (): UseInvestmentReturn => {
     } catch {
       toast.error('Erro ao excluir investimento')
     }
-  }, [investmentToDelete, deleteInvestment, fetchInvestments, fetchMonthlyTotal, month, year, closeDeleteModal, getDateRange, toast])
+  }, [investmentToDelete, deleteInvestment, fetchInvestments, fetchMonthlyTotal, fetchEvolution, fetchSummary, month, year, closeDeleteModal, getDateRange, toast])
   
   return {
     // Period

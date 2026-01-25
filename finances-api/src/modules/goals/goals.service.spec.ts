@@ -6,7 +6,7 @@ import { CreateGoalDto } from './dto';
 
 describe('GoalsService', () => {
   let service: GoalsService;
-  let mockSupabase: any;
+  let mockSupabase: Record<string, jest.Mock>;
 
   const mockUserId = 'user-123';
   const mockGoal = {
@@ -227,7 +227,7 @@ describe('GoalsService', () => {
       ];
       const queryThenable = {
         eq: jest.fn().mockReturnThis(),
-        then: (resolve: any) => resolve({ data: goals, error: null }),
+        then: (resolve: (value: { data: unknown[]; error: null }) => unknown) => resolve({ data: goals, error: null }),
       };
       mockSupabase.select.mockReturnValue(queryThenable);
       mockSupabase.eq.mockReturnValue(queryThenable);

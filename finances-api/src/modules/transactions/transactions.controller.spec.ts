@@ -3,11 +3,12 @@ import { TransactionsController } from './transactions.controller';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto, UpdateTransactionDto } from './dto';
 import { SUPABASE_CLIENT } from '../../config/supabase.module';
+import type { User } from '@supabase/supabase-js';
 
 describe('TransactionsController', () => {
   let controller: TransactionsController;
 
-  const mockUser = { id: 'user-123' } as any;
+  const mockUser = { id: 'user-123' } as User;
   const mockTransaction = {
     id: 'trans-123',
     user_id: 'user-123',

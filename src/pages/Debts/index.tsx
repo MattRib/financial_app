@@ -48,7 +48,6 @@ const DebtsPage: React.FC = () => {
 
     // State
     loading,
-    error,
     isLoadingMore,
     hasMore,
     showModal,

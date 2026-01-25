@@ -6,7 +6,7 @@ import { CreateDebtDto } from './dto';
 
 describe('DebtsService', () => {
   let service: DebtsService;
-  let mockSupabase: any;
+  let mockSupabase: Record<string, jest.Mock>;
 
   const mockUserId = 'user-123';
   const mockDebt = {
@@ -275,7 +275,7 @@ describe('DebtsService', () => {
       const queryThenable = {
         gte: jest.fn().mockReturnThis(),
         lte: jest.fn().mockReturnThis(),
-        then: (resolve: any) => resolve({ data: debts, error: null }),
+        then: (resolve: (value: { data: unknown[]; error: null }) => unknown) => resolve({ data: debts, error: null }),
       };
       mockSupabase.eq.mockReturnValue(queryThenable);
 
@@ -294,7 +294,7 @@ describe('DebtsService', () => {
       const queryThenable = {
         gte: jest.fn().mockReturnThis(),
         lte: jest.fn().mockReturnThis(),
-        then: (resolve: any) => resolve({ data: [], error: null }),
+        then: (resolve: (value: { data: unknown[]; error: null }) => unknown) => resolve({ data: [], error: null }),
       };
       mockSupabase.eq.mockReturnValue(queryThenable);
 
@@ -318,7 +318,7 @@ describe('DebtsService', () => {
           data: overdueDebts,
           error: null,
         }),
-        then: (resolve: any) => resolve({ data: overdueDebts, error: null }),
+        then: (resolve: (value: { data: unknown[]; error: null }) => unknown) => resolve({ data: overdueDebts, error: null }),
       };
       mockSupabase.eq.mockReturnValue(queryThenable);
 

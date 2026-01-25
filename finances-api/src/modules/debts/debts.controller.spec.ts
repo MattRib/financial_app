@@ -3,11 +3,12 @@ import { DebtsController } from './debts.controller';
 import { DebtsService } from './debts.service';
 import { CreateDebtDto, UpdateDebtDto } from './dto';
 import { SUPABASE_CLIENT } from '../../config/supabase.module';
+import type { User } from '@supabase/supabase-js';
 
 describe('DebtsController', () => {
   let controller: DebtsController;
 
-  const mockUser = { id: 'user-123' } as any;
+  const mockUser = { id: 'user-123' } as User;
   const mockDebt = {
     id: 'debt-123',
     user_id: 'user-123',

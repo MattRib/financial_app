@@ -7,7 +7,7 @@ import { StatCard } from '../../components/dashboard/StatCard'
 import { CategoryModal, CategoryFilters } from '../../components/categories'
 import CategoriesList from './CategoriesList'
 import type { Category, CategoryType } from '../../types'
-import { Plus, X, AlertTriangle, TrendingUp, TrendingDown, PiggyBank } from 'lucide-react'
+import { Plus, AlertTriangle, TrendingUp, TrendingDown, PiggyBank } from 'lucide-react'
 
 // Animation variants
 const containerVariants = {

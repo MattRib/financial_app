@@ -3,12 +3,13 @@ import { BudgetsController } from './budgets.controller';
 import { BudgetsService } from './budgets.service';
 import { CreateBudgetDto, UpdateBudgetDto } from './dto';
 import { SUPABASE_CLIENT } from '../../config/supabase.module';
+import type { User } from '@supabase/supabase-js';
 
 describe('BudgetsController', () => {
   let controller: BudgetsController;
   let service: BudgetsService;
 
-  const mockUser = { id: 'user-123' } as any;
+  const mockUser = { id: 'user-123' } as User;
   const mockBudget = {
     id: 'budget-123',
     user_id: 'user-123',

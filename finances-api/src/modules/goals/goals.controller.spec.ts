@@ -3,10 +3,11 @@ import { GoalsController } from './goals.controller';
 import { GoalsService } from './goals.service';
 import { CreateGoalDto, UpdateGoalDto } from './dto';
 import { SUPABASE_CLIENT } from '../../config/supabase.module';
+import type { User } from '@supabase/supabase-js';
 
 describe('GoalsController', () => {
   let controller: GoalsController;
-  const mockUser = { id: 'user-123' } as any;
+  const mockUser = { id: 'user-123' } as User;
   const mockGoal = {
     id: 'goal-123',
     user_id: 'user-123',

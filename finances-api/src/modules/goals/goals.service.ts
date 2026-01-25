@@ -46,7 +46,7 @@ export class GoalsService {
   }
 
   async findAll(userId: string, filters?: FilterGoalDto): Promise<Goal[]> {
-    let query: any = this.supabase
+    let query = this.supabase
       .from('goals')
       .select('*')
       .eq('user_id', userId);
