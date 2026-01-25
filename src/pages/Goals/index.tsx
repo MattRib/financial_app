@@ -217,8 +217,8 @@ const GoalsPage: React.FC = () => {
         <motion.div variants={itemVariants}>
           <GoalFilters
             statusFilter={statusFilter}
-            categoryFilter={categoryFilter}
             onStatusChange={setStatusFilter}
+            categoryFilter={categoryFilter}
             onCategoryChange={setCategoryFilter}
           />
         </motion.div>
