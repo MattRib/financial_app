@@ -122,6 +122,16 @@ const TransactionsPage: React.FC = () => {
           </motion.button>
         </motion.div>
 
+        {/* Error State */}
+        {error && (
+          <motion.div
+            variants={itemVariants}
+            className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl"
+          >
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          </motion.div>
+        )}
+
         {/* Summary Cards */}
         {summary && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
