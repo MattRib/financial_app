@@ -221,14 +221,16 @@ export function useDebt(options: UseDebtOptions = {}) {
 
       setShowModal(false)
       setEditingDebt(null)
-      fetchSummary()
+      // Atualiza tanto a lista quanto o summary
+      await fetchDebts()
+      await fetchSummary()
     } catch {
       setNotification({ 
         type: 'error', 
         message: editingDebt ? 'Erro ao atualizar dívida' : 'Erro ao criar dívida' 
       })
     }
-  }, [editingDebt, createDebt, updateDebt, fetchSummary])
+  }, [editingDebt, createDebt, updateDebt, fetchDebts, fetchSummary])
 
   const handleClearFilters = useCallback(() => {
     setFilterDateStart('')

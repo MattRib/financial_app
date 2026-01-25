@@ -163,13 +163,15 @@ export const useGoal = (): UseGoalReturn => {
     async (data: CreateGoalDto | UpdateGoalDto) => {
       if (selectedGoal) {
         await updateGoal(selectedGoal.id, data as UpdateGoalDto)
+        await refreshData()
       } else {
         await createGoal(data as CreateGoalDto)
+        // Apenas atualiza summary sem aplicar filtros para garantir que a meta criada apareça
+        await fetchSummary()
       }
-      await refreshData()
       closeModal()
     },
-    [selectedGoal, createGoal, updateGoal, refreshData, closeModal]
+    [selectedGoal, createGoal, updateGoal, refreshData, fetchSummary, closeModal]
   )
 
   const handleDelete = useCallback(async () => {
