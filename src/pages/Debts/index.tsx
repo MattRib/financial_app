@@ -13,6 +13,7 @@ import {
   Wallet,
   Loader2,
   Trash2,
+  CheckCircle,
 } from 'lucide-react'
 
 // Animation variants
