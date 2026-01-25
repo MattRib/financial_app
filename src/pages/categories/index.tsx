@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MainLayout } from '../../components/layout'
 import { useCategoriesStore } from '../../store/categoriesStore'
+import { useToast } from '../../store/toastStore'
 import { StatCard } from '../../components/dashboard/StatCard'
 import { CategoryModal, CategoryFilters } from '../../components/categories'
 import CategoriesList from './CategoriesList'
@@ -42,11 +43,12 @@ const CategoriesPage: React.FC = () => {
     createDefaultCategories,
   } = useCategoriesStore()
 
+  const toast = useToast()
+
   // Local state
   const [showModal, setShowModal] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [selectedTab, setSelectedTab] = useState<'all' | CategoryType>('all')
-  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; show: boolean }>({ id: '', show: false })
 
   // Fetch categories on mount
@@ -103,11 +105,11 @@ const CategoriesPage: React.FC = () => {
     if (deleteConfirm.id) {
       try {
         await deleteCategory(deleteConfirm.id)
-        setNotification({ type: 'success', message: 'Categoria deletada com sucesso!' })
+        toast.success('Categoria deletada com sucesso!')
         setDeleteConfirm({ id: '', show: false })
         await fetchCategories()
       } catch {
-        setNotification({ type: 'error', message: 'Erro ao deletar categoria' })
+        toast.error('Erro ao deletar categoria')
       }
     }
   }
@@ -116,10 +118,10 @@ const CategoriesPage: React.FC = () => {
   const handleFormSubmit = async (data: { name: string; type: CategoryType; color: string; icon: string }) => {
     if (editingCategory) {
       await updateCategory(editingCategory.id, data)
-      setNotification({ type: 'success', message: 'Categoria atualizada com sucesso!' })
+      toast.success('Categoria atualizada com sucesso!')
     } else {
       await createCategory(data)
-      setNotification({ type: 'success', message: 'Categoria criada com sucesso!' })
+      toast.success('Categoria criada com sucesso!')
     }
     setShowModal(false)
     setEditingCategory(null)
@@ -136,20 +138,19 @@ const CategoriesPage: React.FC = () => {
   const handleCreateDefaults = async () => {
     try {
       await createDefaultCategories()
-      setNotification({ type: 'success', message: 'Categorias padrão criadas com sucesso!' })
+      toast.success('Categorias padrão criadas com sucesso!')
       await fetchCategories()
     } catch {
-      setNotification({ type: 'error', message: 'Erro ao criar categorias padrão' })
+      toast.error('Erro ao criar categorias padrão')
     }
   }
 
-  // Close notification after 3 seconds
+  // Show error toast when error occurs
   useEffect(() => {
-    if (notification) {
-      const timer = setTimeout(() => setNotification(null), 3000)
-      return () => clearTimeout(timer)
+    if (error) {
+      toast.error(error)
     }
-  }, [notification])
+  }, [error, toast])
 
   return (
     <MainLayout>
@@ -237,32 +238,6 @@ const CategoriesPage: React.FC = () => {
               className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl"
             >
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Notification */}
-        <AnimatePresence>
-          {notification && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className={`
-                p-4 rounded-xl flex items-center justify-between
-                ${notification.type === 'success'
-                  ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400'
-                  : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400'
-                }
-              `}
-            >
-              <p className="text-sm">{notification.message}</p>
-              <button
-                onClick={() => setNotification(null)}
-                className="p-1 hover:bg-black/5 dark:hover:bg-white/5 rounded transition-colors cursor-pointer"
-              >
-                <X size={16} />
-              </button>
             </motion.div>
           )}
         </AnimatePresence>

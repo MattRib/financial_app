@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { User, Save, Loader2 } from 'lucide-react'
 import { AnimatedCard } from '../ui/AnimatedCard'
+import { useToast } from '../../store/toastStore'
 import type { Profile, UpdateProfileDto } from '../../types'
 
 interface ProfileSectionProps {
@@ -9,10 +10,11 @@ interface ProfileSectionProps {
 }
 
 export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
+  const toast = useToast()
+
   const [formName, setFormName] = useState('')
   const [formAvatar, setFormAvatar] = useState('')
   const [isSaving, setIsSaving] = useState(false)
-  const [saveSuccess, setSaveSuccess] = useState(false)
 
   useEffect(() => {
     if (profile) {
@@ -31,17 +33,16 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
     if (!hasChanges) return
 
     setIsSaving(true)
-    setSaveSuccess(false)
 
     try {
       await onUpdate({
         full_name: formName || undefined,
         avatar_url: formAvatar || undefined,
       })
-      setSaveSuccess(true)
-      setTimeout(() => setSaveSuccess(false), 3000)
+      toast.success('Perfil atualizado com sucesso!')
     } catch (error) {
       console.error('Erro ao salvar perfil:', error)
+      toast.error('Erro ao atualizar perfil')
     } finally {
       setIsSaving(false)
     }
@@ -153,11 +154,6 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
                 <>
                   <Loader2 size={16} className="animate-spin" />
                   Salvando...
-                </>
-              ) : saveSuccess ? (
-                <>
-                  <Save size={16} />
-                  Salvo!
                 </>
               ) : (
                 <>

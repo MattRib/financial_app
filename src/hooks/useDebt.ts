@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useDebtsStore } from '../store/debtsStore'
+import { useToast } from '../store/toastStore'
 import type { Debt, DebtStatus, CreateDebtDto, UpdateDebtDto } from '../types'
 
 type TabId = 'all' | DebtStatus
@@ -49,11 +50,12 @@ export function useDebt(options: UseDebtOptions = {}) {
     clearError,
   } = useDebtsStore()
 
+  const toast = useToast()
+
   // UI State
   const [showModal, setShowModal] = useState(false)
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; show: boolean }>({ id: '', show: false })
-  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   // Filter State
   const [selectedTab, setSelectedTab] = useState<TabId>('all')
@@ -71,13 +73,12 @@ export function useDebt(options: UseDebtOptions = {}) {
     fetchSummary()
   }, [fetchDebts, fetchSummary])
 
-  // Auto-dismiss notification
+  // Show error toast when error occurs
   useEffect(() => {
-    if (notification) {
-      const timer = setTimeout(() => setNotification(null), 3000)
-      return () => clearTimeout(timer)
+    if (error) {
+      toast.error(error)
     }
-  }, [notification])
+  }, [error, toast])
 
   // Filter debts
   const filteredDebts = useMemo(() => {
@@ -190,33 +191,33 @@ export function useDebt(options: UseDebtOptions = {}) {
     if (deleteConfirm.id) {
       try {
         await deleteDebt(deleteConfirm.id)
-        setNotification({ type: 'success', message: 'Dívida excluída com sucesso!' })
+        toast.success('Dívida excluída com sucesso!')
         setDeleteConfirm({ id: '', show: false })
         fetchSummary()
       } catch {
-        setNotification({ type: 'error', message: 'Erro ao excluir dívida' })
+        toast.error('Erro ao excluir dívida')
       }
     }
-  }, [deleteConfirm.id, deleteDebt, fetchSummary])
+  }, [deleteConfirm.id, deleteDebt, fetchSummary, toast])
 
   const handleMarkAsPaid = useCallback(async (id: string) => {
     try {
       await markAsPaid(id)
-      setNotification({ type: 'success', message: 'Dívida marcada como paga!' })
+      toast.success('Dívida marcada como paga!')
       fetchSummary()
     } catch {
-      setNotification({ type: 'error', message: 'Erro ao marcar dívida como paga' })
+      toast.error('Erro ao marcar dívida como paga')
     }
-  }, [markAsPaid, fetchSummary])
+  }, [markAsPaid, fetchSummary, toast])
 
   const handleSubmitDebt = useCallback(async (data: CreateDebtDto | UpdateDebtDto) => {
     try {
       if (editingDebt) {
         await updateDebt(editingDebt.id, data as UpdateDebtDto)
-        setNotification({ type: 'success', message: 'Dívida atualizada com sucesso!' })
+        toast.success('Dívida atualizada com sucesso!')
       } else {
         await createDebt(data as CreateDebtDto)
-        setNotification({ type: 'success', message: 'Dívida criada com sucesso!' })
+        toast.success('Dívida criada com sucesso!')
       }
 
       setShowModal(false)
@@ -225,12 +226,9 @@ export function useDebt(options: UseDebtOptions = {}) {
       await fetchDebts()
       await fetchSummary()
     } catch {
-      setNotification({ 
-        type: 'error', 
-        message: editingDebt ? 'Erro ao atualizar dívida' : 'Erro ao criar dívida' 
-      })
+      toast.error(editingDebt ? 'Erro ao atualizar dívida' : 'Erro ao criar dívida')
     }
-  }, [editingDebt, createDebt, updateDebt, fetchDebts, fetchSummary])
+  }, [editingDebt, createDebt, updateDebt, fetchDebts, fetchSummary, toast])
 
   const handleClearFilters = useCallback(() => {
     setFilterDateStart('')
@@ -260,7 +258,6 @@ export function useDebt(options: UseDebtOptions = {}) {
     showModal,
     editingDebt,
     deleteConfirm,
-    notification,
 
     // Filters
     selectedTab,
@@ -283,7 +280,6 @@ export function useDebt(options: UseDebtOptions = {}) {
     handleMarkAsPaid,
     handleSubmitDebt,
     handleClearFilters,
-    setNotification,
     clearError,
   }
 }

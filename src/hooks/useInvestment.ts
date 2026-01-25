@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useInvestmentsStore, type MonthlyEvolution } from '../store/investmentsStore'
+import { useToast } from '../store/toastStore'
 import type { Investment, CreateInvestmentDto, UpdateInvestmentDto, InvestmentType } from '../types'
 import { INVESTMENT_TYPE_CONFIG, type InvestmentTabId } from '../constants/investments'
 
@@ -88,7 +89,9 @@ export const useInvestment = (): UseInvestmentReturn => {
     updateInvestment,
     deleteInvestment,
   } = useInvestmentsStore()
-  
+
+  const toast = useToast()
+
   // Compute date range for current month
   const getDateRange = useCallback((m: number, y: number) => {
     const startDate = new Date(y, m - 1, 1).toISOString().split('T')[0]
@@ -107,7 +110,14 @@ export const useInvestment = (): UseInvestmentReturn => {
   useEffect(() => {
     fetchEvolution(year)
   }, [year, fetchEvolution])
-  
+
+  // Show error toast when error occurs
+  useEffect(() => {
+    if (error) {
+      toast.error(error)
+    }
+  }, [error, toast])
+
   // Filter investments by selected type
   const filteredInvestments = useMemo(() => {
     if (selectedType === 'all') return investments
@@ -203,32 +213,43 @@ export const useInvestment = (): UseInvestmentReturn => {
   
   // CRUD operations
   const handleSubmit = useCallback(async (data: CreateInvestmentDto | UpdateInvestmentDto) => {
-    if (selectedInvestment) {
-      await updateInvestment(selectedInvestment.id, data)
-    } else {
-      await createInvestment(data as CreateInvestmentDto)
+    try {
+      if (selectedInvestment) {
+        await updateInvestment(selectedInvestment.id, data)
+        toast.success('Investimento atualizado com sucesso!')
+      } else {
+        await createInvestment(data as CreateInvestmentDto)
+        toast.success('Investimento criado com sucesso!')
+      }
+
+      // Refresh data
+      const { startDate, endDate } = getDateRange(month, year)
+      await fetchInvestments({ start_date: startDate, end_date: endDate })
+      await fetchMonthlyTotal(month, year)
+
+      closeModal()
+    } catch {
+      toast.error('Erro ao salvar investimento')
     }
-    
-    // Refresh data
-    const { startDate, endDate } = getDateRange(month, year)
-    await fetchInvestments({ start_date: startDate, end_date: endDate })
-    await fetchMonthlyTotal(month, year)
-    
-    closeModal()
-  }, [selectedInvestment, updateInvestment, createInvestment, fetchInvestments, fetchMonthlyTotal, month, year, closeModal, getDateRange])
+  }, [selectedInvestment, updateInvestment, createInvestment, fetchInvestments, fetchMonthlyTotal, month, year, closeModal, getDateRange, toast])
   
   const handleDelete = useCallback(async () => {
     if (!investmentToDelete) return
-    
-    await deleteInvestment(investmentToDelete)
-    
-    // Refresh data
-    const { startDate, endDate } = getDateRange(month, year)
-    await fetchInvestments({ start_date: startDate, end_date: endDate })
-    await fetchMonthlyTotal(month, year)
-    
-    closeDeleteModal()
-  }, [investmentToDelete, deleteInvestment, fetchInvestments, fetchMonthlyTotal, month, year, closeDeleteModal, getDateRange])
+
+    try {
+      await deleteInvestment(investmentToDelete)
+      toast.success('Investimento excluído com sucesso!')
+
+      // Refresh data
+      const { startDate, endDate } = getDateRange(month, year)
+      await fetchInvestments({ start_date: startDate, end_date: endDate })
+      await fetchMonthlyTotal(month, year)
+
+      closeDeleteModal()
+    } catch {
+      toast.error('Erro ao excluir investimento')
+    }
+  }, [investmentToDelete, deleteInvestment, fetchInvestments, fetchMonthlyTotal, month, year, closeDeleteModal, getDateRange, toast])
   
   return {
     // Period

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Eye, EyeOff, Check, Loader2 } from 'lucide-react'
+import { useToast } from '../../store/toastStore'
 import type { ChangePasswordDto } from '../../types'
 import { PASSWORD_REQUIREMENTS } from '../../constants/settings'
 
@@ -15,6 +16,8 @@ export function ChangePasswordModal({
   onClose,
   onSubmit,
 }: ChangePasswordModalProps) {
+  const toast = useToast()
+
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -22,7 +25,6 @@ export function ChangePasswordModal({
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const prevIsOpenRef = useRef(isOpen)
 
@@ -40,7 +42,6 @@ export function ChangePasswordModal({
         setShowNewPassword(false)
         setShowConfirmPassword(false)
         setIsSubmitting(false)
-        setSubmitError(null)
       }, 0)
     }
   }, [isOpen])
@@ -77,15 +78,15 @@ export function ChangePasswordModal({
     if (!canSubmit) return
 
     setIsSubmitting(true)
-    setSubmitError(null)
 
     try {
       await onSubmit({ currentPassword, newPassword })
+      toast.success('Senha alterada com sucesso!')
       onClose()
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Erro ao trocar senha'
-      setSubmitError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
@@ -275,13 +276,6 @@ export function ChangePasswordModal({
                     </p>
                   )}
                 </div>
-
-                {/* Submit error */}
-                {submitError && (
-                  <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                    <p className="text-xs text-red-600 dark:text-red-400">{submitError}</p>
-                  </div>
-                )}
               </div>
 
               {/* Actions */}

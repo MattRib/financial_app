@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useGoalsStore } from '../store/goalsStore'
+import { useToast } from '../store/toastStore'
 import type {
   Goal,
   GoalWithProgress,
@@ -74,6 +75,8 @@ export const useGoal = (): UseGoalReturn => {
     addContribution,
   } = useGoalsStore()
 
+  const toast = useToast()
+
   // Filters state
   const [statusFilter, setStatusFilter] = useState<GoalTabId>('all')
   const [categoryFilter, setCategoryFilter] = useState<GoalCategory | 'all'>('all')
@@ -122,6 +125,13 @@ export const useGoal = (): UseGoalReturn => {
     refreshData()
   }, [refreshData])
 
+  // Show error toast when error occurs
+  useEffect(() => {
+    if (error) {
+      toast.error(error)
+    }
+  }, [error, toast])
+
   // Modal actions
   const openCreateModal = useCallback(() => {
     setSelectedGoal(null)
@@ -161,42 +171,63 @@ export const useGoal = (): UseGoalReturn => {
   // CRUD handlers
   const handleSubmit = useCallback(
     async (data: CreateGoalDto | UpdateGoalDto) => {
-      if (selectedGoal) {
-        await updateGoal(selectedGoal.id, data as UpdateGoalDto)
-        await refreshData()
-      } else {
-        await createGoal(data as CreateGoalDto)
-        // Apenas atualiza summary sem aplicar filtros para garantir que a meta criada apareça
-        await fetchSummary()
+      try {
+        if (selectedGoal) {
+          await updateGoal(selectedGoal.id, data as UpdateGoalDto)
+          toast.success('Meta atualizada com sucesso!')
+          await refreshData()
+        } else {
+          await createGoal(data as CreateGoalDto)
+          toast.success('Meta criada com sucesso!')
+          // Apenas atualiza summary sem aplicar filtros para garantir que a meta criada apareça
+          await fetchSummary()
+        }
+        closeModal()
+      } catch {
+        toast.error('Erro ao salvar meta')
       }
-      closeModal()
     },
-    [selectedGoal, createGoal, updateGoal, refreshData, fetchSummary, closeModal]
+    [selectedGoal, createGoal, updateGoal, refreshData, fetchSummary, closeModal, toast]
   )
 
   const handleDelete = useCallback(async () => {
     if (!goalToDelete) return
-    await deleteGoal(goalToDelete)
-    await refreshData()
-    closeDeleteModal()
-  }, [goalToDelete, deleteGoal, refreshData, closeDeleteModal])
+    try {
+      await deleteGoal(goalToDelete)
+      toast.success('Meta excluída com sucesso!')
+      await refreshData()
+      closeDeleteModal()
+    } catch {
+      toast.error('Erro ao excluir meta')
+    }
+  }, [goalToDelete, deleteGoal, refreshData, closeDeleteModal, toast])
 
   const handleAddProgress = useCallback(
     async (amount: number) => {
       if (!goalToAddProgress) return
-      await addContribution(goalToAddProgress.id, amount)
-      await refreshData()
-      closeAddProgressModal()
+      try {
+        await addContribution(goalToAddProgress.id, amount)
+        toast.success('Progresso adicionado com sucesso!')
+        await refreshData()
+        closeAddProgressModal()
+      } catch {
+        toast.error('Erro ao adicionar progresso')
+      }
     },
-    [goalToAddProgress, addContribution, refreshData, closeAddProgressModal]
+    [goalToAddProgress, addContribution, refreshData, closeAddProgressModal, toast]
   )
 
   const handleMarkComplete = useCallback(
     async (id: string) => {
-      await markAsCompleted(id)
-      await refreshData()
+      try {
+        await markAsCompleted(id)
+        toast.success('Meta marcada como concluída!')
+        await refreshData()
+      } catch {
+        toast.error('Erro ao marcar meta como concluída')
+      }
     },
-    [markAsCompleted, refreshData]
+    [markAsCompleted, refreshData, toast]
   )
 
   return {

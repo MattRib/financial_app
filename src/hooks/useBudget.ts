@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useBudgetsStore } from '../store/budgetsStore'
 import { useCategoriesStore } from '../store/categoriesStore'
+import { useToast } from '../store/toastStore'
 import type { Budget, CreateBudgetDto, UpdateBudgetDto, BudgetOverview, Category } from '../types'
 
 interface UseBudgetReturn {
@@ -71,12 +72,21 @@ export const useBudget = (): UseBudgetReturn => {
     loading: categoriesLoading,
     fetchCategories,
   } = useCategoriesStore()
-  
+
+  const toast = useToast()
+
   // Fetch data when period changes
   useEffect(() => {
     fetchBudgets(month, year)
     fetchBudgetOverview(month, year)
   }, [month, year, fetchBudgets, fetchBudgetOverview])
+
+  // Show error toast when error occurs
+  useEffect(() => {
+    if (error) {
+      toast.error(error)
+    }
+  }, [error, toast])
   
   // Fetch categories on mount
   useEffect(() => {
@@ -139,32 +149,43 @@ export const useBudget = (): UseBudgetReturn => {
   
   // CRUD operations
   const handleSubmit = useCallback(async (data: CreateBudgetDto | UpdateBudgetDto) => {
-    if (selectedBudget) {
-      // Update
-      await updateBudget(selectedBudget.id, data)
-    } else {
-      // Create
-      await createBudget(data as CreateBudgetDto)
+    try {
+      if (selectedBudget) {
+        // Update
+        await updateBudget(selectedBudget.id, data)
+        toast.success('Orçamento atualizado com sucesso!')
+      } else {
+        // Create
+        await createBudget(data as CreateBudgetDto)
+        toast.success('Orçamento criado com sucesso!')
+      }
+
+      // Refresh data
+      await fetchBudgets(month, year)
+      await fetchBudgetOverview(month, year)
+
+      closeModal()
+    } catch {
+      toast.error('Erro ao salvar orçamento')
     }
-    
-    // Refresh data
-    await fetchBudgets(month, year)
-    await fetchBudgetOverview(month, year)
-    
-    closeModal()
-  }, [selectedBudget, updateBudget, createBudget, fetchBudgets, fetchBudgetOverview, month, year, closeModal])
+  }, [selectedBudget, updateBudget, createBudget, fetchBudgets, fetchBudgetOverview, month, year, closeModal, toast])
   
   const handleDelete = useCallback(async () => {
     if (!budgetToDelete) return
-    
-    await deleteBudget(budgetToDelete)
-    
-    // Refresh data
-    await fetchBudgets(month, year)
-    await fetchBudgetOverview(month, year)
-    
-    closeDeleteModal()
-  }, [budgetToDelete, deleteBudget, fetchBudgets, fetchBudgetOverview, month, year, closeDeleteModal])
+
+    try {
+      await deleteBudget(budgetToDelete)
+      toast.success('Orçamento excluído com sucesso!')
+
+      // Refresh data
+      await fetchBudgets(month, year)
+      await fetchBudgetOverview(month, year)
+
+      closeDeleteModal()
+    } catch {
+      toast.error('Erro ao excluir orçamento')
+    }
+  }, [budgetToDelete, deleteBudget, fetchBudgets, fetchBudgetOverview, month, year, closeDeleteModal, toast])
   
   return {
     // Period
