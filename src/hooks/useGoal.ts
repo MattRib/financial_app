@@ -102,28 +102,22 @@ export const useGoal = (): UseGoalReturn => {
     return true
   })
 
-  // Fetch data on mount and when filters change
+  // Fetch data on mount only - filters are applied locally
   const refreshData = useCallback(async () => {
-    const filters: { status?: GoalStatus; category?: GoalCategory } = {}
-
-    if (statusFilter !== 'all') {
-      filters.status = statusFilter
-    }
-    if (categoryFilter !== 'all') {
-      filters.category = categoryFilter
-    }
-
+    // Fetch ALL goals without filters - filtering happens in the frontend
     await Promise.all([
-      fetchGoals(Object.keys(filters).length > 0 ? filters : undefined),
+      fetchGoals(), // No filters - get all goals
       fetchSummary(),
       fetchAtRisk(),
       fetchNearCompletion(),
     ])
-  }, [statusFilter, categoryFilter, fetchGoals, fetchSummary, fetchAtRisk, fetchNearCompletion])
+  }, [fetchGoals, fetchSummary, fetchAtRisk, fetchNearCompletion])
 
+  // Fetch data only on mount, not when filters change
   useEffect(() => {
     refreshData()
-  }, [refreshData])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Empty dependency array - only run on mount
 
   // Show error toast when error occurs
   useEffect(() => {

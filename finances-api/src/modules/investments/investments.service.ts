@@ -23,9 +23,9 @@ export interface TypeSummary {
 }
 
 export interface MonthlyEvolution {
-  month: string;
+  month: number;
+  year: number;
   total: number;
-  by_type: Record<InvestmentType, number>;
 }
 
 @Injectable()
@@ -187,7 +187,7 @@ export class InvestmentsService {
 
     const { data, error } = await this.supabase
       .from('investments')
-      .select('type, amount, date')
+      .select('amount, date')
       .eq('user_id', userId)
       .gte('date', startDate)
       .lte('date', endDate)
@@ -195,35 +195,21 @@ export class InvestmentsService {
 
     if (error) throw error;
 
-    const monthlyMap = new Map<
-      string,
-      { total: number; by_type: Record<string, number> }
-    >();
+    // Initialize all 12 months with zero
+    const monthlyTotals = Array.from({ length: 12 }, (_, i) => ({
+      month: i + 1,
+      year,
+      total: 0,
+    }));
 
-    for (let month = 1; month <= 12; month++) {
-      const monthKey = `${year}-${String(month).padStart(2, '0')}`;
-      monthlyMap.set(monthKey, {
-        total: 0,
-        by_type: { renda_fixa: 0, renda_variavel: 0, cripto: 0, outros: 0 },
-      });
-    }
-
+    // Aggregate investments by month
     for (const inv of data || []) {
-      const monthKey = inv.date.substring(0, 7);
-      const monthData = monthlyMap.get(monthKey);
-      if (monthData) {
-        monthData.total += Number(inv.amount);
-        monthData.by_type[inv.type] += Number(inv.amount);
-      }
+      const invDate = new Date(inv.date);
+      const monthIndex = invDate.getMonth(); // 0-11
+      monthlyTotals[monthIndex].total += Number(inv.amount);
     }
 
-    return Array.from(monthlyMap.entries())
-      .map(([month, data]) => ({
-        month,
-        total: data.total,
-        by_type: data.by_type as Record<InvestmentType, number>,
-      }))
-      .sort((a, b) => a.month.localeCompare(b.month));
+    return monthlyTotals;
   }
 
   async getTotalByMonth(

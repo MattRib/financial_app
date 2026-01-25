@@ -254,17 +254,13 @@ const GoalsPage: React.FC = () => {
                 title="Nenhuma meta encontrada"
                 description={
                   statusFilter !== 'all' || categoryFilter !== 'all'
-                    ? 'Tente ajustar os filtros para ver mais metas'
+                    ? 'Tente ajustar os filtros para ver mais metas ou crie uma nova'
                     : 'Comece criando sua primeira meta financeira'
                 }
-                action={
-                  statusFilter === 'all' && categoryFilter === 'all'
-                    ? {
-                        label: 'Criar primeira meta',
-                        onClick: openCreateModal,
-                      }
-                    : undefined
-                }
+                action={{
+                  label: 'Criar primeira meta',
+                  onClick: openCreateModal,
+                }}
               />
             </div>
           )}
