@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { MoreHorizontal, Pencil, Trash2, Calendar } from 'lucide-react'
+import React from 'react'
+import { motion } from 'framer-motion'
+import { Pencil, Trash2, Calendar } from 'lucide-react'
 import type { Investment } from '../../types'
 import { INVESTMENT_TYPE_CONFIG } from '../../constants/investments'
 import { formatCurrency } from '../../hooks/useTransaction'
@@ -31,22 +31,8 @@ export const InvestmentCard: React.FC<InvestmentCardProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const [showActions, setShowActions] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
   const typeConfig = INVESTMENT_TYPE_CONFIG[investment.type]
   const TypeIcon = typeConfig.icon
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowActions(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
 
   // Format date
   const formattedDate = new Date(investment.date).toLocaleDateString('pt-BR', {
@@ -89,55 +75,29 @@ export const InvestmentCard: React.FC<InvestmentCardProps> = ({
           </div>
         </div>
 
-        {/* Actions Dropdown */}
-        <div className="relative" ref={dropdownRef}>
+        {/* Action Buttons */}
+        <div className="flex items-center gap-1">
+          {/* Edit Button */}
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setShowActions(!showActions)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            onClick={() => onEdit?.(investment)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors cursor-pointer"
+            title="Editar"
           >
-            <MoreHorizontal size={18} />
+            <Pencil size={16} />
           </motion.button>
 
-          <AnimatePresence>
-            {showActions && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: -5 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -5 }}
-                transition={{ duration: 0.15 }}
-                className="
-                  absolute right-0 top-full mt-1 z-10
-                  bg-white dark:bg-slate-800
-                  border border-slate-200 dark:border-slate-700
-                  rounded-lg shadow-lg
-                  py-1 min-w-[120px]
-                "
-              >
-                <button
-                  onClick={() => {
-                    setShowActions(false)
-                    onEdit?.(investment)
-                  }}
-                  className="w-full px-3 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors cursor-pointer"
-                >
-                  <Pencil size={14} />
-                  Editar
-                </button>
-                <button
-                  onClick={() => {
-                    setShowActions(false)
-                    onDelete?.(investment.id)
-                  }}
-                  className="w-full px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors cursor-pointer"
-                >
-                  <Trash2 size={14} />
-                  Excluir
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Delete Button */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onDelete?.(investment.id)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer"
+            title="Excluir"
+          >
+            <Trash2 size={16} />
+          </motion.button>
         </div>
       </div>
 

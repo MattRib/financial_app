@@ -80,10 +80,12 @@ export const useInvestment = (): UseInvestmentReturn => {
     loading,
     error,
     monthlyTotal,
+    summary,
     evolution,
     evolutionLoading,
     fetchInvestments,
     fetchMonthlyTotal,
+    fetchSummary,
     fetchEvolution,
     createInvestment,
     updateInvestment,
@@ -104,7 +106,8 @@ export const useInvestment = (): UseInvestmentReturn => {
     const { startDate, endDate } = getDateRange(month, year)
     fetchInvestments({ start_date: startDate, end_date: endDate })
     fetchMonthlyTotal(month, year)
-  }, [month, year, fetchInvestments, fetchMonthlyTotal, getDateRange])
+    fetchSummary() // Fetch summary for totals and charts
+  }, [month, year, fetchInvestments, fetchMonthlyTotal, fetchSummary, getDateRange])
   
   // Fetch evolution data when year changes
   useEffect(() => {
@@ -124,32 +127,32 @@ export const useInvestment = (): UseInvestmentReturn => {
     return investments.filter(inv => inv.type === selectedType)
   }, [investments, selectedType])
   
-  // Calculate total invested (all time - fetch without date filter)
+  // Calculate total invested from summary (all time)
   const totalInvested = useMemo(() => {
-    return investments.reduce((sum, inv) => sum + inv.amount, 0)
-  }, [investments])
-  
-  // Calculate summary by type
+    return summary?.total_invested ?? 0
+  }, [summary])
+
+  // Calculate summary by type from summary API
   const summaryByType = useMemo((): InvestmentSummaryByType[] => {
-    const types: InvestmentType[] = ['renda_fixa', 'renda_variavel', 'cripto', 'outros']
-    const total = investments.reduce((sum, inv) => sum + inv.amount, 0)
-    
-    return types.map(type => {
-      const typeInvestments = investments.filter(inv => inv.type === type)
-      const typeTotal = typeInvestments.reduce((sum, inv) => sum + inv.amount, 0)
-      
-      return {
-        type,
-        total: typeTotal,
-        count: typeInvestments.length,
-        percentage: total > 0 ? (typeTotal / total) * 100 : 0,
-      }
-    })
-  }, [investments])
-  
+    if (!summary?.by_type) {
+      return []
+    }
+
+    return summary.by_type.map(item => ({
+      type: item.type,
+      total: item.total,
+      count: item.count,
+      percentage: item.percentage,
+    }))
+  }, [summary])
+
   // Chart data for CategoryBarChart
   const chartData = useMemo(() => {
-    return summaryByType
+    if (!summary?.by_type) {
+      return []
+    }
+
+    return summary.by_type
       .filter(item => item.total > 0)
       .map(item => ({
         name: INVESTMENT_TYPE_CONFIG[item.type].label,
@@ -157,7 +160,7 @@ export const useInvestment = (): UseInvestmentReturn => {
         color: INVESTMENT_TYPE_CONFIG[item.type].chartColor,
       }))
       .sort((a, b) => b.value - a.value)
-  }, [summaryByType])
+  }, [summary])
   
   // Navigation
   const goToPrevMonth = () => {
@@ -224,8 +227,12 @@ export const useInvestment = (): UseInvestmentReturn => {
 
       // Refresh data
       const { startDate, endDate } = getDateRange(month, year)
-      await fetchInvestments({ start_date: startDate, end_date: endDate })
-      await fetchMonthlyTotal(month, year)
+      await Promise.all([
+        fetchInvestments({ start_date: startDate, end_date: endDate }),
+        fetchMonthlyTotal(month, year),
+        fetchEvolution(year),
+        fetchSummary(), // Fetch summary for totals and charts
+      ])
 
       closeModal()
     } catch {
@@ -242,8 +249,12 @@ export const useInvestment = (): UseInvestmentReturn => {
 
       // Refresh data
       const { startDate, endDate } = getDateRange(month, year)
-      await fetchInvestments({ start_date: startDate, end_date: endDate })
-      await fetchMonthlyTotal(month, year)
+      await Promise.all([
+        fetchInvestments({ start_date: startDate, end_date: endDate }),
+        fetchMonthlyTotal(month, year),
+        fetchEvolution(year),
+        fetchSummary(), // Fetch summary for totals and charts
+      ])
 
       closeDeleteModal()
     } catch {

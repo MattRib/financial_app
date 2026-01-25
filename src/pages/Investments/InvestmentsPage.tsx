@@ -177,34 +177,39 @@ const InvestmentsPage: React.FC = () => {
           />
         </div>
 
-        {/* Distribution Chart */}
-        {chartData.length > 0 && (
-          <motion.div variants={itemVariants}>
+        {/* Charts Grid - Distribution and Evolution */}
+        <motion.div variants={itemVariants}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Distribution Chart */}
             <AnimatedCard delay={0.2}>
               <SectionHeader title="Distribuição por Tipo" />
               <div className="mt-4">
-                <CategoryBarChart data={chartData} height={200} />
+                {chartData.length > 0 ? (
+                  <CategoryBarChart data={chartData} height={200} />
+                ) : (
+                  <div className="h-[200px] flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                    Nenhum investimento cadastrado
+                  </div>
+                )}
               </div>
             </AnimatedCard>
-          </motion.div>
-        )}
 
-        {/* Evolution Chart */}
-        <motion.div variants={itemVariants}>
-          <AnimatedCard delay={0.3}>
-            <SectionHeader title={`Evolução Mensal - ${year}`} />
-            <div className="mt-4">
-              {evolutionLoading ? (
-                <InvestmentEvolutionChartSkeleton height={200} />
-              ) : evolution.length > 0 ? (
-                <InvestmentEvolutionChart data={evolution} height={200} />
-              ) : (
-                <div className="h-[200px] flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
-                  Nenhum dado de evolução disponível para {year}
-                </div>
-              )}
-            </div>
-          </AnimatedCard>
+            {/* Evolution Chart */}
+            <AnimatedCard delay={0.3}>
+              <SectionHeader title={`Evolução Mensal - ${year}`} />
+              <div className="mt-4">
+                {evolutionLoading ? (
+                  <InvestmentEvolutionChartSkeleton height={200} />
+                ) : evolution.length > 0 ? (
+                  <InvestmentEvolutionChart data={evolution} height={200} />
+                ) : (
+                  <div className="h-[200px] flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm">
+                    Nenhum dado de evolução disponível para {year}
+                  </div>
+                )}
+              </div>
+            </AnimatedCard>
+          </div>
         </motion.div>
 
         {/* Investments Section */}
