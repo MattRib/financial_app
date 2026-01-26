@@ -1,4 +1,5 @@
 import React from 'react'
+import { formatPercentage } from '../../utils/formatters'
 import type { Budget } from '../../types'
 import { Edit2, Trash2 } from 'lucide-react'
 
@@ -81,7 +82,7 @@ const BudgetItem = React.memo<{
               />
             </div>
             <span className={`text-xs font-medium whitespace-nowrap ${getProgressTextColor(percentage)}`}>
-              {percentage}%
+              {formatPercentage(percentage)}
             </span>
           </div>
         </td>
@@ -150,7 +151,7 @@ const BudgetItem = React.memo<{
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-gray-600">Gasto: {formatCurrency(spent)}</span>
             <span className={`text-xs font-medium ${getProgressTextColor(percentage)}`}>
-              {percentage}%
+              {formatPercentage(percentage)}
             </span>
           </div>
           <div className="bg-gray-200 rounded-full h-2.5">

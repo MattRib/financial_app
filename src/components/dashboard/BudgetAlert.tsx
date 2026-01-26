@@ -1,6 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { AlertTriangle } from 'lucide-react'
+import { formatPercentage, formatCurrency } from '../../utils/formatters'
 
 interface BudgetAlertProps {
   categoryName: string
@@ -8,13 +9,6 @@ interface BudgetAlertProps {
   spent: number
   total: number
   index?: number
-}
-
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value)
 }
 
 export const BudgetAlert: React.FC<BudgetAlertProps> = ({
@@ -61,7 +55,7 @@ export const BudgetAlert: React.FC<BudgetAlertProps> = ({
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-          {percentage}% do orcamento de {categoryName}
+          {formatPercentage(percentage)} do orcamento de {categoryName}
         </p>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
           {formatCurrency(spent)} de {formatCurrency(total)}

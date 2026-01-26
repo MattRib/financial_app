@@ -11,6 +11,7 @@ import {
   PieChart,
 } from 'lucide-react'
 import type { InsightReport } from '../../../types'
+import { formatPercentage } from '../../../utils/formatters'
 
 interface InsightReportCardProps {
   report: InsightReport
@@ -240,7 +241,7 @@ export const InsightReportCard: React.FC<InsightReportCardProps> = ({
                 </span>
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-slate-600 dark:text-slate-400">
-                    {cat.percentage.toFixed(1)}%
+                    {formatPercentage(cat.percentage)}
                   </span>
                   <span className="text-sm font-semibold text-slate-900 dark:text-slate-50">
                     {formatCurrency(cat.amount)}

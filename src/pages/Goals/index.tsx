@@ -14,6 +14,7 @@ import {
 } from '../../components/goals'
 import { useGoal } from '../../hooks/useGoal'
 import { formatGoalCurrency, GOAL_CATEGORY_CONFIG } from '../../constants/goals'
+import { formatPercentage } from '../../utils/formatters'
 
 // Animation variants
 const containerVariants = {
@@ -135,7 +136,7 @@ const GoalsPage: React.FC = () => {
           />
           <StatCard
             title="Progresso Geral"
-            value={`${progressPercentage}%`}
+            value={formatPercentage(progressPercentage)}
             icon={<TrendingUp size={24} />}
             loading={loading}
             index={2}
@@ -189,7 +190,7 @@ const GoalsPage: React.FC = () => {
                           {goal.name}
                         </p>
                         <p className="text-xs text-amber-600 dark:text-amber-400">
-                          {goal.progress_percentage}% concluído • {goal.days_remaining} dias restantes
+                          {formatPercentage(goal.progress_percentage)} concluído • {goal.days_remaining} dias restantes
                         </p>
                       </div>
                     </div>

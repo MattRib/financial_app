@@ -70,7 +70,7 @@ export function useTransaction(options: UseTransactionOptions = {}) {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
     fetchSummary(startOfMonth, endOfMonth)
-  }, [fetchTransactions, fetchCategories, fetchSummary])
+  }, [fetchTransactions, fetchCategories, fetchSummary, fetchAccounts])
 
   // Show error toast when error occurs
   useEffect(() => {
