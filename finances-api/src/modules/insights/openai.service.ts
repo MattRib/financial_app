@@ -35,7 +35,8 @@ export class OpenAIService {
     }
 
     this.openai = new OpenAI({ apiKey });
-    this.model = this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini';
+    this.model =
+      this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini';
   }
 
   async generateFinancialInsight(input: OpenAIInsightInput): Promise<{
@@ -103,9 +104,9 @@ Sempre responda em português do Brasil.`,
   }
 
   private buildPrompt(input: OpenAIInsightInput): string {
-    const monthName = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(
-      new Date(input.year, input.month - 1),
-    );
+    const monthName = new Intl.DateTimeFormat('pt-BR', {
+      month: 'long',
+    }).format(new Date(input.year, input.month - 1));
 
     const categoriesText =
       input.categories.length > 0

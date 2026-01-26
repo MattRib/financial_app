@@ -340,13 +340,16 @@ export class TransactionsService {
       ).length;
 
       const monthlyAmount = Number(firstInstallment.amount);
-      const totalAmount = monthlyAmount * (firstInstallment.total_installments || 1);
+      const totalAmount =
+        monthlyAmount * (firstInstallment.total_installments || 1);
       const paidAmount = monthlyAmount * paidCount;
       const remainingAmount = totalAmount - paidAmount;
 
       summaries.push({
         installment_group_id: groupId,
-        description: firstInstallment.description?.replace(/\s*\(\d+\/\d+\)/, '') || 'Compra parcelada',
+        description:
+          firstInstallment.description?.replace(/\s*\(\d+\/\d+\)/, '') ||
+          'Compra parcelada',
         category: (firstInstallment as any).categories || null,
         total_installments: firstInstallment.total_installments || 0,
         paid_installments: paidCount,

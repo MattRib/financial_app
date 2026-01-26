@@ -227,7 +227,8 @@ describe('GoalsService', () => {
       ];
       const queryThenable = {
         eq: jest.fn().mockReturnThis(),
-        then: (resolve: (value: { data: unknown[]; error: null }) => unknown) => resolve({ data: goals, error: null }),
+        then: (resolve: (value: { data: unknown[]; error: null }) => unknown) =>
+          resolve({ data: goals, error: null }),
       };
       mockSupabase.select.mockReturnValue(queryThenable);
       mockSupabase.eq.mockReturnValue(queryThenable);

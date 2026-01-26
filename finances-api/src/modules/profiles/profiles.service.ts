@@ -57,21 +57,20 @@ export class ProfilesService {
     }
 
     // 2. Validar senha atual
-    const { error: signInError } =
-      await this.supabase.auth.signInWithPassword({
-        email: profile.email,
-        password: currentPassword,
-      });
+    const { error: signInError } = await this.supabase.auth.signInWithPassword({
+      email: profile.email,
+      password: currentPassword,
+    });
 
     if (signInError) {
       throw new UnauthorizedException('Senha atual incorreta');
     }
 
     // 3. Atualizar senha via Admin API
-    const { error: updateError } = await this.supabase.auth.admin.updateUserById(
-      userId,
-      { password: newPassword },
-    );
+    const { error: updateError } =
+      await this.supabase.auth.admin.updateUserById(userId, {
+        password: newPassword,
+      });
 
     if (updateError) {
       throw new InternalServerErrorException('Erro ao atualizar senha');

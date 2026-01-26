@@ -46,10 +46,7 @@ export class GoalsService {
   }
 
   async findAll(userId: string, filters?: FilterGoalDto): Promise<Goal[]> {
-    let query = this.supabase
-      .from('goals')
-      .select('*')
-      .eq('user_id', userId);
+    let query = this.supabase.from('goals').select('*').eq('user_id', userId);
 
     if (filters?.status) query = query.eq('status', filters.status);
     if (filters?.target_date_start)

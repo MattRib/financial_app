@@ -153,7 +153,12 @@ describe('BudgetsService', () => {
           data: [{ amount: 300 }],
           error: null,
         }),
-        then: function (resolve: (value: { data: { amount: number }[]; error: null }) => unknown) {
+        then: function (
+          resolve: (value: {
+            data: { amount: number }[];
+            error: null;
+          }) => unknown,
+        ) {
           return resolve({ data: [{ amount: 300 }], error: null });
         },
       };
@@ -278,7 +283,12 @@ describe('BudgetsService', () => {
         eq: jest
           .fn()
           .mockResolvedValue({ data: [{ amount: 300 }], error: null }),
-        then: function (resolve: (value: { data: { amount: number }[]; error: null }) => unknown) {
+        then: function (
+          resolve: (value: {
+            data: { amount: number }[];
+            error: null;
+          }) => unknown,
+        ) {
           return resolve({ data: [{ amount: 300 }], error: null });
         },
       };
@@ -286,7 +296,12 @@ describe('BudgetsService', () => {
         eq: jest
           .fn()
           .mockResolvedValue({ data: [{ amount: 200 }], error: null }),
-        then: function (resolve: (value: { data: { amount: number }[]; error: null }) => unknown) {
+        then: function (
+          resolve: (value: {
+            data: { amount: number }[];
+            error: null;
+          }) => unknown,
+        ) {
           return resolve({ data: [{ amount: 200 }], error: null });
         },
       };
@@ -336,7 +351,12 @@ describe('BudgetsService', () => {
         eq: jest
           .fn()
           .mockResolvedValue({ data: [{ amount: 90 }], error: null }),
-        then: function (resolve: (value: { data: { amount: number }[]; error: null }) => unknown) {
+        then: function (
+          resolve: (value: {
+            data: { amount: number }[];
+            error: null;
+          }) => unknown,
+        ) {
           return resolve({ data: [{ amount: 90 }], error: null });
         },
       };
@@ -344,7 +364,12 @@ describe('BudgetsService', () => {
         eq: jest
           .fn()
           .mockResolvedValue({ data: [{ amount: 100 }], error: null }),
-        then: function (resolve: (value: { data: { amount: number }[]; error: null }) => unknown) {
+        then: function (
+          resolve: (value: {
+            data: { amount: number }[];
+            error: null;
+          }) => unknown,
+        ) {
           return resolve({ data: [{ amount: 100 }], error: null });
         },
       };
@@ -373,7 +398,12 @@ describe('BudgetsService', () => {
         eq: jest
           .fn()
           .mockResolvedValue({ data: [{ amount: 100 }], error: null }),
-        then: function (resolve: (value: { data: { amount: number }[]; error: null }) => unknown) {
+        then: function (
+          resolve: (value: {
+            data: { amount: number }[];
+            error: null;
+          }) => unknown,
+        ) {
           return resolve({ data: [{ amount: 100 }], error: null });
         },
       };

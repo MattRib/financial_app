@@ -275,7 +275,8 @@ describe('DebtsService', () => {
       const queryThenable = {
         gte: jest.fn().mockReturnThis(),
         lte: jest.fn().mockReturnThis(),
-        then: (resolve: (value: { data: unknown[]; error: null }) => unknown) => resolve({ data: debts, error: null }),
+        then: (resolve: (value: { data: unknown[]; error: null }) => unknown) =>
+          resolve({ data: debts, error: null }),
       };
       mockSupabase.eq.mockReturnValue(queryThenable);
 
@@ -294,7 +295,8 @@ describe('DebtsService', () => {
       const queryThenable = {
         gte: jest.fn().mockReturnThis(),
         lte: jest.fn().mockReturnThis(),
-        then: (resolve: (value: { data: unknown[]; error: null }) => unknown) => resolve({ data: [], error: null }),
+        then: (resolve: (value: { data: unknown[]; error: null }) => unknown) =>
+          resolve({ data: [], error: null }),
       };
       mockSupabase.eq.mockReturnValue(queryThenable);
 
@@ -318,7 +320,8 @@ describe('DebtsService', () => {
           data: overdueDebts,
           error: null,
         }),
-        then: (resolve: (value: { data: unknown[]; error: null }) => unknown) => resolve({ data: overdueDebts, error: null }),
+        then: (resolve: (value: { data: unknown[]; error: null }) => unknown) =>
+          resolve({ data: overdueDebts, error: null }),
       };
       mockSupabase.eq.mockReturnValue(queryThenable);
 

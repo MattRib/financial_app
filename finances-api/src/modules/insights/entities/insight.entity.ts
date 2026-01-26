@@ -1,7 +1,12 @@
 export interface InsightReport {
   summary: {
     spending_pattern: string;
-    financial_health: 'excellent' | 'good' | 'moderate' | 'warning' | 'critical';
+    financial_health:
+      | 'excellent'
+      | 'good'
+      | 'moderate'
+      | 'warning'
+      | 'critical';
     balance_trend: 'positive' | 'neutral' | 'negative';
   };
   insights: Array<{

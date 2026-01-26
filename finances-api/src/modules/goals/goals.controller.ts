@@ -46,10 +46,26 @@ export class GoalsController {
   @ApiOperation({ summary: 'Listar todas as metas do usuário' })
   @ApiResponse({ status: 200, description: 'Lista de metas' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
-  @ApiQuery({ name: 'status', required: false, enum: ['active', 'completed', 'cancelled'] })
-  @ApiQuery({ name: 'target_date_start', required: false, description: 'Data inicial (YYYY-MM-DD)' })
-  @ApiQuery({ name: 'target_date_end', required: false, description: 'Data final (YYYY-MM-DD)' })
-  @ApiQuery({ name: 'category', required: false, description: 'Categoria da meta' })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['active', 'completed', 'cancelled'],
+  })
+  @ApiQuery({
+    name: 'target_date_start',
+    required: false,
+    description: 'Data inicial (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'target_date_end',
+    required: false,
+    description: 'Data final (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'category',
+    required: false,
+    description: 'Categoria da meta',
+  })
   findAll(@CurrentUser() user: User, @Query() filters: FilterGoalDto) {
     return this.goalsService.findAll(user.id, filters);
   }
@@ -66,7 +82,9 @@ export class GoalsController {
   }
 
   @Get('at-risk')
-  @ApiOperation({ summary: 'Listar metas em risco (prazo < 30 dias e progresso < 50%)' })
+  @ApiOperation({
+    summary: 'Listar metas em risco (prazo < 30 dias e progresso < 50%)',
+  })
   @ApiResponse({ status: 200, description: 'Lista de metas em risco' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   getAtRisk(@CurrentUser() user: User) {
@@ -74,8 +92,13 @@ export class GoalsController {
   }
 
   @Get('near-completion')
-  @ApiOperation({ summary: 'Listar metas próximas de conclusão (progresso >= 80%)' })
-  @ApiResponse({ status: 200, description: 'Lista de metas próximas de conclusão' })
+  @ApiOperation({
+    summary: 'Listar metas próximas de conclusão (progresso >= 80%)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de metas próximas de conclusão',
+  })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   getNearCompletion(@CurrentUser() user: User) {
     return this.goalsService.getNearCompletion(user.id);

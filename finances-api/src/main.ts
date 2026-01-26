@@ -48,10 +48,22 @@ async function bootstrap() {
 
   // Redirect root to docs (useful when `api` global prefix is set)
   try {
-    const serverAny = app.getHttpAdapter().getInstance() as { get?: (path: string, handler: (req: unknown, res: { redirect: (url: string) => void }) => void) => void };
+    const serverAny = app.getHttpAdapter().getInstance() as {
+      get?: (
+        path: string,
+        handler: (
+          req: unknown,
+          res: { redirect: (url: string) => void },
+        ) => void,
+      ) => void;
+    };
     // Express adapter
     if (serverAny && typeof serverAny.get === 'function') {
-      serverAny.get('/', (_req: unknown, res: { redirect: (url: string) => void }) => res.redirect('/docs'));
+      serverAny.get(
+        '/',
+        (_req: unknown, res: { redirect: (url: string) => void }) =>
+          res.redirect('/docs'),
+      );
     }
   } catch (err) {
     // ignore adapters where `getInstance()` is not available
