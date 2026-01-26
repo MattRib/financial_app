@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, TrendingUp, TrendingDown, Calendar, Tag } from 'lucide-react'
-import type { Transaction, TransactionType, Category } from '../../types'
+import type { Transaction, TransactionType, Category, Account } from '../../types'
 
 interface TransactionModalProps {
   isOpen: boolean
   transaction: Transaction | null
   categories: Category[]
+  accounts?: Account[]
   loading?: boolean
   onClose: () => void
   onSubmit: (data: {
@@ -16,6 +17,8 @@ interface TransactionModalProps {
     amount: number
     description?: string
     tags?: string[]
+    total_installments?: number
+    account_id: string
   }) => Promise<void>
 }
 
@@ -60,6 +63,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   isOpen,
   transaction,
   categories,
+  accounts,
   loading = false,
   onClose,
   onSubmit,
@@ -68,6 +72,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     const [formDate, setFormDate] = useState<string>(() => new Date().toISOString().split('T')[0])
     const [formType, setFormType] = useState<TransactionType>('expense')
     const [formCategoryId, setFormCategoryId] = useState<string>('')
+    const [formAccountId, setFormAccountId] = useState<string>('')
     const [formAmount, setFormAmount] = useState<string>('')
     const [formDescription, setFormDescription] = useState<string>('')
     const [formTags, setFormTags] = useState<string[]>([])
@@ -102,6 +107,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           setFormDate(transaction.date)
           setFormType(transaction.type)
           setFormCategoryId(transaction.category_id || '')
+          setFormAccountId(transaction.account_id || '')
           setFormAmount(formatCurrency(transaction.amount))
           setFormDescription(transaction.description || '')
           setFormTags(transaction.tags || [])
@@ -109,6 +115,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           setFormDate(new Date().toISOString().split('T')[0])
           setFormType('expense')
           setFormCategoryId('')
+          setFormAccountId('')
           setFormAmount('')
           setFormDescription('')
           setFormTags([])
@@ -176,6 +183,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       errors.date = 'Data é obrigatória'
     }
 
+    if (!formAccountId) {
+      errors.account_id = 'Conta é obrigatória'
+    }
+
     const amountValue = parseCurrency(formAmount)
     if (!formAmount || amountValue <= 0) {
       errors.amount = 'Valor deve ser maior que zero'
@@ -201,16 +212,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         description: formDescription.trim() || undefined,
         tags: formTags.length ? formTags : undefined,
         total_installments: formInstallments || undefined,
-      } as any)
+        account_id: formAccountId,
+      })
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Erro ao salvar transação')
     }
   }
 
-  // Get type config for preview
-  const getTypeConfig = (type: TransactionType) => {
-    return TRANSACTION_TYPES.find((t) => t.id === type) || TRANSACTION_TYPES[1]
-  }
 
   return (
     <AnimatePresence>
@@ -236,7 +244,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               relative bg-white dark:bg-slate-900
               border border-slate-200 dark:border-slate-800
               rounded-2xl shadow-2xl
-              w-full max-w-md
+              w-full max-w-3xl
               max-h-[90vh] flex flex-col
             "
           >
@@ -256,11 +264,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               </div>
 
               {/* Form Content */}
-              <div className="px-5 py-3 space-y-3 overflow-y-auto flex-1">
-                {/* Date & Type Row */}
-                <div className="grid grid-cols-3 gap-3">
-                  {/* Date - Takes 1 column */}
-                  <div className="col-span-1">
+              <div className="px-6 py-4 space-y-4 overflow-y-auto flex-1">
+                {/* Date, Type & Amount Row */}
+                <div className="grid grid-cols-12 gap-4">
+                  {/* Date - 3 columns */}
+                  <div className="col-span-3">
                     <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">
                       <Calendar size={14} />
                       Data
@@ -273,7 +281,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         if (formErrors.date) setFormErrors((prev) => ({ ...prev, date: '' }))
                       }}
                       className={`
-                        w-full px-3 py-2.5 rounded-xl
+                        w-full px-3 py-3 rounded-xl
                         bg-slate-50 dark:bg-slate-800
                         border ${formErrors.date ? 'border-red-600' : 'border-slate-200 dark:border-slate-700'}
                         text-slate-900 dark:text-slate-100 text-sm
@@ -286,8 +294,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     )}
                   </div>
 
-                  {/* Type Toggle - Takes 2 columns for prominence */}
-                  <div className="col-span-2">
+                  {/* Type Toggle - 4 columns */}
+                  <div className="col-span-4">
                     <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2 block">
                       Tipo
                     </label>
@@ -306,7 +314,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             className={`
-                              flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all
+                              flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-all
                               flex items-center justify-center gap-2
                               border-2 cursor-pointer
                               ${isSelected
@@ -315,53 +323,53 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                               }
                             `}
                           >
-                            <Icon size={16} />
+                            <Icon size={18} />
                             {type.label}
                           </motion.button>
                         )
                       })}
                     </div>
                   </div>
-                </div>
 
-                {/* Amount */}
-                <div>
-                  <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">
-                    Valor
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      placeholder="R$ 0,00"
-                      value={formAmount}
-                      onChange={handleAmountChange}
-                      className={`
-                        w-full px-4 py-2.5 rounded-xl
-                        bg-slate-50 dark:bg-slate-800
-                        border-2 ${formErrors.amount ? 'border-red-600' : 'border-slate-200 dark:border-slate-700'}
-                        text-slate-900 dark:text-slate-100 text-2xl font-bold tracking-tight
-                        focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-slate-400 dark:focus:ring-slate-500 focus:border-transparent
-                        transition-all cursor-text
-                        placeholder:text-slate-300 dark:placeholder:text-slate-600
-                      `}
-                    />
+                  {/* Amount - 5 columns */}
+                  <div className="col-span-5">
+                    <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2 block">
+                      Valor
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="R$ 0,00"
+                        value={formAmount}
+                        onChange={handleAmountChange}
+                        className={`
+                          w-full px-4 py-3 rounded-xl
+                          bg-slate-50 dark:bg-slate-800
+                          border-2 ${formErrors.amount ? 'border-red-600' : 'border-slate-200 dark:border-slate-700'}
+                          text-slate-900 dark:text-slate-100 text-2xl font-bold tracking-tight
+                          focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-slate-400 dark:focus:ring-slate-500 focus:border-transparent
+                          transition-all cursor-text
+                          placeholder:text-slate-300 dark:placeholder:text-slate-600
+                        `}
+                      />
+                    </div>
+                    {formErrors.amount && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-xs text-red-600 mt-1.5 flex items-center gap-1"
+                      >
+                        <span>⚠️</span>
+                        {formErrors.amount}
+                      </motion.p>
+                    )}
                   </div>
-                  {formErrors.amount && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-xs text-red-600 mt-1.5 flex items-center gap-1"
-                    >
-                      <span>⚠️</span>
-                      {formErrors.amount}
-                    </motion.p>
-                  )}
                 </div>
 
                 {/* Category */}
                 <div>
-                  <label className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
+                  <label className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">
                     <span className="flex items-center gap-1.5">
                       <Tag size={14} />
                       Categoria
@@ -371,7 +379,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     </span>
                   </label>
                   {filteredCategories.length > 0 ? (
-                    <div className="grid grid-cols-4 gap-1.5">
+                    <div className="grid grid-cols-8 gap-2">
                       {/* "None" option */}
                       <motion.button
                         type="button"
@@ -379,15 +387,15 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className={`
-                          px-1.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer
-                          flex flex-col items-center justify-center gap-0.5
+                          px-2 py-3 rounded-xl text-xs font-medium transition-all cursor-pointer
+                          flex flex-col items-center justify-center gap-1
                           ${!formCategoryId
                             ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 ring-2 ring-slate-900 dark:ring-slate-100'
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                           }
                         `}
                       >
-                        <span className="text-base">📋</span>
+                        <span className="text-xl">📋</span>
                         <span className="text-[10px] leading-tight">Nenhuma</span>
                       </motion.button>
                       {filteredCategories.map((cat) => (
@@ -398,8 +406,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.98 }}
                           className={`
-                            px-1.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer
-                            flex flex-col items-center justify-center gap-0.5
+                            px-2 py-3 rounded-xl text-xs font-medium transition-all cursor-pointer
+                            flex flex-col items-center justify-center gap-1
                             ${formCategoryId === cat.id
                               ? 'ring-2 ring-slate-900 dark:ring-slate-100'
                               : ''
@@ -410,7 +418,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                             color: cat.color,
                           }}
                         >
-                          <span className="text-base">{cat.icon}</span>
+                          <span className="text-xl">{cat.icon}</span>
                           <span className="truncate text-[10px] leading-tight max-w-full">{cat.name}</span>
                         </motion.button>
                       ))}
@@ -424,9 +432,44 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   )}
                 </div>
 
+                {/* Account */}
+                <div>
+                  <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2 block">
+                    Conta <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formAccountId}
+                    onChange={(e) => {
+                      setFormAccountId(e.target.value)
+                      if (formErrors.account_id) {
+                        setFormErrors((prev) => ({ ...prev, account_id: '' }))
+                      }
+                    }}
+                    className={`
+                      w-full px-3 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border
+                      ${
+                        formErrors.account_id
+                          ? 'border-red-500 dark:border-red-500'
+                          : 'border-slate-200 dark:border-slate-700'
+                      }
+                      text-sm text-slate-900 dark:text-slate-100
+                      focus:outline-none focus:ring-2 focus:ring-slate-400 dark:focus:ring-slate-500
+                      transition-colors cursor-pointer
+                    `}
+                  >
+                    <option value="">Selecione uma conta</option>
+                    {accounts?.map((acc) => (
+                      <option key={acc.id} value={acc.id}>{acc.name}</option>
+                    ))}
+                  </select>
+                  {formErrors.account_id && (
+                    <p className="mt-1 text-xs text-red-500">{formErrors.account_id}</p>
+                  )}
+                </div>
+
                 {/* Description */}
                 <div>
-                  <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">
+                  <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2 block">
                     Descrição <span className="text-slate-400">(opcional)</span>
                   </label>
                   <input
@@ -440,7 +483,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     }}
                     maxLength={100}
                     className="
-                      w-full px-3 py-2 rounded-xl
+                      w-full px-4 py-3 rounded-xl
                       bg-slate-50 dark:bg-slate-800
                       border border-slate-200 dark:border-slate-700
                       text-slate-900 dark:text-slate-100 text-sm
@@ -454,7 +497,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 {/* Installments - Only for expenses */}
                 {formType === 'expense' && (
                   <div>
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-3">
                       <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
                         Parcelar compra?
                       </label>
@@ -465,10 +508,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                           if (showInstallments) setFormInstallments(null)
                         }}
                         className={`
-                          px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer
+                          px-4 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer
                           ${showInstallments
                             ? 'bg-slate-900 dark:bg-slate-700 text-white'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                           }
                         `}
                       >
@@ -481,66 +524,74 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="space-y-2"
+                        className="space-y-3"
                       >
-                        <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                          Número de parcelas
-                        </label>
+                        <div className="grid grid-cols-2 gap-4">
+                          {/* Grid de botões rápidos */}
+                          <div>
+                            <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2 block">
+                              Número de parcelas
+                            </label>
+                            <div className="grid grid-cols-6 gap-2">
+                              {[2, 3, 4, 6, 10, 12].map((num) => (
+                                <button
+                                  key={num}
+                                  type="button"
+                                  onClick={() => setFormInstallments(num)}
+                                  className={`
+                                    py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer
+                                    ${formInstallments === num
+                                      ? 'bg-slate-900 dark:bg-slate-700 text-white ring-2 ring-slate-900 dark:ring-slate-100'
+                                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                    }
+                                  `}
+                                >
+                                  {num}x
+                                </button>
+                              ))}
+                            </div>
+                          </div>
 
-                        {/* Grid de botões rápidos - Compacto */}
-                        <div className="grid grid-cols-6 gap-1.5">
-                          {[2, 3, 4, 6, 10, 12].map((num) => (
-                            <button
-                              key={num}
-                              type="button"
-                              onClick={() => setFormInstallments(num)}
-                              className={`
-                                py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer
-                                ${formInstallments === num
-                                  ? 'bg-slate-900 dark:bg-slate-700 text-white ring-2 ring-slate-900 dark:ring-slate-100'
-                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                          {/* Input manual */}
+                          <div>
+                            <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2 block">
+                              Ou digite personalizado
+                            </label>
+                            <input
+                              type="number"
+                              min="2"
+                              max="60"
+                              placeholder="Digite (2-60)"
+                              value={formInstallments || ''}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value)
+                                if (val >= 2 && val <= 60) {
+                                  setFormInstallments(val)
+                                } else if (e.target.value === '') {
+                                  setFormInstallments(null)
                                 }
-                              `}
-                            >
-                              {num}x
-                            </button>
-                          ))}
+                              }}
+                              className="
+                                w-full px-4 py-3 rounded-xl
+                                bg-slate-50 dark:bg-slate-800
+                                border border-slate-200 dark:border-slate-700
+                                text-slate-900 dark:text-slate-100 text-sm
+                                placeholder-slate-400 dark:placeholder-slate-500
+                                focus:outline-none focus:ring-2 focus:ring-slate-400 dark:focus:ring-slate-500
+                                transition-colors cursor-text
+                              "
+                            />
+                          </div>
                         </div>
-
-                        {/* Input manual */}
-                        <input
-                          type="number"
-                          min="2"
-                          max="60"
-                          placeholder="Ou digite (2-60)"
-                          value={formInstallments || ''}
-                          onChange={(e) => {
-                            const val = parseInt(e.target.value)
-                            if (val >= 2 && val <= 60) {
-                              setFormInstallments(val)
-                            } else if (e.target.value === '') {
-                              setFormInstallments(null)
-                            }
-                          }}
-                          className="
-                            w-full px-3 py-2 rounded-lg
-                            bg-slate-50 dark:bg-slate-800
-                            border border-slate-200 dark:border-slate-700
-                            text-slate-900 dark:text-slate-100 text-sm
-                            placeholder-slate-400 dark:placeholder-slate-500
-                            focus:outline-none focus:ring-2 focus:ring-slate-400 dark:focus:ring-slate-500
-                            transition-colors cursor-text
-                          "
-                        />
 
                         {/* Preview do parcelamento */}
                         {formInstallments && formInstallments > 1 && (
                           <motion.div
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700"
+                            className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700"
                           >
-                            <p className="text-xs text-slate-600 dark:text-slate-400">
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
                               <span className="font-bold text-slate-900 dark:text-slate-100">
                                 {formInstallments}x
                               </span>
@@ -559,11 +610,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
                 {/* Preview - Compacto */}
                 {formAmount && parseCurrency(formAmount) > 0 && (
-                  <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 border border-slate-200 dark:border-slate-700">
+                  <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         <div
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-base"
+                          className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
                           style={{
                             backgroundColor: selectedCategory ? `${selectedCategory.color}20` : 'rgb(241 245 249)',
                             color: selectedCategory?.color || 'rgb(148 163 184)',
@@ -572,16 +623,16 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                           {selectedCategory?.icon || '📋'}
                         </div>
                         <div>
-                          <p className="font-medium text-slate-900 dark:text-slate-100 text-xs leading-tight">
+                          <p className="font-medium text-slate-900 dark:text-slate-100 text-sm leading-tight">
                             {formDescription || selectedCategory?.name || 'Nova transação'}
                           </p>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                             {formDate ? new Date(formDate + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) : 'Data'}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className={`text-base font-bold tabular-nums ${formType === 'income' ? 'text-emerald-600 dark:text-emerald-500' : 'text-red-600 dark:text-red-500'}`}>
+                        <p className={`text-lg font-bold tabular-nums ${formType === 'income' ? 'text-emerald-600 dark:text-emerald-500' : 'text-red-600 dark:text-red-500'}`}>
                           {formType === 'income' ? '+' : '-'}{formAmount || 'R$ 0,00'}
                         </p>
                       </div>
@@ -598,13 +649,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2 px-5 pb-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex gap-3 px-6 pb-5 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={onClose}
                   disabled={loading}
                   className="
-                    flex-1 px-4 py-2.5 rounded-xl
+                    flex-1 px-5 py-3 rounded-xl
                     border border-slate-200 dark:border-slate-700
                     text-slate-600 dark:text-slate-400
                     hover:bg-slate-50 dark:hover:bg-slate-800
@@ -618,7 +669,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   type="submit"
                   disabled={loading}
                   className="
-                    flex-1 px-4 py-2.5 rounded-xl
+                    flex-1 px-5 py-3 rounded-xl
                     bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600
                     text-white text-sm font-medium transition-colors cursor-pointer
                     disabled:opacity-50 disabled:cursor-not-allowed

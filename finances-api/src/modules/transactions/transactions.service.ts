@@ -63,6 +63,7 @@ export class TransactionsService {
         date: dto.date,
         tags: dto.tags ?? [],
         attachment_url: dto.attachment_url ?? null,
+        account_id: dto.account_id,
       })
       .select()
       .single();
@@ -99,6 +100,7 @@ export class TransactionsService {
         date: format(installmentDate, 'yyyy-MM-dd'),
         tags: dto.tags ?? [],
         attachment_url: dto.attachment_url ?? null,
+        account_id: dto.account_id,
         installment_group_id: installmentGroupId,
         installment_number: installmentNumber,
         total_installments: totalInstallments,
@@ -130,6 +132,10 @@ export class TransactionsService {
 
     if (filters?.category_id) {
       query = query.eq('category_id', filters.category_id);
+    }
+
+    if (filters?.account_id) {
+      query = query.eq('account_id', filters.account_id);
     }
 
     if (filters?.start_date) {

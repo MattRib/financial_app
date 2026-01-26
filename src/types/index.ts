@@ -40,6 +40,14 @@ export interface Transaction {
   attachment_url: string | null
   created_at: string
 
+  // Account field
+  account_id: string
+  
+  // Transfer fields (only for transfers with transfer_id)
+  from_account_id?: string | null
+  to_account_id?: string | null
+  transfer_id?: string | null
+  
   // Installment fields
   installment_group_id?: string | null
   installment_number?: number | null
@@ -60,6 +68,7 @@ export interface CreateTransactionDto {
   date: string
   tags?: string[]
   total_installments?: number
+  account_id: string
 }
 
 export interface UpdateTransactionDto {
@@ -69,6 +78,7 @@ export interface UpdateTransactionDto {
   description?: string
   date?: string
   tags?: string[]
+  account_id?: string
 }
 
 export interface TransactionFilters {
@@ -76,6 +86,7 @@ export interface TransactionFilters {
   category_id?: string
   start_date?: string
   end_date?: string
+  account_id?: string
 }
 
 export interface TransactionSummary {

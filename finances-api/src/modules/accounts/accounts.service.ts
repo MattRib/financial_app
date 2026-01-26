@@ -185,7 +185,8 @@ export class AccountsService {
     // Create expense transaction (from account)
     const { error: error1 } = await this.supabase.from('transactions').insert({
       user_id: userId,
-      account_id: dto.from_account_id,
+      from_account_id: dto.from_account_id,
+      to_account_id: dto.to_account_id,
       amount: dto.amount,
       type: 'expense',
       description: description,
@@ -198,7 +199,8 @@ export class AccountsService {
     // Create income transaction (to account)
     const { error: error2 } = await this.supabase.from('transactions').insert({
       user_id: userId,
-      account_id: dto.to_account_id,
+      from_account_id: dto.from_account_id,
+      to_account_id: dto.to_account_id,
       amount: dto.amount,
       type: 'income',
       description: description,

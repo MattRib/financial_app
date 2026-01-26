@@ -12,6 +12,11 @@ export class Transaction {
   attachment_url: string | null;
   created_at: Date;
 
+  // Account / transfer fields
+  from_account_id?: string | null;
+  to_account_id?: string | null;
+  transfer_id?: string | null;
+
   // Installment fields
   installment_group_id?: string | null;
   installment_number?: number | null;

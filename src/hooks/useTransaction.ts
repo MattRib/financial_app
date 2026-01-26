@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useTransactionsStore } from '../store/transactionsStore'
+import { useAccountsStore } from '../store/accountsStore'
 import { useCategoriesStore } from '../store/categoriesStore'
 import { useToast } from '../store/toastStore'
 import type { Transaction, TransactionType } from '../types'
@@ -34,6 +35,8 @@ export function useTransaction(options: UseTransactionOptions = {}) {
     deleteTransaction,
   } = useTransactionsStore()
 
+  const { accounts, fetch: fetchAccounts } = useAccountsStore()
+
   const { categories, fetchCategories } = useCategoriesStore()
   const toast = useToast()
 
@@ -61,7 +64,7 @@ export function useTransaction(options: UseTransactionOptions = {}) {
   useEffect(() => {
     fetchTransactions()
     fetchCategories()
-
+    fetchAccounts()
     // Fetch summary for current month
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
@@ -226,6 +229,7 @@ export function useTransaction(options: UseTransactionOptions = {}) {
     amount: number
     description?: string
     tags?: string[]
+    account_id: string
   }) => {
     if (editingTransaction) {
       await updateTransaction(editingTransaction.id, data)
@@ -261,6 +265,7 @@ export function useTransaction(options: UseTransactionOptions = {}) {
     allTransactions: filteredTransactions,
     summary,
     categories,
+    accounts,
     transactionCounts,
     transactionToDelete,
 

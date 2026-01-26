@@ -27,6 +27,8 @@ describe('CategoriesService', () => {
       update: jest.fn().mockReturnThis(),
       delete: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
+      ilike: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
       order: jest.fn().mockReturnThis(),
       single: jest.fn(),
     };
@@ -200,8 +202,9 @@ describe('CategoriesService', () => {
       mockSupabase.eq
         .mockReturnValueOnce(mockSupabase)
         .mockReturnValueOnce(mockSupabase)
-        .mockReturnValueOnce(mockSupabase)
-        .mockResolvedValueOnce({ error: null });
+        .mockReturnValueOnce(mockSupabase);
+
+      mockSupabase.limit.mockResolvedValueOnce({ error: null });
 
       await service.remove(mockUserId, 'cat-123');
 

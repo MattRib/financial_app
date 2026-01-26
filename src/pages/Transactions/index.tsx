@@ -66,6 +66,8 @@ const TransactionsPage: React.FC = () => {
 
     // Refs
     loadMoreRef,
+    // Accounts
+    accounts,
 
     // Handlers
     setSelectedTab,
@@ -266,6 +268,7 @@ const TransactionsPage: React.FC = () => {
         transaction={editingTransaction}
         categories={categories}
         loading={loading}
+        accounts={accounts}
         onClose={handleCloseModal}
         onSubmit={handleSubmitTransaction}
       />

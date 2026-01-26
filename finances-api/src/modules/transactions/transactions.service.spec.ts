@@ -62,6 +62,7 @@ describe('TransactionsService', () => {
         description: 'Almoço',
         date: '2024-01-15',
         tags: ['alimentação'],
+        account_id: 'acc-123',
       };
 
       mockSupabase.single.mockResolvedValue({
@@ -81,6 +82,7 @@ describe('TransactionsService', () => {
         date: dto.date,
         tags: dto.tags,
         attachment_url: null,
+        account_id: dto.account_id,
       });
       expect(result).toEqual(mockTransaction);
     });
@@ -90,6 +92,7 @@ describe('TransactionsService', () => {
         amount: 100,
         type: 'income',
         date: '2024-01-15',
+        account_id: 'acc-456',
       };
 
       mockSupabase.single.mockResolvedValue({
@@ -108,6 +111,7 @@ describe('TransactionsService', () => {
         date: dto.date,
         tags: [],
         attachment_url: null,
+        account_id: dto.account_id,
       });
     });
 
@@ -116,6 +120,7 @@ describe('TransactionsService', () => {
         amount: 100,
         type: 'expense',
         date: '2024-01-15',
+        account_id: 'acc-789',
       };
 
       const error = new Error('Database error');

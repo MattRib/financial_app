@@ -11,6 +11,10 @@ export class FilterTransactionDto {
   category_id?: string;
 
   @IsOptional()
+  @IsUUID()
+  account_id?: string;
+
+  @IsOptional()
   @IsDateString()
   start_date?: string;
 

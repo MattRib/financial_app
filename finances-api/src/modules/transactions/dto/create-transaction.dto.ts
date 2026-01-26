@@ -37,6 +37,9 @@ export class CreateTransactionDto {
   @IsString({ each: true })
   tags?: string[];
 
+  @IsUUID()
+  account_id: string;
+
   @IsOptional()
   @IsString()
   attachment_url?: string;

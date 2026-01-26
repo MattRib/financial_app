@@ -30,6 +30,7 @@ describe('DebtsService', () => {
       update: jest.fn().mockReturnThis(),
       delete: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
+      lt: jest.fn().mockReturnThis(),
       gte: jest.fn().mockReturnThis(),
       lte: jest.fn().mockReturnThis(),
       order: jest.fn().mockReturnThis(),
@@ -273,8 +274,10 @@ describe('DebtsService', () => {
       ];
 
       const queryThenable = {
+        eq: jest.fn().mockReturnThis(),
         gte: jest.fn().mockReturnThis(),
         lte: jest.fn().mockReturnThis(),
+        lt: jest.fn().mockReturnThis(),
         then: (resolve: (value: { data: unknown[]; error: null }) => unknown) =>
           resolve({ data: debts, error: null }),
       };
@@ -293,8 +296,10 @@ describe('DebtsService', () => {
 
     it('should handle empty debts', async () => {
       const queryThenable = {
+        eq: jest.fn().mockReturnThis(),
         gte: jest.fn().mockReturnThis(),
         lte: jest.fn().mockReturnThis(),
+        lt: jest.fn().mockReturnThis(),
         then: (resolve: (value: { data: unknown[]; error: null }) => unknown) =>
           resolve({ data: [], error: null }),
       };
