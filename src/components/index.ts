@@ -7,6 +7,9 @@ export * from './categories'
 // Transactions
 export * from './transactions'
 
+// Accounts
+export * from './accounts'
+
 // Charts
 export * from './charts'
 

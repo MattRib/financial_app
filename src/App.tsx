@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard'
 import Transactions from './pages/Transactions'
 import Categories from './pages/categories'
 import Budgets from './pages/Budgets'
+import Accounts from './pages/Accounts'
 import Investments from './pages/Investments'
 import Goals from './pages/Goals'
 import Debts from './pages/Debts'
@@ -36,6 +37,14 @@ function App() {
           element={
             <PrivateRoute>
               <Transactions />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/accounts"
+          element={
+            <PrivateRoute>
+              <Accounts />
             </PrivateRoute>
           }
         />

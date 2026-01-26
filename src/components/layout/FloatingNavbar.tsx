@@ -6,6 +6,7 @@ import {
   ArrowLeftRight,
   Tags,
   Wallet,
+  Building2,
   TrendingUp,
   Target,
   CreditCard,
@@ -18,6 +19,7 @@ import { useAuthStore } from '../../store/authStore'
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Transacoes', href: '/transactions', icon: ArrowLeftRight },
+  { name: 'Contas', href: '/accounts', icon: Building2 },
   { name: 'Categorias', href: '/categories', icon: Tags },
   { name: 'Orcamentos', href: '/budgets', icon: Wallet },
   { name: 'Investimentos', href: '/investments', icon: TrendingUp },

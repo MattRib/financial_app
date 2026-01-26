@@ -390,3 +390,90 @@ export interface FilterInsightDto {
   month?: number
   year?: number
 }
+
+// Account
+export type AccountType =
+  | 'checking'
+  | 'savings'
+  | 'credit_card'
+  | 'cash'
+  | 'investment'
+  | 'other'
+
+export const AccountTypeLabels: Record<AccountType, string> = {
+  checking: 'Conta Corrente',
+  savings: 'Poupança',
+  credit_card: 'Cartão de Crédito',
+  cash: 'Dinheiro',
+  investment: 'Investimento',
+  other: 'Outro',
+}
+
+export const AccountTypeIcons: Record<AccountType, string> = {
+  checking: '🏦',
+  savings: '🐷',
+  credit_card: '💳',
+  cash: '💵',
+  investment: '📈',
+  other: '📁',
+}
+
+export interface Account {
+  id: string
+  user_id: string
+  name: string
+  type: AccountType
+  initial_balance: number
+  current_balance: number
+  color: string
+  icon: string
+  is_active: boolean
+  include_in_total: boolean
+  notes?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface AccountSummary {
+  total_balance: number
+  total_accounts: number
+  by_type: Array<{
+    type: AccountType
+    count: number
+    total_balance: number
+  }>
+}
+
+export interface CreateAccountDto {
+  name: string
+  type: AccountType
+  initial_balance?: number
+  color?: string
+  icon?: string
+  include_in_total?: boolean
+  notes?: string
+}
+
+export interface UpdateAccountDto {
+  name?: string
+  type?: AccountType
+  initial_balance?: number
+  color?: string
+  icon?: string
+  is_active?: boolean
+  include_in_total?: boolean
+  notes?: string
+}
+
+export interface FilterAccountDto {
+  type?: AccountType
+  is_active?: boolean
+}
+
+export interface CreateTransferDto {
+  from_account_id: string
+  to_account_id: string
+  amount: number
+  description?: string
+  date: string
+}

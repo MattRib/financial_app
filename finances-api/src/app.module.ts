@@ -11,6 +11,7 @@ import { GoalsModule } from './modules/goals/goals.module';
 import { DebtsModule } from './modules/debts/debts.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
 import { InsightsModule } from './modules/insights/insights.module';
+import { AccountsModule } from './modules/accounts/accounts.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -27,6 +28,7 @@ import { AppService } from './app.service';
     GoalsModule,
     DebtsModule,
     InsightsModule,
+    AccountsModule,
     // Profiles module for user profiles synced with Supabase Auth
     ProfilesModule,
   ],
