@@ -20,7 +20,9 @@
       "Bash(npm run dev:*)",
       "Bash(git log:*)",
       "Bash(npx supabase db push:*)",
-      "Bash(npm run start:dev:*)"
+      "Bash(npm run start:dev:*)",
+      "Bash(tree:*)",
+      "Bash(xargs:*)"
     ]
   }
 }

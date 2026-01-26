@@ -7,6 +7,7 @@ import Budgets from './pages/Budgets'
 import Investments from './pages/Investments'
 import Goals from './pages/Goals'
 import Debts from './pages/Debts'
+import Insights from './pages/Insights'
 import Settings from './pages/settings'
 import NotFound from './pages/404/notFound'
 import PrivateRoute from './components/layout/PrivateRoute'
@@ -75,6 +76,14 @@ function App() {
           element={
             <PrivateRoute>
               <Debts />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/insights"
+          element={
+            <PrivateRoute>
+              <Insights />
             </PrivateRoute>
           }
         />
