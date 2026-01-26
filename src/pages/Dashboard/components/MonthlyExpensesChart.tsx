@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { ChevronLeft, ChevronRight, TrendingDown } from 'lucide-react'
 import { transactionsService } from '../../../services/transactions'
 import { AnimatedCard } from '../../../components/ui/AnimatedCard'
 import { SectionHeader } from '../../../components/ui/SectionHeader'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const MONTH_LABELS = [
   'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
@@ -16,6 +16,18 @@ export const MonthlyExpensesChart: React.FC = () => {
   const [year, setYear] = useState(currentYear)
   const [data, setData] = useState<{ month: string; total: number }[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [theme, setTheme] = useState<'light' | 'dark'>(() =>
+    typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+  )
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const observer = new MutationObserver(() => {
+      setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light')
+    })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,10 +64,11 @@ export const MonthlyExpensesChart: React.FC = () => {
       <div className="space-y-4">
         {/* Header com filtro de ano */}
         <div className="flex items-center justify-between">
-          <SectionHeader
-            title="Gastos do Ano"
-            icon={<TrendingDown size={20} />}
-          />
+          <div className="flex items-center gap-3">
+            <SectionHeader
+              title="Gastos do Ano"
+            />
+          </div>
 
           <div className="flex items-center gap-2">
             <motion.button
@@ -145,9 +158,9 @@ export const MonthlyExpensesChart: React.FC = () => {
                 <Line
                   type="monotone"
                   dataKey="total"
-                  stroke="#3b82f6"
+                  stroke={theme === 'light' ? '#0f172a' : '#3b82f6'}
                   strokeWidth={2}
-                  dot={{ fill: '#3b82f6', r: 4 }}
+                  dot={{ fill: theme === 'light' ? '#0f172a' : '#3b82f6', r: 4 }}
                   activeDot={{ r: 6 }}
                   name="Gastos"
                 />

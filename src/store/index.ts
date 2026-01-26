@@ -6,6 +6,7 @@ export { useAccountsStore } from './accountsStore'
 export { useInvestmentsStore } from './investmentsStore'
 export { useGoalsStore } from './goalsStore'
 export { useDebtsStore } from './debtsStore'
+export { useThemeStore } from './themeStore'
 
 export type { InvestmentsState, InvestmentSummary, FilterInvestmentDto } from './investmentsStore'
 export type { AccountsState } from './accountsStore'
