@@ -9,6 +9,7 @@ import {
   TrendingUp,
   Target,
   CreditCard,
+  Sparkles,
   Settings,
   LogOut,
 } from 'lucide-react'
@@ -22,6 +23,7 @@ const navigation = [
   { name: 'Investimentos', href: '/investments', icon: TrendingUp },
   { name: 'Metas', href: '/goals', icon: Target },
   { name: 'Dividas', href: '/debts', icon: CreditCard },
+  { name: 'Insights', href: '/insights', icon: Sparkles },
   { name: 'Configuracoes', href: '/settings', icon: Settings },
 ]
 
