@@ -237,11 +237,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               border border-slate-200 dark:border-slate-800
               rounded-2xl shadow-2xl
               w-full max-w-md
+              max-h-[90vh] flex flex-col
             "
           >
             <form onSubmit={handleSubmit}>
               {/* Header */}
-              <div className="p-5 pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                   {transaction ? 'Editar Transação' : 'Nova Transação'}
                 </h3>
@@ -255,7 +256,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               </div>
 
               {/* Form Content */}
-              <div className="px-5 py-4 space-y-4">
+              <div className="px-5 py-3 space-y-3 overflow-y-auto flex-1">
                 {/* Date & Type Row */}
                 <div className="grid grid-cols-3 gap-3">
                   {/* Date - Takes 1 column */}
@@ -325,8 +326,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
                 {/* Amount */}
                 <div>
-                  <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-                    <span className="text-base">💰</span>
+                  <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">
                     Valor
                   </label>
                   <div className="relative">
@@ -337,10 +337,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       value={formAmount}
                       onChange={handleAmountChange}
                       className={`
-                        w-full px-4 py-3.5 rounded-xl
+                        w-full px-4 py-2.5 rounded-xl
                         bg-slate-50 dark:bg-slate-800
                         border-2 ${formErrors.amount ? 'border-red-600' : 'border-slate-200 dark:border-slate-700'}
-                        text-slate-900 dark:text-slate-100 text-3xl font-bold tracking-tight
+                        text-slate-900 dark:text-slate-100 text-2xl font-bold tracking-tight
                         focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-slate-400 dark:focus:ring-slate-500 focus:border-transparent
                         transition-all cursor-text
                         placeholder:text-slate-300 dark:placeholder:text-slate-600
@@ -371,7 +371,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     </span>
                   </label>
                   {filteredCategories.length > 0 ? (
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-4 gap-1.5">
                       {/* "None" option */}
                       <motion.button
                         type="button"
@@ -379,16 +379,16 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className={`
-                          px-2 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer
-                          flex items-center justify-center gap-1.5
+                          px-1.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer
+                          flex flex-col items-center justify-center gap-0.5
                           ${!formCategoryId
                             ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 ring-2 ring-slate-900 dark:ring-slate-100'
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                           }
                         `}
                       >
-                        <span className="text-sm">📋</span>
-                        <span className="text-xs">Nenhuma</span>
+                        <span className="text-base">📋</span>
+                        <span className="text-[10px] leading-tight">Nenhuma</span>
                       </motion.button>
                       {filteredCategories.map((cat) => (
                         <motion.button
@@ -398,8 +398,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.98 }}
                           className={`
-                            px-2 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer
-                            flex items-center justify-center gap-1.5
+                            px-1.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer
+                            flex flex-col items-center justify-center gap-0.5
                             ${formCategoryId === cat.id
                               ? 'ring-2 ring-slate-900 dark:ring-slate-100'
                               : ''
@@ -410,8 +410,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                             color: cat.color,
                           }}
                         >
-                          <span className="text-sm">{cat.icon}</span>
-                          <span className="truncate text-xs">{cat.name}</span>
+                          <span className="text-base">{cat.icon}</span>
+                          <span className="truncate text-[10px] leading-tight max-w-full">{cat.name}</span>
                         </motion.button>
                       ))}
                     </div>
@@ -427,18 +427,18 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 {/* Description */}
                 <div>
                   <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">
-                    Descrição (opcional)
+                    Descrição <span className="text-slate-400">(opcional)</span>
                   </label>
                   <input
                     type="text"
-                    placeholder="Ex: Compras no supermercado"
+                    placeholder="Adicione uma descrição..."
                     value={formDescription}
                     onChange={(e) => {
-                      if (e.target.value.length <= 255) {
+                      if (e.target.value.length <= 100) {
                         setFormDescription(e.target.value)
                       }
                     }}
-                    maxLength={255}
+                    maxLength={100}
                     className="
                       w-full px-3 py-2 rounded-xl
                       bg-slate-50 dark:bg-slate-800
@@ -477,20 +477,25 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     </div>
 
                     {showInstallments && (
-                      <div className="space-y-2">
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="space-y-2"
+                      >
                         <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
                           Número de parcelas
                         </label>
 
-                        {/* Grid de botões rápidos */}
-                        <div className="grid grid-cols-5 gap-2">
-                          {[2, 3, 4, 5, 6, 10, 12, 15, 18, 24].map((num) => (
+                        {/* Grid de botões rápidos - Compacto */}
+                        <div className="grid grid-cols-6 gap-1.5">
+                          {[2, 3, 4, 6, 10, 12].map((num) => (
                             <button
                               key={num}
                               type="button"
                               onClick={() => setFormInstallments(num)}
                               className={`
-                                py-2 rounded-lg text-sm font-medium transition-all cursor-pointer
+                                py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer
                                 ${formInstallments === num
                                   ? 'bg-slate-900 dark:bg-slate-700 text-white ring-2 ring-slate-900 dark:ring-slate-100'
                                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -530,66 +535,59 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
                         {/* Preview do parcelamento */}
                         {formInstallments && formInstallments > 1 && (
-                          <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                              {formInstallments}x de{' '}
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700"
+                          >
+                            <p className="text-xs text-slate-600 dark:text-slate-400">
+                              <span className="font-bold text-slate-900 dark:text-slate-100">
+                                {formInstallments}x
+                              </span>
+                              {' de '}
                               <span className="font-bold text-slate-900 dark:text-slate-100">
                                 {formatCurrency(parseCurrency(formAmount) / formInstallments)}
                               </span>
+                              <span className="text-slate-400 dark:text-slate-500"> • Total: {formAmount || 'R$ 0,00'}</span>
                             </p>
-                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                              Total: {formAmount || 'R$ 0,00'}
-                            </p>
-                          </div>
+                          </motion.div>
                         )}
-                      </div>
+                      </motion.div>
                     )}
                   </div>
                 )}
 
-                {/* Submit Error */}
-                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
-                  <p className="text-xs font-medium text-slate-400 dark:text-slate-500 mb-3">Preview</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
-                        style={{
-                          backgroundColor: selectedCategory ? `${selectedCategory.color}20` : 'rgb(241 245 249)',
-                          color: selectedCategory?.color || 'rgb(148 163 184)',
-                        }}
-                      >
-                        {selectedCategory?.icon || '📋'}
+                {/* Preview - Compacto */}
+                {formAmount && parseCurrency(formAmount) > 0 && (
+                  <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-base"
+                          style={{
+                            backgroundColor: selectedCategory ? `${selectedCategory.color}20` : 'rgb(241 245 249)',
+                            color: selectedCategory?.color || 'rgb(148 163 184)',
+                          }}
+                        >
+                          {selectedCategory?.icon || '📋'}
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-900 dark:text-slate-100 text-xs leading-tight">
+                            {formDescription || selectedCategory?.name || 'Nova transação'}
+                          </p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                            {formDate ? new Date(formDate + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) : 'Data'}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-slate-900 dark:text-slate-100 text-sm">
-                          {formDescription || 'Descrição da transação'}
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          {formDate ? new Date(formDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'Data'}
+                      <div className="text-right">
+                        <p className={`text-base font-bold tabular-nums ${formType === 'income' ? 'text-emerald-600 dark:text-emerald-500' : 'text-red-600 dark:text-red-500'}`}>
+                          {formType === 'income' ? '+' : '-'}{formAmount || 'R$ 0,00'}
                         </p>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <p className={`text-lg font-bold ${formType === 'income' ? 'text-emerald-600 dark:text-emerald-500' : 'text-red-600 dark:text-red-500'}`}>
-                        {formType === 'income' ? '+' : '-'} {formAmount || 'R$ 0,00'}
-                      </p>
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${getTypeConfig(formType).bgColor} ${getTypeConfig(formType).textColor}`}>
-                        {formType === 'income' ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-                        {getTypeConfig(formType).label}
-                      </span>
                     </div>
                   </div>
-                  {formTags.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {formTags.map((tag) => (
-                        <span key={tag} className="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 rounded text-xs">
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                )}
 
                 {/* Submit Error */}
                 {submitError && (
@@ -600,7 +598,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               </div>
 
               {/* Actions */}
-              <div className="flex gap-3 px-5 pb-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex gap-2 px-5 pb-4 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={onClose}
