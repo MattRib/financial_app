@@ -1,11 +1,12 @@
 import { api } from './api'
-import type { 
-  Transaction, 
-  CreateTransactionDto, 
+import type {
+  Transaction,
+  CreateTransactionDto,
   UpdateTransactionDto,
   TransactionFilters,
   TransactionSummary,
-  CategorySummary 
+  CategorySummary,
+  InstallmentGroupSummary
 } from '../types'
 
 export const transactionsService = {
@@ -30,9 +31,15 @@ export const transactionsService = {
       end_date: endDate 
     }),
 
-  getByCategory: (startDate: string, endDate: string) => 
-    api.get<CategorySummary[]>('/transactions/by-category', { 
-      start_date: startDate, 
-      end_date: endDate 
+  getByCategory: (startDate: string, endDate: string) =>
+    api.get<CategorySummary[]>('/transactions/by-category', {
+      start_date: startDate,
+      end_date: endDate
     }),
+
+  getInstallmentGroups: () =>
+    api.get<InstallmentGroupSummary[]>('/transactions/installments/groups'),
+
+  getInstallmentsByGroup: (groupId: string) =>
+    api.get<Transaction[]>(`/transactions/installments/group/${groupId}`),
 }

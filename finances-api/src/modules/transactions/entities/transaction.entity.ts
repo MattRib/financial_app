@@ -11,4 +11,9 @@ export class Transaction {
   tags: string[];
   attachment_url: string | null;
   created_at: Date;
+
+  // Installment fields
+  installment_group_id?: string | null;
+  installment_number?: number | null;
+  total_installments?: number | null;
 }

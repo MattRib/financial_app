@@ -40,7 +40,11 @@ export function useTransaction(options: UseTransactionOptions = {}) {
   // UI State
   const [showModal, setShowModal] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
-  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; show: boolean }>({ id: '', show: false })
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    transaction: Transaction | null
+    message: string
+    show: boolean
+  }>({ transaction: null, message: '', show: false })
 
   // Filter State
   const [selectedTab, setSelectedTab] = useState<TabId>('all')
@@ -182,19 +186,27 @@ export function useTransaction(options: UseTransactionOptions = {}) {
   }, [])
 
   const handleDeleteClick = useCallback((id: string) => {
-    setDeleteConfirm({ id, show: true })
-  }, [])
+    const transaction = transactions.find((t) => t.id === id)
+    if (!transaction) return
+
+    const isInstallment = transaction.installment_number && transaction.total_installments
+    const message = isInstallment
+      ? `Esta transação faz parte de um parcelamento de ${transaction.total_installments}x. Ao excluir, TODAS as ${transaction.total_installments} parcelas serão removidas. Deseja continuar?`
+      : 'Tem certeza que deseja excluir esta transação?'
+
+    setDeleteConfirm({ transaction, message, show: true })
+  }, [transactions])
 
   const handleDeleteCancel = useCallback(() => {
-    setDeleteConfirm({ id: '', show: false })
+    setDeleteConfirm({ transaction: null, message: '', show: false })
   }, [])
 
   const handleDeleteConfirm = useCallback(async () => {
-    if (deleteConfirm.id) {
+    if (deleteConfirm.transaction) {
       try {
-        await deleteTransaction(deleteConfirm.id)
+        await deleteTransaction(deleteConfirm.transaction.id)
         toast.success('Transação excluída com sucesso!')
-        setDeleteConfirm({ id: '', show: false })
+        setDeleteConfirm({ transaction: null, message: '', show: false })
 
         // Refresh summary after deletion
         const now = new Date()
@@ -205,7 +217,7 @@ export function useTransaction(options: UseTransactionOptions = {}) {
         toast.error('Erro ao excluir transação')
       }
     }
-  }, [deleteConfirm.id, deleteTransaction, fetchSummary, toast])
+  }, [deleteConfirm.transaction, deleteTransaction, fetchSummary, toast])
 
   const handleSubmitTransaction = useCallback(async (data: {
     date: string
@@ -241,9 +253,7 @@ export function useTransaction(options: UseTransactionOptions = {}) {
   }, [])
 
   // Get transaction being deleted (for confirmation modal)
-  const transactionToDelete = useMemo(() => {
-    return transactions.find((t) => t.id === deleteConfirm.id)
-  }, [transactions, deleteConfirm.id])
+  const transactionToDelete = deleteConfirm.transaction
 
   return {
     // Data

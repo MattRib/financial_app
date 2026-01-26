@@ -8,6 +8,7 @@ import {
   IsUUID,
   MaxLength,
   Min,
+  Max,
 } from 'class-validator';
 import type { TransactionType } from '../../../common/types/database.types';
 
@@ -39,4 +40,10 @@ export class CreateTransactionDto {
   @IsOptional()
   @IsString()
   attachment_url?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(2)
+  @Max(60)
+  total_installments?: number;
 }

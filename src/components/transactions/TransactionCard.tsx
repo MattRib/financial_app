@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { MoreHorizontal, Edit2, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
+import { MoreHorizontal, Edit2, Trash2, TrendingUp, TrendingDown, CreditCard } from 'lucide-react'
 import type { Transaction } from '../../types'
 
 interface TransactionCardProps {
@@ -88,6 +88,13 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
               }}
             >
               {category.name}
+            </span>
+          )}
+          {/* Installment badge */}
+          {transaction.installment_number && transaction.total_installments && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded text-xs font-medium">
+              <CreditCard size={10} />
+              {transaction.installment_number}/{transaction.total_installments}
             </span>
           )}
           {/* Date */}

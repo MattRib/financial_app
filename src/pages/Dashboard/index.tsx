@@ -7,8 +7,15 @@ import { useBudgetsStore } from '../../store/budgetsStore'
 import { investmentsService } from '../../services/investments'
 import { transactionsService } from '../../services/transactions'
 import { CategoryBarChart } from '../../components/charts/CategoryBarChart'
-import { StatCard, TransactionItem, BudgetAlert } from '../../components/dashboard'
+import {
+  StatCard,
+  TransactionItem,
+  BudgetAlert,
+  DashboardFilters,
+  InstallmentsCard,
+} from '../../components/dashboard'
 import { AnimatedCard } from '../../components/ui/AnimatedCard'
+import type { InstallmentGroupSummary } from '../../types'
 import { SectionHeader } from '../../components/ui/SectionHeader'
 import { PremiumEmptyState } from '../../components/common/PremiumEmptyState'
 import {
@@ -52,8 +59,11 @@ const Dashboard: React.FC = () => {
   const { budgets, fetchBudgets } = useBudgetsStore()
 
   // Local state
+  const [month, setMonth] = React.useState(() => new Date().getMonth() + 1)
+  const [year, setYear] = React.useState(() => new Date().getFullYear())
   const [investmentsTotal, setInvestmentsTotal] = React.useState<number | null>(null)
   const [isLoadingDashboard, setIsLoadingDashboard] = React.useState(false)
+  const [installmentGroups, setInstallmentGroups] = React.useState<InstallmentGroupSummary[]>([])
   const [errors, setErrors] = React.useState<{
     transactions?: string
     summary?: string
@@ -70,12 +80,30 @@ const Dashboard: React.FC = () => {
 
   const [categoryData, setCategoryData] = React.useState<CategoryData[]>([])
 
-  // Get current month dates
-  const currentDate = new Date()
-  const currentMonth = currentDate.getMonth() + 1
-  const currentYear = currentDate.getFullYear()
-  const startDate = new Date(currentYear, currentMonth - 1, 1).toISOString().split('T')[0]
-  const endDate = new Date(currentYear, currentMonth, 0).toISOString().split('T')[0]
+  // Calculate dates based on selected month/year
+  const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0]
+  const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+
+  // Month navigation functions
+  const goToPrevMonth = () => {
+    setMonth((current) => {
+      if (current === 1) {
+        setYear((y) => y - 1)
+        return 12
+      }
+      return current - 1
+    })
+  }
+
+  const goToNextMonth = () => {
+    setMonth((current) => {
+      if (current === 12) {
+        setYear((y) => y + 1)
+        return 1
+      }
+      return current + 1
+    })
+  }
 
   // Fetch all data in parallel on mount
   useEffect(() => {
@@ -99,13 +127,16 @@ const Dashboard: React.FC = () => {
         fetchSummary(startDate, endDate),
 
         // 3. Fetch budgets for current month
-        fetchBudgets(currentMonth, currentYear),
+        fetchBudgets(month, year),
 
         // 4. Fetch investments total
-        investmentsService.getMonthlyTotal(currentMonth, currentYear),
+        investmentsService.getMonthlyTotal(month, year),
 
         // 5. Fetch transactions by category
         transactionsService.getByCategory(startDate, endDate),
+
+        // 6. Fetch installment groups
+        transactionsService.getInstallmentGroups(),
       ])
 
       if (!mounted) return
@@ -144,6 +175,13 @@ const Dashboard: React.FC = () => {
         setCategoryData([])
       }
 
+      // Result 5: Installment Groups
+      if (results[5].status === 'fulfilled') {
+        setInstallmentGroups(results[5].value as InstallmentGroupSummary[])
+      } else {
+        setInstallmentGroups([])
+      }
+
       setErrors(newErrors)
       setIsLoadingDashboard(false)
     }
@@ -153,7 +191,7 @@ const Dashboard: React.FC = () => {
     return () => {
       mounted = false
     }
-  }, [fetchTransactions, fetchSummary, fetchBudgets, currentMonth, currentYear, startDate, endDate])
+  }, [fetchTransactions, fetchSummary, fetchBudgets, month, year, startDate, endDate])
 
   // Format currency
   const formatCurrency = (value: number) => {
@@ -213,6 +251,16 @@ const Dashboard: React.FC = () => {
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
             Visao geral das suas financas
           </p>
+        </motion.div>
+
+        {/* Period Filter */}
+        <motion.div variants={itemVariants}>
+          <DashboardFilters
+            month={month}
+            year={year}
+            onPrevMonth={goToPrevMonth}
+            onNextMonth={goToNextMonth}
+          />
         </motion.div>
 
         {/* Stats grid - horizontal cards */}
@@ -343,6 +391,22 @@ const Dashboard: React.FC = () => {
             )}
           </AnimatedCard>
         </div>
+
+        {/* Installments Card */}
+        <AnimatedCard delay={0.45}>
+          <SectionHeader
+            title="Compras parceladas"
+            action={{
+              label: 'Ver transacoes',
+              onClick: () => navigate('/transactions'),
+            }}
+          />
+          <InstallmentsCard
+            groups={installmentGroups}
+            loading={isLoadingDashboard}
+            formatCurrency={formatCurrency}
+          />
+        </AnimatedCard>
 
         {/* Budget alerts */}
         <AnimatedCard delay={0.5}>

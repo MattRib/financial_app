@@ -55,6 +55,19 @@ export class TransactionsController {
     return this.transactionsService.getByCategory(user.id, startDate, endDate);
   }
 
+  @Get('installments/groups')
+  getInstallmentGroups(@CurrentUser() user: User) {
+    return this.transactionsService.getInstallmentGroups(user.id);
+  }
+
+  @Get('installments/group/:groupId')
+  getInstallmentsByGroup(
+    @CurrentUser() user: User,
+    @Param('groupId', ParseUUIDPipe) groupId: string,
+  ) {
+    return this.transactionsService.findByInstallmentGroup(user.id, groupId);
+  }
+
   @Get(':id')
   findOne(@CurrentUser() user: User, @Param('id', ParseUUIDPipe) id: string) {
     return this.transactionsService.findOne(user.id, id);

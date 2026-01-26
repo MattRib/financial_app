@@ -74,6 +74,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     const [formErrors, setFormErrors] = useState<Record<string, string>>({})
     const [submitError, setSubmitError] = useState<string | null>(null)
 
+  // Installment state
+  const [showInstallments, setShowInstallments] = useState<boolean>(false)
+  const [formInstallments, setFormInstallments] = useState<number | null>(null)
+
   // Track previous isOpen to detect when modal opens
   const prevIsOpenRef = useRef(isOpen)
 
@@ -109,6 +113,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           setFormDescription('')
           setFormTags([])
         }
+        setShowInstallments(false)
+        setFormInstallments(null)
         setFormErrors({})
         setSubmitError(null)
       }, 0)
@@ -194,7 +200,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         amount: parseCurrency(formAmount),
         description: formDescription.trim() || undefined,
         tags: formTags.length ? formTags : undefined,
-      })
+        total_installments: formInstallments || undefined,
+      } as any)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Erro ao salvar transação')
     }
@@ -443,6 +450,102 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     "
                   />
                 </div>
+
+                {/* Installments - Only for expenses */}
+                {formType === 'expense' && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                        Parcelar compra?
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowInstallments(!showInstallments)
+                          if (showInstallments) setFormInstallments(null)
+                        }}
+                        className={`
+                          px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer
+                          ${showInstallments
+                            ? 'bg-slate-900 dark:bg-slate-700 text-white'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                          }
+                        `}
+                      >
+                        {showInstallments ? 'Sim' : 'Não'}
+                      </button>
+                    </div>
+
+                    {showInstallments && (
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                          Número de parcelas
+                        </label>
+
+                        {/* Grid de botões rápidos */}
+                        <div className="grid grid-cols-5 gap-2">
+                          {[2, 3, 4, 5, 6, 10, 12, 15, 18, 24].map((num) => (
+                            <button
+                              key={num}
+                              type="button"
+                              onClick={() => setFormInstallments(num)}
+                              className={`
+                                py-2 rounded-lg text-sm font-medium transition-all cursor-pointer
+                                ${formInstallments === num
+                                  ? 'bg-slate-900 dark:bg-slate-700 text-white ring-2 ring-slate-900 dark:ring-slate-100'
+                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                }
+                              `}
+                            >
+                              {num}x
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Input manual */}
+                        <input
+                          type="number"
+                          min="2"
+                          max="60"
+                          placeholder="Ou digite (2-60)"
+                          value={formInstallments || ''}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value)
+                            if (val >= 2 && val <= 60) {
+                              setFormInstallments(val)
+                            } else if (e.target.value === '') {
+                              setFormInstallments(null)
+                            }
+                          }}
+                          className="
+                            w-full px-3 py-2 rounded-lg
+                            bg-slate-50 dark:bg-slate-800
+                            border border-slate-200 dark:border-slate-700
+                            text-slate-900 dark:text-slate-100 text-sm
+                            placeholder-slate-400 dark:placeholder-slate-500
+                            focus:outline-none focus:ring-2 focus:ring-slate-400 dark:focus:ring-slate-500
+                            transition-colors cursor-text
+                          "
+                        />
+
+                        {/* Preview do parcelamento */}
+                        {formInstallments && formInstallments > 1 && (
+                          <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              {formInstallments}x de{' '}
+                              <span className="font-bold text-slate-900 dark:text-slate-100">
+                                {formatCurrency(parseCurrency(formAmount) / formInstallments)}
+                              </span>
+                            </p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                              Total: {formAmount || 'R$ 0,00'}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Submit Error */}
                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">

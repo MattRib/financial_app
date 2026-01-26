@@ -39,6 +39,12 @@ export interface Transaction {
   tags: string[]
   attachment_url: string | null
   created_at: string
+
+  // Installment fields
+  installment_group_id?: string | null
+  installment_number?: number | null
+  total_installments?: number | null
+
   categories?: {
     name: string
     color: string
@@ -53,6 +59,7 @@ export interface CreateTransactionDto {
   description?: string
   date: string
   tags?: string[]
+  total_installments?: number
 }
 
 export interface UpdateTransactionDto {
@@ -83,6 +90,20 @@ export interface CategorySummary {
   category_color: string
   total: number
   percentage: number
+}
+
+export interface InstallmentGroupSummary {
+  installment_group_id: string
+  description: string
+  category?: { name: string; color: string; icon: string } | null
+  total_installments: number
+  paid_installments: number
+  monthly_amount: number
+  total_amount: number
+  remaining_amount: number
+  first_date: string
+  last_date: string
+  type: TransactionType
 }
 
 // Budget
