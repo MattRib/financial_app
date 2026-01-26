@@ -7,8 +7,10 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
   globalIgnores(['dist', 'finances-api/dist']),
+
+  // Frontend (React + TypeScript)
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ['src/**/*.{ts,tsx}'],
     extends: [
       js.configs.recommended,
       tseslint.configs.recommended,
@@ -17,7 +19,26 @@ export default defineConfig([
     ],
     languageOptions: {
       ecmaVersion: 2020,
+      sourceType: 'module',
       globals: globals.browser,
+    },
+  },
+
+  // Backend (NestJS / Node + TypeScript)
+  {
+    files: ['finances-api/**/*.{ts,tsx}'],
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.recommended,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      sourceType: 'module',
+      globals: globals.node,
+    },
+    rules: {
+      // allow some backend patterns that differ from frontend rules
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 ])
