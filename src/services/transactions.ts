@@ -42,4 +42,9 @@ export const transactionsService = {
 
   getInstallmentsByGroup: (groupId: string) =>
     api.get<Transaction[]>(`/transactions/installments/group/${groupId}`),
+
+  getMonthlyExpenses: (year: number) =>
+    api.get<{ month: number; total: number }[]>('/transactions/monthly-expenses', {
+      year: year.toString()
+    }),
 }

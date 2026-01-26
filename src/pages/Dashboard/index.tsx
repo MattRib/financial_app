@@ -14,6 +14,7 @@ import {
   DashboardFilters,
   InstallmentsCard,
 } from '../../components/dashboard'
+import { MonthlyExpensesChart } from './components/MonthlyExpensesChart'
 import { AnimatedCard } from '../../components/ui/AnimatedCard'
 import type { InstallmentGroupSummary } from '../../types'
 import { SectionHeader } from '../../components/ui/SectionHeader'
@@ -294,6 +295,11 @@ const Dashboard: React.FC = () => {
             index={3}
           />
         </div>
+
+        {/* Monthly Expenses Chart */}
+        <motion.div variants={itemVariants}>
+          <MonthlyExpensesChart />
+        </motion.div>
 
         {/* Chart and Recent Transactions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

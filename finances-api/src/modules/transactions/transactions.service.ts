@@ -367,4 +367,46 @@ export class TransactionsService {
         new Date(b.first_date).getTime() - new Date(a.first_date).getTime(),
     );
   }
+
+  /**
+   * Get monthly expenses breakdown for a specific year
+   */
+  async getMonthlyExpenses(
+    userId: string,
+    year: number,
+  ): Promise<{ month: number; total: number }[]> {
+    const startDate = `${year}-01-01`;
+    const endDate = `${year}-12-31`;
+
+    const { data, error } = await this.supabase
+      .from('transactions')
+      .select('amount, date')
+      .eq('user_id', userId)
+      .eq('type', 'expense')
+      .gte('date', startDate)
+      .lte('date', endDate);
+
+    if (error) throw error;
+
+    // Group by month
+    const monthlyTotals = new Map<number, number>();
+
+    // Initialize all months with 0
+    for (let month = 1; month <= 12; month++) {
+      monthlyTotals.set(month, 0);
+    }
+
+    // Sum expenses by month
+    for (const transaction of data || []) {
+      const date = new Date(transaction.date);
+      const month = date.getMonth() + 1; // 1-12
+      const currentTotal = monthlyTotals.get(month) || 0;
+      monthlyTotals.set(month, currentTotal + Number(transaction.amount));
+    }
+
+    // Convert to array and sort by month
+    return Array.from(monthlyTotals.entries())
+      .map(([month, total]) => ({ month, total }))
+      .sort((a, b) => a.month - b.month);
+  }
 }

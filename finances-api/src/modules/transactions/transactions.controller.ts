@@ -17,6 +17,7 @@ import {
   CreateTransactionDto,
   UpdateTransactionDto,
   FilterTransactionDto,
+  GetMonthlyExpensesDto,
 } from './dto';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { CurrentUser } from '../../common/decorators/user.decorator';
@@ -66,6 +67,14 @@ export class TransactionsController {
     @Param('groupId', ParseUUIDPipe) groupId: string,
   ) {
     return this.transactionsService.findByInstallmentGroup(user.id, groupId);
+  }
+
+  @Get('monthly-expenses')
+  getMonthlyExpenses(
+    @CurrentUser() user: User,
+    @Query() dto: GetMonthlyExpensesDto,
+  ) {
+    return this.transactionsService.getMonthlyExpenses(user.id, dto.year);
   }
 
   @Get(':id')
