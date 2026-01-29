@@ -197,22 +197,34 @@ export class InvestmentsService {
     if (error) throw error;
 
     // Initialize all 12 months with zero (month in YYYY-MM format) and by_type breakdown
-    const investmentTypes = ['renda_fixa', 'renda_variavel', 'cripto', 'outros']
-    const monthlyTotals: MonthlyEvolution[] = Array.from({ length: 12 }, (_, i) => ({
-      month: `${year}-${String(i + 1).padStart(2, '0')}`,
-      year,
-      total: 0,
-      by_type: investmentTypes.reduce((acc, t) => ({ ...acc, [t]: 0 }), {} as Record<string, number>),
-    }));
+    const investmentTypes = [
+      'renda_fixa',
+      'renda_variavel',
+      'cripto',
+      'outros',
+    ];
+    const monthlyTotals: MonthlyEvolution[] = Array.from(
+      { length: 12 },
+      (_, i) => ({
+        month: `${year}-${String(i + 1).padStart(2, '0')}`,
+        year,
+        total: 0,
+        by_type: investmentTypes.reduce(
+          (acc, t) => ({ ...acc, [t]: 0 }),
+          {} as Record<string, number>,
+        ),
+      }),
+    );
 
     // Aggregate investments by month and type
     for (const inv of data || []) {
       const invDate = new Date(inv.date);
       const monthIndex = invDate.getMonth(); // 0-11
       monthlyTotals[monthIndex].total += Number(inv.amount);
-      const typeKey = inv.type || 'outros'
-      if (!monthlyTotals[monthIndex].by_type[typeKey]) monthlyTotals[monthIndex].by_type[typeKey] = 0
-      monthlyTotals[monthIndex].by_type[typeKey] += Number(inv.amount)
+      const typeKey = inv.type || 'outros';
+      if (!monthlyTotals[monthIndex].by_type[typeKey])
+        monthlyTotals[monthIndex].by_type[typeKey] = 0;
+      monthlyTotals[monthIndex].by_type[typeKey] += Number(inv.amount);
     }
 
     return monthlyTotals;

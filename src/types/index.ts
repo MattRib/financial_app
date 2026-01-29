@@ -117,6 +117,25 @@ export interface InstallmentGroupSummary {
   type: TransactionType
 }
 
+// OFX Import
+export interface ParsedOfxTransaction {
+  description: string
+  amount: number
+  date: string
+  type: TransactionType
+  suggested_category_id?: string
+}
+
+export interface OfxPreview {
+  total_transactions: number
+  transactions: ParsedOfxTransaction[]
+  duplicates: number[]
+}
+
+export interface OfxImportConfirm {
+  transactions: CreateTransactionDto[]
+}
+
 // Budget
 export interface Budget {
   id: string

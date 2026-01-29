@@ -6,8 +6,13 @@ import type {
   TransactionFilters,
   TransactionSummary,
   CategorySummary,
-  InstallmentGroupSummary
+  InstallmentGroupSummary,
+  OfxPreview,
+  OfxImportConfirm
 } from '../types'
+import { useAuthStore } from '../store/authStore'
+
+const API_URL = import.meta.env.VITE_API_URL
 
 export const transactionsService = {
   getAll: (filters?: TransactionFilters) => 
@@ -47,4 +52,35 @@ export const transactionsService = {
     api.get<{ month: number; total: number }[]>('/transactions/monthly-expenses', {
       year: year.toString()
     }),
+
+  previewOfxImport: async (file: File, accountId: string): Promise<OfxPreview> => {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const token = useAuthStore.getState().getAccessToken()
+    if (!token) {
+      throw new Error('Não autenticado')
+    }
+
+    const response = await fetch(`${API_URL}/transactions/import/ofx/preview?account_id=${accountId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Erro ao processar arquivo' }))
+      throw new Error(error.message || 'Erro ao processar arquivo OFX')
+    }
+
+    return response.json()
+  },
+
+  confirmOfxImport: (data: OfxImportConfirm) =>
+    api.post<{ imported: number; transactions: Transaction[] }>(
+      '/transactions/import/ofx/confirm',
+      data
+    ),
 }

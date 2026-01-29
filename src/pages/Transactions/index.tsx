@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MainLayout } from '../../components/layout'
 import { StatCard } from '../../components/dashboard/StatCard'
@@ -7,9 +7,11 @@ import { ConfirmationModal } from '../../components/ui/ConfirmationModal'
 import { TransactionCard, TransactionCardSkeleton } from '../../components/transactions/TransactionCard'
 import { TransactionModal } from '../../components/transactions/TransactionModal'
 import { TransactionFilters } from '../../components/transactions/TransactionFilters'
+import { OfxImportModal } from '../../components/transactions/OfxImportModal'
 import { useTransaction, formatCurrency } from '../../hooks/useTransaction'
 import {
   Plus,
+  Upload,
   TrendingUp,
   TrendingDown,
   Wallet,
@@ -40,6 +42,8 @@ const itemVariants = {
 }
 
 const TransactionsPage: React.FC = () => {
+  const [showOfxModal, setShowOfxModal] = useState(false)
+
   const {
     // Data
     transactions,
@@ -105,23 +109,43 @@ const TransactionsPage: React.FC = () => {
               Gerencie suas receitas e despesas
             </p>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleNewTransaction}
-            className="
-              inline-flex items-center gap-2 px-4 py-2.5
-              bg-slate-900 dark:bg-slate-100
-              text-white dark:text-slate-900
-              rounded-xl font-medium text-sm
-              hover:bg-slate-800 dark:hover:bg-slate-200
-              transition-colors shadow-sm
-              cursor-pointer
-            "
-          >
-            <Plus size={18} />
-            Nova Transação
-          </motion.button>
+          <div className="flex gap-3">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowOfxModal(true)}
+              className="
+                inline-flex items-center gap-2 px-4 py-2.5
+                bg-white dark:bg-slate-800
+                border border-slate-200 dark:border-slate-700
+                text-slate-700 dark:text-slate-300
+                rounded-xl font-medium text-sm
+                hover:bg-slate-50 dark:hover:bg-slate-700
+                transition-colors shadow-sm
+                cursor-pointer
+              "
+            >
+              <Upload size={18} />
+              Importar
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleNewTransaction}
+              className="
+                inline-flex items-center gap-2 px-4 py-2.5
+                bg-slate-900 dark:bg-slate-100
+                text-white dark:text-slate-900
+                rounded-xl font-medium text-sm
+                hover:bg-slate-800 dark:hover:bg-slate-200
+                transition-colors shadow-sm
+                cursor-pointer
+              "
+            >
+              <Plus size={18} />
+              Nova Transação
+            </motion.button>
+          </div>
         </motion.div>
 
         {/* Error State */}
@@ -300,6 +324,18 @@ const TransactionsPage: React.FC = () => {
           </div>
         )}
       </ConfirmationModal>
+
+      {/* OFX Import Modal */}
+      <OfxImportModal
+        isOpen={showOfxModal}
+        accounts={accounts}
+        categories={categories}
+        onClose={() => setShowOfxModal(false)}
+        onComplete={() => {
+          setShowOfxModal(false)
+          window.location.reload()
+        }}
+      />
     </MainLayout>
   )
 }
