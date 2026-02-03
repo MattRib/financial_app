@@ -37,15 +37,18 @@ export const RecurringExpenseModal: React.FC<RecurringExpenseModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      // Reset form when modal opens
-      setFormData({
-        amount: 0,
-        type: 'expense',
-        description: '',
-        start_date: new Date().toISOString().split('T')[0],
-        account_id: accounts[0]?.id || '',
-        total_recurrences: 12,
-      })
+      // Reset form when modal opens (deferred to avoid synchronous setState in effect)
+      const id = window.setTimeout(() => {
+        setFormData({
+          amount: 0,
+          type: 'expense',
+          description: '',
+          start_date: new Date().toISOString().split('T')[0],
+          account_id: accounts[0]?.id || '',
+          total_recurrences: 12,
+        })
+      }, 0)
+      return () => clearTimeout(id)
     }
   }, [isOpen, accounts])
 
