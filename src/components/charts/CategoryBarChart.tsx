@@ -1,5 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
+import { formatCurrency } from '../../utils/formatters'
 
 interface CategoryData {
   name: string
@@ -12,14 +13,6 @@ interface CategoryBarChartProps {
   height?: number
 }
 
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value)
-}
 
 export const CategoryBarChart: React.FC<CategoryBarChartProps> = ({
   data,
