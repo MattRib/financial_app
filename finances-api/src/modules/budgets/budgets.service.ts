@@ -157,8 +157,21 @@ export class BudgetsService {
   ): Promise<BudgetOverview> {
     const budgets = await this.findAll(userId, month, year);
 
-    const totalBudget = budgets.reduce((sum, b) => sum + Number(b.amount), 0);
-    const totalSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
+    // If there's a general budget (category_id == null), it is absolute and
+    // should define the totals. Category budgets are considered allocations
+    // inside the general budget and must not be double-counted.
+    const general = budgets.find((b) => b.category_id === null);
+
+    let totalBudget: number;
+    let totalSpent: number;
+
+    if (general) {
+      totalBudget = Number(general.amount);
+      totalSpent = general.spent;
+    } else {
+      totalBudget = budgets.reduce((sum, b) => sum + Number(b.amount), 0);
+      totalSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
+    }
     const totalRemaining = totalBudget - totalSpent;
     const percentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
 

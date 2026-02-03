@@ -326,6 +326,57 @@ describe('BudgetsService', () => {
       expect(result.total_budget).toBe(0);
       expect(result.percentage).toBe(0);
     });
+
+    it('should prefer general budget when present', async () => {
+      const budgets = [
+        {
+          ...mockBudget,
+          id: 'general-budget',
+          category_id: null,
+          amount: 4000,
+          categories: null,
+        },
+        {
+          ...mockBudget,
+          id: 'budget-2',
+          category_id: 'cat-1',
+          amount: 300,
+          categories: { name: 'Transporte', color: '#fff', icon: 'car' },
+        },
+      ];
+
+      mockSupabase.order.mockResolvedValueOnce({ data: budgets, error: null });
+
+      // thenable mocks for getSpentAmount: first for general (all expenses), second for category
+      const thenableGeneral = {
+        eq: jest
+          .fn()
+          .mockResolvedValue({ data: [{ amount: 1000 }], error: null }),
+        then: function (resolve: (value: any) => unknown) {
+          return resolve({ data: [{ amount: 1000 }], error: null });
+        },
+      };
+      const thenableCategory = {
+        eq: jest
+          .fn()
+          .mockResolvedValue({ data: [{ amount: 200 }], error: null }),
+        then: function (resolve: (value: any) => unknown) {
+          return resolve({ data: [{ amount: 200 }], error: null });
+        },
+      };
+
+      mockSupabase.lte
+        .mockReturnValueOnce(thenableGeneral)
+        .mockReturnValueOnce(thenableCategory);
+
+      const result = await service.getOverview(mockUserId, 1, 2024);
+
+      // totals must follow the general budget (4000) and its spent (1000)
+      expect(result.total_budget).toBe(4000);
+      expect(result.total_spent).toBe(1000);
+      expect(result.total_remaining).toBe(3000);
+      expect(result.budgets).toHaveLength(2);
+    });
   });
 
   describe('getAlerts', () => {
