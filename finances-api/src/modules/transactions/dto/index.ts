@@ -9,3 +9,7 @@ export {
 } from './import-ofx.dto';
 export { CreateRecurringExpenseDto } from './create-recurring-expense.dto';
 export { RecurringExpenseSummaryDto } from './recurring-expense-summary.dto';
+export {
+  DeleteInstallmentDto,
+  InstallmentDeleteMode,
+} from './delete-installment.dto';

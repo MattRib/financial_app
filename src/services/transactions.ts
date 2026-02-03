@@ -27,8 +27,8 @@ export const transactionsService = {
   update: (id: string, data: UpdateTransactionDto) => 
     api.patch<Transaction>(`/transactions/${id}`, data),
 
-  delete: (id: string) => 
-    api.delete(`/transactions/${id}`),
+  delete: (id: string, mode?: 'single' | 'future' | 'all') => 
+    api.delete(`/transactions/${id}${mode ? `?mode=${encodeURIComponent(mode)}` : ''}`),
 
   getSummary: (startDate: string, endDate: string) => 
     api.get<TransactionSummary>('/transactions/summary', { 

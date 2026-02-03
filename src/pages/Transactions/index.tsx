@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { MainLayout } from '../../components/layout'
 import { StatCard } from '../../components/dashboard/StatCard'
 import { PremiumEmptyState } from '../../components/common/PremiumEmptyState'
-import { ConfirmationModal } from '../../components/ui/ConfirmationModal'
+import { DeleteInstallmentModal } from '../../components/common'
 import { TransactionCard, TransactionCardSkeleton } from '../../components/transactions/TransactionCard'
 import { TransactionModal } from '../../components/transactions/TransactionModal'
 import { TransactionFilters } from '../../components/transactions/TransactionFilters'
@@ -17,7 +17,6 @@ import {
   Wallet,
   Receipt,
   Loader2,
-  Trash2,
 } from 'lucide-react'
 
 // Animation variants
@@ -51,7 +50,6 @@ const TransactionsPage: React.FC = () => {
     summary,
     categories,
     transactionCounts,
-    transactionToDelete,
 
     // State
     loading,
@@ -182,8 +180,11 @@ const TransactionsPage: React.FC = () => {
               loading={loading}
               index={2}
               trend={
-                summary.balance !== 0
-                  ? { value: Math.round((summary.balance / (summary.total_income || 1)) * 100), positive: summary.balance > 0 }
+                summary.total_income > 0 && summary.balance !== 0
+                  ? { 
+                      value: Math.abs(Math.round((summary.balance / summary.total_income) * 100)), 
+                      positive: summary.balance > 0 
+                    }
                   : undefined
               }
             />
@@ -298,32 +299,18 @@ const TransactionsPage: React.FC = () => {
       />
 
       {/* Delete Confirmation Modal */}
-      <ConfirmationModal
+      <DeleteInstallmentModal
         isOpen={deleteConfirm.show}
-        title="Excluir transação"
-        description="Tem certeza que deseja excluir esta transação? Esta ação não pode ser desfeita."
-        confirmLabel="Excluir"
-        cancelLabel="Cancelar"
-        variant="danger"
-        icon={Trash2}
+        transaction={deleteConfirm.transaction}
+        isInstallment={Boolean(
+          deleteConfirm.transaction?.installment_number &&
+          deleteConfirm.transaction?.total_installments
+        )}
+        installmentNumber={deleteConfirm.transaction?.installment_number || 1}
+        totalInstallments={deleteConfirm.transaction?.total_installments || 1}
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
-      >
-        {transactionToDelete && (
-          <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-            <p className="font-medium text-slate-900 dark:text-slate-100 text-sm">
-              {transactionToDelete.description || 'Sem descrição'}
-            </p>
-            <p className={`text-sm font-semibold mt-1 ${
-              transactionToDelete.type === 'income'
-                ? 'text-emerald-600 dark:text-emerald-500'
-                : 'text-red-600 dark:text-red-500'
-            }`}>
-              {transactionToDelete.type === 'income' ? '+' : '-'} {formatCurrency(transactionToDelete.amount)}
-            </p>
-          </div>
-        )}
-      </ConfirmationModal>
+      />
 
       {/* OFX Import Modal */}
       <OfxImportModal

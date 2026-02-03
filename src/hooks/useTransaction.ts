@@ -45,9 +45,8 @@ export function useTransaction(options: UseTransactionOptions = {}) {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<{
     transaction: Transaction | null
-    message: string
     show: boolean
-  }>({ transaction: null, message: '', show: false })
+  }>({ transaction: null, show: false })
 
   // Filter State
   const [selectedTab, setSelectedTab] = useState<TabId>('all')
@@ -192,24 +191,19 @@ export function useTransaction(options: UseTransactionOptions = {}) {
     const transaction = transactions.find((t) => t.id === id)
     if (!transaction) return
 
-    const isInstallment = transaction.installment_number && transaction.total_installments
-    const message = isInstallment
-      ? `Esta transação faz parte de um parcelamento de ${transaction.total_installments}x. Ao excluir, TODAS as ${transaction.total_installments} parcelas serão removidas. Deseja continuar?`
-      : 'Tem certeza que deseja excluir esta transação?'
-
-    setDeleteConfirm({ transaction, message, show: true })
+    setDeleteConfirm({ transaction, show: true })
   }, [transactions])
 
   const handleDeleteCancel = useCallback(() => {
-    setDeleteConfirm({ transaction: null, message: '', show: false })
+    setDeleteConfirm({ transaction: null, show: false })
   }, [])
 
-  const handleDeleteConfirm = useCallback(async () => {
+  const handleDeleteConfirm = useCallback(async (mode: 'single' | 'future' | 'all') => {
     if (deleteConfirm.transaction) {
       try {
-        await deleteTransaction(deleteConfirm.transaction.id)
+        await deleteTransaction(deleteConfirm.transaction.id, mode)
         toast.success('Transação excluída com sucesso!')
-        setDeleteConfirm({ transaction: null, message: '', show: false })
+        setDeleteConfirm({ transaction: null, show: false })
 
         // Refresh summary after deletion
         const now = new Date()
@@ -256,9 +250,6 @@ export function useTransaction(options: UseTransactionOptions = {}) {
     setLoadedPages(1)
   }, [])
 
-  // Get transaction being deleted (for confirmation modal)
-  const transactionToDelete = deleteConfirm.transaction
-
   return {
     // Data
     transactions: displayedTransactions,
@@ -267,7 +258,6 @@ export function useTransaction(options: UseTransactionOptions = {}) {
     categories,
     accounts,
     transactionCounts,
-    transactionToDelete,
 
     // State
     loading,

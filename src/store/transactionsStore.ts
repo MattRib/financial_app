@@ -18,7 +18,7 @@ export interface TransactionsState {
   fetchSummary: (startDate: string, endDate: string) => Promise<void>
   createTransaction: (data: CreateTransactionDto) => Promise<void>
   updateTransaction: (id: string, data: UpdateTransactionDto) => Promise<void>
-  deleteTransaction: (id: string) => Promise<void>
+  deleteTransaction: (id: string, mode?: 'single' | 'future' | 'all') => Promise<void>
 }
 
 export const useTransactionsStore = create<TransactionsState>((set) => ({
@@ -76,14 +76,15 @@ export const useTransactionsStore = create<TransactionsState>((set) => ({
     }
   },
 
-  deleteTransaction: async (id: string) => {
+  deleteTransaction: async (id: string, mode?: 'single' | 'future' | 'all') => {
     set({ loading: true, error: null })
     try {
-      await transactionsService.delete(id)
-      set((state) => ({
-        transactions: state.transactions.filter((t) => t.id !== id),
-        loading: false,
-      }))
+      await transactionsService.delete(id, mode)
+      
+      // Refetch transactions to get the updated list
+      // (since we might delete multiple installments)
+      const transactions = await transactionsService.getAll()
+      set({ transactions, loading: false })
     } catch (err: unknown) {
       set({ error: String(err), loading: false })
       throw err

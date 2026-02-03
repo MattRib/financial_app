@@ -22,6 +22,7 @@ import {
   ApiConsumes,
   ApiBody,
   ApiResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { TransactionsService } from './transactions.service';
 import {
@@ -32,6 +33,7 @@ import {
   OfxPreviewDto,
   ConfirmOfxImportDto,
   RecurringExpenseSummaryDto,
+  InstallmentDeleteMode,
 } from './dto';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { CurrentUser } from '../../common/decorators/user.decorator';
@@ -222,7 +224,23 @@ export class TransactionsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@CurrentUser() user: User, @Param('id', ParseUUIDPipe) id: string) {
-    return this.transactionsService.remove(user.id, id);
+  @ApiOperation({
+    summary: 'Excluir transação',
+    description:
+      'Exclui uma transação. Para parcelamentos, use o parâmetro "mode" para controlar o comportamento.',
+  })
+  @ApiQuery({
+    name: 'mode',
+    enum: InstallmentDeleteMode,
+    required: false,
+    description:
+      'Modo de exclusão para transações parceladas: "single" (apenas esta), "future" (esta e futuras), "all" (todas - padrão)',
+  })
+  remove(
+    @CurrentUser() user: User,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('mode') mode?: InstallmentDeleteMode,
+  ) {
+    return this.transactionsService.remove(user.id, id, mode);
   }
 }

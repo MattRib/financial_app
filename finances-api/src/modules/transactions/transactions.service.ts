@@ -7,6 +7,7 @@ import {
   CreateTransactionDto,
   UpdateTransactionDto,
   FilterTransactionDto,
+  InstallmentDeleteMode,
 } from './dto';
 import type { Transaction } from './entities/transaction.entity';
 
@@ -242,7 +243,11 @@ export class TransactionsService {
     return data as Transaction;
   }
 
-  async remove(userId: string, id: string): Promise<void> {
+  async remove(
+    userId: string,
+    id: string,
+    mode?: InstallmentDeleteMode,
+  ): Promise<void> {
     const transaction = await this.findOne(userId, id);
 
     // Check if this transaction is part of a recurring group
@@ -261,14 +266,40 @@ export class TransactionsService {
 
     // Check if this transaction is part of an installment group
     if (transaction.installment_group_id) {
-      // Delete ALL installments in the group
-      const { error } = await this.supabase
-        .from('transactions')
-        .delete()
-        .eq('installment_group_id', transaction.installment_group_id)
-        .eq('user_id', userId);
+      // Use default mode if not provided
+      const deleteMode = mode || InstallmentDeleteMode.ALL;
 
-      if (error) throw error;
+      if (deleteMode === InstallmentDeleteMode.SINGLE) {
+        // Delete only this single installment
+        const { error } = await this.supabase
+          .from('transactions')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', userId);
+
+        if (error) throw error;
+      } else if (deleteMode === InstallmentDeleteMode.FUTURE) {
+        // Delete this installment and all future ones
+        const currentInstallmentNumber = transaction.installment_number || 0;
+
+        const { error } = await this.supabase
+          .from('transactions')
+          .delete()
+          .eq('installment_group_id', transaction.installment_group_id)
+          .eq('user_id', userId)
+          .gte('installment_number', currentInstallmentNumber);
+
+        if (error) throw error;
+      } else {
+        // InstallmentDeleteMode.ALL - Delete ALL installments in the group
+        const { error } = await this.supabase
+          .from('transactions')
+          .delete()
+          .eq('installment_group_id', transaction.installment_group_id)
+          .eq('user_id', userId);
+
+        if (error) throw error;
+      }
     } else {
       // Regular single transaction delete
       const { error } = await this.supabase
