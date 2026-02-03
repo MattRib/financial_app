@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TransactionsController } from './transactions.controller';
 import { TransactionsService } from './transactions.service';
+import { OfxParserService } from './ofx-parser.service';
 import { CreateTransactionDto, UpdateTransactionDto } from './dto';
 import { SUPABASE_CLIENT } from '../../config/supabase.module';
 import type { User } from '@supabase/supabase-js';
@@ -39,6 +40,10 @@ describe('TransactionsController', () => {
         {
           provide: TransactionsService,
           useValue: mockTransactionsService,
+        },
+        {
+          provide: OfxParserService,
+          useValue: { parseOfxFile: jest.fn() },
         },
         {
           provide: SUPABASE_CLIENT,
@@ -191,6 +196,7 @@ describe('TransactionsController', () => {
       expect(mockTransactionsService.remove).toHaveBeenCalledWith(
         mockUser.id,
         'trans-123',
+        undefined,
       );
     });
   });
