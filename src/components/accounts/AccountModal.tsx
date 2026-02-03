@@ -26,6 +26,8 @@ const COLORS = [
   '#64748b', // slate
 ]
 
+const DAYS = Array.from({ length: 31 }, (_, i) => i + 1)
+
 interface AccountModalProps {
   isOpen: boolean
   onClose: () => void
@@ -42,6 +44,9 @@ export const AccountModal: React.FC<AccountModalProps> = ({
   const [name, setName] = useState('')
   const [type, setType] = useState<AccountType>('checking')
   const [initialBalance, setInitialBalance] = useState('')
+  const [creditLimit, setCreditLimit] = useState('')
+  const [closingDay, setClosingDay] = useState(10)
+  const [dueDay, setDueDay] = useState(15)
   const [color, setColor] = useState(COLORS[0])
   const [icon, setIcon] = useState('🏦')
   const [includeInTotal, setIncludeInTotal] = useState(true)
@@ -57,6 +62,9 @@ export const AccountModal: React.FC<AccountModalProps> = ({
       setName(account.name)
       setType(account.type)
       setInitialBalance(String(account.initial_balance || ''))
+      setCreditLimit(String(account.credit_limit ?? ''))
+      setClosingDay(account.closing_day || 10)
+      setDueDay(account.due_day || 15)
       setColor(account.color)
       setIcon(account.icon)
       setIncludeInTotal(account.include_in_total)
@@ -66,6 +74,9 @@ export const AccountModal: React.FC<AccountModalProps> = ({
       setName('')
       setType('checking')
       setInitialBalance('')
+      setCreditLimit('')
+      setClosingDay(10)
+      setDueDay(15)
       setColor(COLORS[0])
       setIcon('🏦')
       setIncludeInTotal(true)
@@ -90,7 +101,18 @@ export const AccountModal: React.FC<AccountModalProps> = ({
       const data: CreateAccountDto | UpdateAccountDto = {
         name: name.trim(),
         type,
-        initial_balance: initialBalance ? parseFloat(initialBalance) : 0,
+        initial_balance:
+          type === 'credit_card'
+            ? 0
+            : initialBalance
+              ? parseFloat(initialBalance)
+              : 0,
+        credit_limit:
+          type === 'credit_card' && creditLimit
+            ? parseFloat(creditLimit)
+            : undefined,
+        closing_day: type === 'credit_card' ? closingDay : undefined,
+        due_day: type === 'credit_card' ? dueDay : undefined,
         color,
         icon,
         include_in_total: includeInTotal,
@@ -200,29 +222,93 @@ export const AccountModal: React.FC<AccountModalProps> = ({
               </div>
             </div>
 
-            {/* Initial Balance */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                Saldo inicial
-              </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                  R$
-                </span>
-                <input
-                  type="text"
-                  value={initialBalance}
-                  onChange={(e) =>
-                    setInitialBalance(formatCurrencyInput(e.target.value))
-                  }
-                  placeholder="0,00"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+            {/* Initial Balance / Credit Card Settings */}
+            {type !== 'credit_card' ? (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Saldo inicial
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                    R$
+                  </span>
+                  <input
+                    type="text"
+                    value={initialBalance}
+                    onChange={(e) =>
+                      setInitialBalance(formatCurrencyInput(e.target.value))
+                    }
+                    placeholder="0,00"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                  />
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Informe o saldo atual da conta para começar
+                </p>
               </div>
-              <p className="text-xs text-slate-500 mt-1">
-                Informe o saldo atual da conta para começar
-              </p>
-            </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    Limite do cartão
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                      R$
+                    </span>
+                    <input
+                      type="text"
+                      value={creditLimit}
+                      onChange={(e) =>
+                        setCreditLimit(formatCurrencyInput(e.target.value))
+                      }
+                      placeholder="0,00"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                      Dia de fechamento
+                    </label>
+                    <select
+                      value={closingDay}
+                      onChange={(e) => setClosingDay(Number(e.target.value))}
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                    >
+                      {DAYS.map((day) => (
+                        <option key={day} value={day}>
+                          {day}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                      Dia de vencimento
+                    </label>
+                    <select
+                      value={dueDay}
+                      onChange={(e) => setDueDay(Number(e.target.value))}
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                    >
+                      {DAYS.map((day) => (
+                        <option key={day} value={day}>
+                          {day}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-500">
+                  Compras entram na fatura conforme o dia de fechamento.
+                </p>
+              </div>
+            )}
 
             {/* Color */}
             <div>

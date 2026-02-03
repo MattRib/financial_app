@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useState } from 'react'
 import {
   Plus,
   Wallet,
@@ -16,9 +17,10 @@ import {
   AccountCardSkeleton,
   AccountModal,
   TransferModal,
+  CreditCardInvoiceModal,
 } from '../../components/accounts'
 import { useAccount } from '../../hooks/useAccount'
-import { AccountTypeLabels } from '../../types'
+import { AccountTypeLabels, type Account } from '../../types'
 
 // Animation variants
 const containerVariants = {
@@ -49,6 +51,8 @@ const formatCurrency = (value: number) => {
 }
 
 const AccountsPage: React.FC = () => {
+  const [invoiceAccount, setInvoiceAccount] = useState<Account | null>(null)
+
   const {
     // Data
     accounts,
@@ -80,6 +84,10 @@ const AccountsPage: React.FC = () => {
     handleTransfer,
     handleTransferSubmit,
   } = useAccount()
+
+  const handleInvoice = (account: Account) => {
+    setInvoiceAccount(account)
+  }
 
   // Stats
   const totalBalance = summary?.total_balance || 0
@@ -287,6 +295,7 @@ const AccountsPage: React.FC = () => {
                         account={account}
                         onEdit={handleEdit}
                         onDelete={handleDeleteClick}
+                        onInvoice={handleInvoice}
                       />
                     ))}
                   </div>
@@ -310,6 +319,12 @@ const AccountsPage: React.FC = () => {
         onClose={() => setShowTransferModal(false)}
         onSubmit={handleTransferSubmit}
         accounts={allAccounts.filter((a) => a.is_active)}
+      />
+
+      <CreditCardInvoiceModal
+        isOpen={!!invoiceAccount}
+        account={invoiceAccount}
+        onClose={() => setInvoiceAccount(null)}
       />
 
       <ConfirmationModal

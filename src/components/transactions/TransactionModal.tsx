@@ -96,6 +96,28 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     return categories.find((cat) => cat.id === formCategoryId)
   }, [categories, formCategoryId])
 
+  const selectedAccount = useMemo(() => {
+    return accounts?.find((acc) => acc.id === formAccountId)
+  }, [accounts, formAccountId])
+
+  const creditLimitWarning = useMemo(() => {
+    if (!selectedAccount || selectedAccount.type !== 'credit_card') return null
+    if (!selectedAccount.credit_limit) return null
+    if (formType !== 'expense') return null
+
+    const amount = parseCurrency(formAmount)
+    if (!amount) return null
+
+    const available = Number(selectedAccount.current_balance)
+    const projected = available - amount
+    if (projected >= 0) return null
+
+    return {
+      available,
+      over: Math.abs(projected),
+    }
+  }, [selectedAccount, formType, formAmount])
+
   // Reset or populate form when modal opens
   useEffect(() => {
     const wasOpen = prevIsOpenRef.current
@@ -464,6 +486,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   </select>
                   {formErrors.account_id && (
                     <p className="mt-1 text-xs text-red-500">{formErrors.account_id}</p>
+                  )}
+                  {creditLimitWarning && (
+                    <div className="mt-2 rounded-lg border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-900/20 p-2 text-xs text-amber-700 dark:text-amber-400">
+                      Atenção: esta compra excederá seu limite disponível.
+                    </div>
                   )}
                 </div>
 

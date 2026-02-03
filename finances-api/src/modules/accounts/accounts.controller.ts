@@ -26,6 +26,7 @@ import {
   UpdateAccountDto,
   FilterAccountDto,
   CreateTransferDto,
+  PayInvoiceDto,
 } from './dto';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { CurrentUser } from '../../common/decorators/user.decorator';
@@ -87,6 +88,54 @@ export class AccountsController {
   @ApiParam({ name: 'id', description: 'ID da conta (UUID)' })
   findOne(@CurrentUser() user: User, @Param('id', ParseUUIDPipe) id: string) {
     return this.accountsService.findOne(user.id, id);
+  }
+
+  @Get(':id/invoices/current')
+  @ApiOperation({ summary: 'Obter fatura atual do cartão de crédito' })
+  @ApiResponse({ status: 200, description: 'Fatura atual' })
+  @ApiResponse({ status: 400, description: 'Conta inválida ou não configurada' })
+  @ApiResponse({ status: 404, description: 'Conta não encontrada' })
+  @ApiResponse({ status: 401, description: 'Não autorizado' })
+  @ApiParam({ name: 'id', description: 'ID da conta (UUID)' })
+  getCurrentInvoice(
+    @CurrentUser() user: User,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.accountsService.getCurrentInvoice(user.id, id);
+  }
+
+  @Get(':id/invoices/history')
+  @ApiOperation({ summary: 'Listar histórico de faturas do cartão' })
+  @ApiResponse({ status: 200, description: 'Histórico de faturas' })
+  @ApiResponse({ status: 400, description: 'Conta inválida ou não configurada' })
+  @ApiResponse({ status: 404, description: 'Conta não encontrada' })
+  @ApiResponse({ status: 401, description: 'Não autorizado' })
+  @ApiParam({ name: 'id', description: 'ID da conta (UUID)' })
+  getInvoiceHistory(
+    @CurrentUser() user: User,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.accountsService.getInvoiceHistory(user.id, id);
+  }
+
+  @Patch(':id/invoices/pay')
+  @ApiOperation({ summary: 'Marcar fatura como paga (sem movimentação)' })
+  @ApiResponse({ status: 200, description: 'Fatura marcada como paga' })
+  @ApiResponse({ status: 400, description: 'Dados inválidos' })
+  @ApiResponse({ status: 404, description: 'Conta não encontrada' })
+  @ApiResponse({ status: 401, description: 'Não autorizado' })
+  @ApiParam({ name: 'id', description: 'ID da conta (UUID)' })
+  markInvoicePaid(
+    @CurrentUser() user: User,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: PayInvoiceDto,
+  ) {
+    return this.accountsService.markInvoicePaid(
+      user.id,
+      id,
+      dto.period_start,
+      dto.period_end,
+    );
   }
 
   @Patch(':id')

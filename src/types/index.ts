@@ -491,6 +491,9 @@ export interface Account {
   type: AccountType
   initial_balance: number
   current_balance: number
+  credit_limit?: number | null
+  closing_day?: number | null
+  due_day?: number | null
   color: string
   icon: string
   is_active: boolean
@@ -498,6 +501,23 @@ export interface Account {
   notes?: string
   created_at: string
   updated_at: string
+}
+
+export interface CreditCardInvoice {
+  period_start: string
+  period_end: string
+  closing_day: number
+  due_day?: number | null
+  total: number
+  is_paid: boolean
+  paid_at?: string | null
+  transactions?: Array<{
+    id: string
+    date: string
+    amount: number
+    description: string | null
+    category?: { name: string; color: string; icon: string } | null
+  }>
 }
 
 export interface AccountSummary {
@@ -514,6 +534,9 @@ export interface CreateAccountDto {
   name: string
   type: AccountType
   initial_balance?: number
+  credit_limit?: number
+  closing_day?: number
+  due_day?: number
   color?: string
   icon?: string
   include_in_total?: boolean
@@ -524,6 +547,9 @@ export interface UpdateAccountDto {
   name?: string
   type?: AccountType
   initial_balance?: number
+  credit_limit?: number
+  closing_day?: number
+  due_day?: number
   color?: string
   icon?: string
   is_active?: boolean

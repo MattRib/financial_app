@@ -6,6 +6,7 @@ import type {
   UpdateAccountDto,
   FilterAccountDto,
   CreateTransferDto,
+  CreditCardInvoice,
 } from '../types'
 
 export const accountsService = {
@@ -28,4 +29,16 @@ export const accountsService = {
 
   transfer: (data: CreateTransferDto) =>
     api.post<{ transfer_id: string }>('/accounts/transfer', data),
+
+  getCurrentInvoice: (accountId: string) =>
+    api.get<CreditCardInvoice>(`/accounts/${accountId}/invoices/current`),
+
+  getInvoiceHistory: (accountId: string) =>
+    api.get<CreditCardInvoice[]>(`/accounts/${accountId}/invoices/history`),
+
+  markInvoicePaid: (accountId: string, period_start: string, period_end: string) =>
+    api.patch<{ paid_at: string }>(`/accounts/${accountId}/invoices/pay`, {
+      period_start,
+      period_end,
+    }),
 }

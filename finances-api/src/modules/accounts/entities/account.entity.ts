@@ -6,6 +6,9 @@ export interface Account {
   name: string;
   type: AccountType;
   initial_balance: number;
+  credit_limit?: number | null;
+  closing_day?: number | null;
+  due_day?: number | null;
   color: string;
   icon: string;
   is_active: boolean;

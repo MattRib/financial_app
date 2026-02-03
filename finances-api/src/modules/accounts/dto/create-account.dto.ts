@@ -5,6 +5,9 @@ import {
   IsNumber,
   IsBoolean,
   MaxLength,
+  IsInt,
+  Min,
+  Max,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -73,4 +76,33 @@ export class CreateAccountDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @ApiPropertyOptional({
+    description: 'Limite do cartão de crédito',
+    example: 5000.0,
+  })
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0.01)
+  @IsOptional()
+  credit_limit?: number;
+
+  @ApiPropertyOptional({
+    description: 'Dia de fechamento da fatura (1-31)',
+    example: 15,
+  })
+  @IsInt()
+  @Min(1)
+  @Max(31)
+  @IsOptional()
+  closing_day?: number;
+
+  @ApiPropertyOptional({
+    description: 'Dia de vencimento da fatura (1-31)',
+    example: 10,
+  })
+  @IsInt()
+  @Min(1)
+  @Max(31)
+  @IsOptional()
+  due_day?: number;
 }

@@ -7,6 +7,7 @@ import {
   TrendingUp,
   TrendingDown,
   EyeOff,
+  Receipt,
 } from 'lucide-react'
 import { AccountTypeLabels } from '../../types'
 import type { Account } from '../../types'
@@ -15,17 +16,28 @@ interface AccountCardProps {
   account: Account
   onEdit: (account: Account) => void
   onDelete: (account: Account) => void
+  onInvoice?: (account: Account) => void
 }
 
 export const AccountCard: React.FC<AccountCardProps> = ({
   account,
   onEdit,
   onDelete,
+  onInvoice,
 }) => {
   const [showActions, setShowActions] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const isPositive = account.current_balance >= 0
+  const isCreditCard = account.type === 'credit_card' && account.credit_limit != null
+  const availableLimit = isCreditCard ? account.current_balance : 0
+  const usedLimit = isCreditCard
+    ? Math.max(0, Number(account.credit_limit) - Number(availableLimit))
+    : 0
+  const usagePct = isCreditCard && account.credit_limit
+    ? (usedLimit / Number(account.credit_limit)) * 100
+    : 0
+  const usageColor = usagePct > 100 ? 'bg-red-600' : usagePct > 80 ? 'bg-amber-500' : 'bg-emerald-500'
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -137,6 +149,18 @@ export const AccountCard: React.FC<AccountCardProps> = ({
                   <Pencil size={14} />
                   <span>Editar</span>
                 </button>
+                {isCreditCard && onInvoice && (
+                  <button
+                    onClick={() => {
+                      onInvoice(account)
+                      setShowActions(false)
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+                  >
+                    <Receipt size={14} />
+                    <span>Fatura</span>
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     onDelete(account)
@@ -155,33 +179,70 @@ export const AccountCard: React.FC<AccountCardProps> = ({
 
       {/* Balance */}
       <div className="mt-4">
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
-          Saldo atual
-        </p>
-        <div className="flex items-center gap-2">
-          <p
-            className={`text-2xl font-bold ${
-              isPositive
-                ? 'text-emerald-600 dark:text-emerald-400'
-                : 'text-red-600 dark:text-red-400'
-            }`}
-          >
-            {formatCurrency(account.current_balance)}
-          </p>
-          {isPositive ? (
-            <TrendingUp
-              size={18}
-              className="text-emerald-500 dark:text-emerald-400"
-            />
-          ) : (
-            <TrendingDown size={18} className="text-red-500 dark:text-red-400" />
-          )}
-        </div>
+        {isCreditCard ? (
+          <>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+              Limite disponível
+            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                {formatCurrency(availableLimit)}
+              </p>
+            </div>
 
-        {account.initial_balance !== 0 && (
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-            Saldo inicial: {formatCurrency(account.initial_balance)}
-          </p>
+            <div className="mt-3 space-y-2">
+              <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                <div
+                  className={`h-full ${usageColor}`}
+                  style={{ width: `${Math.min(100, Math.max(0, usagePct))}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                <span>Usado: {formatCurrency(usedLimit)}</span>
+                <span>Limite: {formatCurrency(Number(account.credit_limit))}</span>
+              </div>
+            </div>
+
+            {(account.closing_day || account.due_day) && (
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
+                Fecha dia {account.closing_day || '-'} • Vence dia {account.due_day || '-'}
+              </p>
+            )}
+          </>
+        ) : (
+          <>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+              Saldo atual
+            </p>
+            <div className="flex items-center gap-2">
+              <p
+                className={`text-2xl font-bold ${
+                  isPositive
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-red-600 dark:text-red-400'
+                }`}
+              >
+                {formatCurrency(account.current_balance)}
+              </p>
+              {isPositive ? (
+                <TrendingUp
+                  size={18}
+                  className="text-emerald-500 dark:text-emerald-400"
+                />
+              ) : (
+                <TrendingDown
+                  size={18}
+                  className="text-red-500 dark:text-red-400"
+                />
+              )}
+            </div>
+
+            {account.initial_balance !== 0 && (
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                Saldo inicial: {formatCurrency(account.initial_balance)}
+              </p>
+            )}
+          </>
         )}
       </div>
 
