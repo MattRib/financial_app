@@ -53,6 +53,12 @@ export interface Transaction {
   installment_number?: number | null
   total_installments?: number | null
 
+  // Recurring expense fields
+  recurring_group_id?: string | null
+  recurring_number?: number | null
+  total_recurrences?: number | null
+  is_recurring?: boolean
+
   categories?: {
     name: string
     color: string
@@ -115,6 +121,36 @@ export interface InstallmentGroupSummary {
   first_date: string
   last_date: string
   type: TransactionType
+}
+
+// Recurring Expenses
+export interface RecurringExpenseSummary {
+  recurring_group_id: string
+  description: string
+  category?: { name: string; color: string; icon: string } | null
+  total_recurrences: number
+  completed_recurrences: number
+  pending_recurrences: number
+  monthly_amount: number
+  total_amount: number
+  paid_amount: number
+  remaining_amount: number
+  first_date: string
+  last_date: string
+  type: TransactionType
+  is_active: boolean
+}
+
+export interface CreateRecurringExpenseDto {
+  amount: number
+  type: TransactionType
+  category_id?: string
+  description: string
+  start_date: string
+  tags?: string[]
+  account_id: string
+  attachment_url?: string
+  total_recurrences: number
 }
 
 // OFX Import

@@ -46,6 +46,15 @@ export class TransactionsService {
     userId: string,
     dto: CreateTransactionDto,
   ): Promise<Transaction | Transaction[]> {
+    // Check if this is a recurring expense
+    if (
+      'total_recurrences' in dto &&
+      (dto as any).total_recurrences &&
+      (dto as any).total_recurrences > 1
+    ) {
+      return this.createRecurringExpenses(userId, dto as any);
+    }
+
     // Check if this is an installment transaction
     if (dto.total_installments && dto.total_installments > 1) {
       return this.createInstallments(userId, dto);
@@ -111,6 +120,54 @@ export class TransactionsService {
     const { data, error } = await this.supabase
       .from('transactions')
       .insert(installments)
+      .select();
+
+    if (error) throw error;
+    return data as Transaction[];
+  }
+
+  /**
+   * Creates recurring expense transactions
+   * Similar to installments, but repeats the FULL amount each month
+   */
+  private async createRecurringExpenses(
+    userId: string,
+    dto: any,
+  ): Promise<Transaction[]> {
+    const totalRecurrences = dto.total_recurrences;
+    const recurringGroupId = uuidv4();
+    const monthlyAmount = dto.amount; // Full amount each month (not divided)
+
+    // Parse the start date
+    const startDate = new Date((dto.start_date || dto.date) + 'T00:00:00');
+
+    // Build recurring expense transactions
+    const recurrences: any[] = [];
+    for (let i = 0; i < totalRecurrences; i++) {
+      const recurrenceDate = addMonths(startDate, i);
+      const recurrenceNumber = i + 1;
+
+      recurrences.push({
+        user_id: userId,
+        amount: monthlyAmount, // Full amount (not divided)
+        type: dto.type,
+        category_id: dto.category_id ?? null,
+        description: dto.description || 'Despesa recorrente', // Keep description as-is
+        date: format(recurrenceDate, 'yyyy-MM-dd'),
+        tags: dto.tags ?? [],
+        attachment_url: dto.attachment_url ?? null,
+        account_id: dto.account_id,
+        recurring_group_id: recurringGroupId,
+        recurring_number: recurrenceNumber,
+        total_recurrences: totalRecurrences,
+        is_recurring: true,
+      });
+    }
+
+    // Insert all recurrences in a single query
+    const { data, error } = await this.supabase
+      .from('transactions')
+      .insert(recurrences)
       .select();
 
     if (error) throw error;
@@ -188,6 +245,20 @@ export class TransactionsService {
   async remove(userId: string, id: string): Promise<void> {
     const transaction = await this.findOne(userId, id);
 
+    // Check if this transaction is part of a recurring group
+    if (transaction.is_recurring && transaction.recurring_group_id) {
+      // For recurring expenses, just delete this single transaction
+      // User should use removeRecurringExpense() to delete future ones
+      const { error } = await this.supabase
+        .from('transactions')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', userId);
+
+      if (error) throw error;
+      return;
+    }
+
     // Check if this transaction is part of an installment group
     if (transaction.installment_group_id) {
       // Delete ALL installments in the group
@@ -262,7 +333,7 @@ export class TransactionsService {
     let totalExpenses = 0;
 
     for (const transaction of data || []) {
-      const categoryId = transaction.category_id || 'uncategorized';
+      const categoryId = String(transaction.category_id ?? 'uncategorized');
 
       const categories = transaction.categories as any;
       const categoryName = categories?.name || 'Sem categoria';
@@ -324,7 +395,7 @@ export class TransactionsService {
     // Group by installment_group_id
     const groupsMap = new Map<string, Transaction[]>();
     for (const transaction of data || []) {
-      const groupId = transaction.installment_group_id!;
+      const groupId = String(transaction.installment_group_id);
       if (!groupsMap.has(groupId)) {
         groupsMap.set(groupId, []);
       }
@@ -370,8 +441,125 @@ export class TransactionsService {
 
     return summaries.sort(
       (a, b) =>
-        new Date(b.first_date).getTime() - new Date(a.first_date).getTime(),
+        new Date(String(b.first_date)).getTime() -
+        new Date(String(a.first_date)).getTime(),
     );
+  }
+
+  /**
+   * Get all recurring expense groups for the user
+   */
+  async getRecurringExpenseGroups(userId: string): Promise<any[]> {
+    // Get all transactions that are recurring
+    const { data, error } = await this.supabase
+      .from('transactions')
+      .select('*, categories(name, color, icon)')
+      .eq('user_id', userId)
+      .eq('is_recurring', true)
+      .order('date', { ascending: false });
+
+    if (error) throw error;
+
+    // Group by recurring_group_id
+    const groupsMap = new Map<string, Transaction[]>();
+    for (const transaction of data || []) {
+      if (!transaction.recurring_group_id) continue;
+      const groupId = String(transaction.recurring_group_id);
+      if (!groupsMap.has(groupId)) {
+        groupsMap.set(groupId, []);
+      }
+      groupsMap.get(groupId)!.push(transaction as Transaction);
+    }
+
+    // Build summary for each group
+    const summaries: any[] = [];
+    const today = new Date();
+
+    for (const [groupId, recurrences] of groupsMap.entries()) {
+      const sorted = recurrences.sort(
+        (a, b) => (a.recurring_number || 0) - (b.recurring_number || 0),
+      );
+
+      const firstRecurrence = sorted[0];
+      const completedCount = sorted.filter(
+        (rec) => new Date(rec.date) <= today,
+      ).length;
+      const pendingCount = sorted.length - completedCount;
+
+      const monthlyAmount = Number(firstRecurrence.amount);
+      const totalAmount =
+        monthlyAmount * (firstRecurrence.total_recurrences || 1);
+      const paidAmount = monthlyAmount * completedCount;
+      const remainingAmount = totalAmount - paidAmount;
+
+      // Check if all recurrences still exist (not deleted)
+      const isActive = sorted.length === firstRecurrence.total_recurrences;
+
+      summaries.push({
+        recurring_group_id: groupId,
+        description: firstRecurrence.description || 'Despesa recorrente',
+        category: (firstRecurrence as any).categories || null,
+        total_recurrences: firstRecurrence.total_recurrences || 0,
+        completed_recurrences: completedCount,
+        pending_recurrences: pendingCount,
+        monthly_amount: monthlyAmount,
+        total_amount: totalAmount,
+        paid_amount: paidAmount,
+        remaining_amount: remainingAmount,
+        first_date: sorted[0].date,
+        last_date: sorted[sorted.length - 1].date,
+        type: firstRecurrence.type,
+        is_active: isActive,
+      });
+    }
+
+    return summaries.sort(
+      (a, b) =>
+        new Date(String(b.first_date)).getTime() -
+        new Date(String(a.first_date)).getTime(),
+    );
+  }
+
+  /**
+   * Get all transactions in a recurring expense group
+   */
+  async findByRecurringGroup(
+    userId: string,
+    recurringGroupId: string,
+  ): Promise<Transaction[]> {
+    const { data, error } = await this.supabase
+      .from('transactions')
+      .select('*, categories(name, color, icon)')
+      .eq('user_id', userId)
+      .eq('recurring_group_id', recurringGroupId)
+      .order('recurring_number', { ascending: true });
+
+    if (error) throw error;
+    return (data ?? []) as Transaction[];
+  }
+
+  /**
+   * Remove recurring expense (deletes only FUTURE transactions)
+   * Keeps past transactions as history
+   */
+  async removeRecurringExpense(
+    userId: string,
+    recurringGroupId: string,
+  ): Promise<{ deleted: number }> {
+    const today = format(new Date(), 'yyyy-MM-dd');
+
+    // Delete only future transactions
+    const { data, error } = await this.supabase
+      .from('transactions')
+      .delete()
+      .eq('user_id', userId)
+      .eq('recurring_group_id', recurringGroupId)
+      .gt('date', today) // Only future dates
+      .select();
+
+    if (error) throw error;
+
+    return { deleted: (data || []).length };
   }
 
   /**

@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { MoreHorizontal, Edit2, Trash2, TrendingUp, TrendingDown, CreditCard } from 'lucide-react'
+import { MoreHorizontal, Edit2, Trash2, TrendingUp, TrendingDown, CreditCard, Repeat } from 'lucide-react'
 import type { Transaction } from '../../types'
 
 interface TransactionCardProps {
@@ -95,6 +95,13 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded text-xs font-medium">
               <CreditCard size={10} />
               {transaction.installment_number}/{transaction.total_installments}
+            </span>
+          )}
+          {/* Recurring expense badge */}
+          {transaction.is_recurring && transaction.recurring_number && transaction.total_recurrences && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded text-xs font-medium">
+              <Repeat size={10} />
+              Despesa Fixa ({transaction.recurring_number}/{transaction.total_recurrences})
             </span>
           )}
           {/* Date */}

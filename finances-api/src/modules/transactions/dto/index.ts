@@ -7,3 +7,5 @@ export {
   OfxPreviewDto,
   ConfirmOfxImportDto,
 } from './import-ofx.dto';
+export { CreateRecurringExpenseDto } from './create-recurring-expense.dto';
+export { RecurringExpenseSummaryDto } from './recurring-expense-summary.dto';

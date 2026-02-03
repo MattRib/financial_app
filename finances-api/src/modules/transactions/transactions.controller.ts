@@ -31,6 +31,7 @@ import {
   GetMonthlyExpensesDto,
   OfxPreviewDto,
   ConfirmOfxImportDto,
+  RecurringExpenseSummaryDto,
 } from './dto';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { CurrentUser } from '../../common/decorators/user.decorator';
@@ -85,6 +86,51 @@ export class TransactionsController {
     @Param('groupId', ParseUUIDPipe) groupId: string,
   ) {
     return this.transactionsService.findByInstallmentGroup(user.id, groupId);
+  }
+
+  @Get('recurring/groups')
+  @ApiOperation({
+    summary: 'Lista grupos de despesas fixas recorrentes',
+    description:
+      'Retorna resumo de todas as despesas fixas recorrentes do usuário com estatísticas',
+  })
+  getRecurringExpenseGroups(@CurrentUser() user: User) {
+    return this.transactionsService.getRecurringExpenseGroups(user.id);
+  }
+
+  @Get('recurring/group/:groupId')
+  @ApiOperation({
+    summary: 'Lista transações de um grupo de despesas recorrentes',
+    description:
+      'Retorna todas as transações (passadas e futuras) de uma despesa recorrente específica',
+  })
+  getRecurringByGroup(
+    @CurrentUser() user: User,
+    @Param('groupId', ParseUUIDPipe) groupId: string,
+  ) {
+    return this.transactionsService.findByRecurringGroup(user.id, groupId);
+  }
+
+  @Delete('recurring/group/:groupId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Remove despesa fixa recorrente',
+    description:
+      'Deleta APENAS transações futuras (date > today), mantendo histórico passado',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Retorna número de transações deletadas',
+    schema: {
+      type: 'object',
+      properties: { deleted: { type: 'number' } },
+    },
+  })
+  removeRecurringExpense(
+    @CurrentUser() user: User,
+    @Param('groupId', ParseUUIDPipe) groupId: string,
+  ) {
+    return this.transactionsService.removeRecurringExpense(user.id, groupId);
   }
 
   @Get('monthly-expenses')

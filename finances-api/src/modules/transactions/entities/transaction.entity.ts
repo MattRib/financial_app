@@ -21,4 +21,10 @@ export class Transaction {
   installment_group_id?: string | null;
   installment_number?: number | null;
   total_installments?: number | null;
+
+  // Recurring expense fields
+  recurring_group_id?: string | null;
+  recurring_number?: number | null;
+  total_recurrences?: number | null;
+  is_recurring?: boolean;
 }
