@@ -136,8 +136,8 @@ const Dashboard: React.FC = () => {
         // 5. Fetch transactions by category
         transactionsService.getByCategory(startDate, endDate),
 
-        // 6. Fetch installment groups
-        transactionsService.getInstallmentGroups(),
+        // 6. Fetch installment groups (only active ones)
+        transactionsService.getInstallmentGroups(true),
       ])
 
       if (!mounted) return
@@ -178,7 +178,12 @@ const Dashboard: React.FC = () => {
 
       // Result 5: Installment Groups
       if (results[5].status === 'fulfilled') {
-        setInstallmentGroups(results[5].value as InstallmentGroupSummary[])
+        const raw = results[5].value as InstallmentGroupSummary[]
+        // Defensive client-side filter in case backend didn't filter
+        const filtered = raw.filter(
+          (g) => (g.paid_installments ?? 0) < (g.total_installments ?? 0) && (g.remaining_amount ?? 0) > 0,
+        )
+        setInstallmentGroups(filtered)
       } else {
         setInstallmentGroups([])
       }

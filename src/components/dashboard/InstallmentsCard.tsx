@@ -41,7 +41,12 @@ export const InstallmentsCard: React.FC<InstallmentsCardProps> = ({
     )
   }
 
-  if (groups.length === 0) {
+  // Defensive filter: ignore fully-paid groups if any slipped through
+  const visibleGroups = groups.filter(
+    (g) => (g.paid_installments ?? 0) < (g.total_installments ?? 0) && (g.remaining_amount ?? 0) > 0,
+  )
+
+  if (visibleGroups.length === 0) {
     return (
       <div className="py-8 text-center">
         <CreditCard className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-700 mb-3" />
@@ -52,8 +57,8 @@ export const InstallmentsCard: React.FC<InstallmentsCardProps> = ({
     )
   }
 
-  const totalGroups = groups.length
-  const totalMonthly = groups.reduce((sum, g) => sum + g.monthly_amount, 0)
+  const totalGroups = visibleGroups.length
+  const totalMonthly = visibleGroups.reduce((sum, g) => sum + g.monthly_amount, 0)
 
   return (
     <div className="space-y-4">
@@ -69,7 +74,7 @@ export const InstallmentsCard: React.FC<InstallmentsCardProps> = ({
 
       {/* Lista de grupos */}
       <div className="space-y-2">
-        {groups.map((group) => {
+        {visibleGroups.map((group) => {
           const isExpanded = expandedGroups.has(group.installment_group_id)
           const progress = (group.paid_installments / group.total_installments) * 100
 

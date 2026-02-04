@@ -93,6 +93,7 @@ async function handleHttpError(response: Response): Promise<never> {
   // Try to parse error response body
   try {
     errorData = await response.json()
+    console.error('❌ [API] Erro do servidor:', errorData)
     errorMessage = (errorData as { message?: string })?.message || ''
   } catch {
     // If JSON parsing fails, use default messages
@@ -128,7 +129,7 @@ async function handleHttpError(response: Response): Promise<never> {
       // Server errors
       throw new HttpError(
         status,
-        'Erro no servidor. Tente novamente mais tarde',
+        errorMessage || 'Erro no servidor. Tente novamente mais tarde',
         errorData
       )
 

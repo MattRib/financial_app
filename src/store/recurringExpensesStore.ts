@@ -32,13 +32,18 @@ export const useRecurringExpensesStore = create<RecurringExpensesState>(
     },
 
     createRecurringExpense: async (data: CreateRecurringExpenseDto) => {
+      console.log('🏪 [Store] createRecurringExpense chamado com:', data)
       set({ loading: true, error: null })
       try {
-        await recurringExpensesService.create(data)
+        console.log('🏪 [Store] Chamando service.create...')
+        const result = await recurringExpensesService.create(data)
+        console.log('🏪 [Store] Resultado do service.create:', result)
         // Refresh list after creation
         const recurringExpenses = await recurringExpensesService.getGroups()
+        console.log('🏪 [Store] Lista atualizada:', recurringExpenses)
         set({ recurringExpenses, loading: false })
       } catch (err: unknown) {
+        console.error('🏪 [Store] Erro capturado:', err)
         set({ error: String(err), loading: false })
         throw err
       }

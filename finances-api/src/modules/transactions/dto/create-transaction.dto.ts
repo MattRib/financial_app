@@ -9,6 +9,7 @@ import {
   MaxLength,
   Min,
   Max,
+  ValidateIf,
 } from 'class-validator';
 import type { TransactionType } from '../../../common/types/database.types';
 
@@ -29,8 +30,13 @@ export class CreateTransactionDto {
   @MaxLength(255)
   description?: string;
 
+  @ValidateIf((o) => !o.start_date)
   @IsDateString()
-  date: string;
+  date?: string;
+
+  @ValidateIf((o) => !o.date)
+  @IsDateString()
+  start_date?: string;
 
   @IsOptional()
   @IsArray()
@@ -49,4 +55,10 @@ export class CreateTransactionDto {
   @Min(2)
   @Max(60)
   total_installments?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(2)
+  @Max(60)
+  total_recurrences?: number;
 }

@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, Logger } from '@nestjs/common';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 import { addMonths, format } from 'date-fns';
@@ -41,6 +41,8 @@ export interface InstallmentGroupSummary {
 
 @Injectable()
 export class TransactionsService {
+  private readonly logger = new Logger(TransactionsService.name);
+
   constructor(@Inject(SUPABASE_CLIENT) private supabase: SupabaseClient) {}
 
   async create(
@@ -70,7 +72,7 @@ export class TransactionsService {
         type: dto.type,
         category_id: dto.category_id ?? null,
         description: dto.description ?? null,
-        date: dto.date,
+        date: (dto as any).date || (dto as any).start_date,
         tags: dto.tags ?? [],
         attachment_url: dto.attachment_url ?? null,
         account_id: dto.account_id,
@@ -91,7 +93,9 @@ export class TransactionsService {
     const installmentAmount = dto.amount / totalInstallments;
 
     // Parse the start date
-    const startDate = new Date(dto.date + 'T00:00:00');
+    const startDate = new Date(
+      (dto.date || (dto as any).start_date) + 'T00:00:00',
+    );
 
     // Build installment transactions
     const installments: any[] = [];
@@ -137,6 +141,7 @@ export class TransactionsService {
   ): Promise<Transaction[]> {
     const totalRecurrences = dto.total_recurrences;
     const recurringGroupId = uuidv4();
+    this.logger.log(`💰 [Backend] Group ID gerado: ${recurringGroupId}`);
     const monthlyAmount = dto.amount; // Full amount each month (not divided)
 
     // Parse the start date
@@ -165,13 +170,14 @@ export class TransactionsService {
       });
     }
 
-    // Insert all recurrences in a single query
     const { data, error } = await this.supabase
       .from('transactions')
       .insert(recurrences)
       .select();
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
     return data as Transaction[];
   }
 
@@ -412,6 +418,7 @@ export class TransactionsService {
 
   async getInstallmentGroups(
     userId: string,
+    activeOnly?: boolean,
   ): Promise<InstallmentGroupSummary[]> {
     // Get all transactions that are part of installments
     const { data, error } = await this.supabase
@@ -470,7 +477,17 @@ export class TransactionsService {
       });
     }
 
-    return summaries.sort(
+    // If caller requested only active groups, filter out fully paid groups
+    let result = summaries;
+    if (activeOnly) {
+      result = summaries.filter(
+        (s) =>
+          (s.paid_installments ?? 0) < (s.total_installments ?? 0) &&
+          (s.remaining_amount ?? 0) > 0,
+      );
+    }
+
+    return result.sort(
       (a, b) =>
         new Date(String(b.first_date)).getTime() -
         new Date(String(a.first_date)).getTime(),
@@ -489,7 +506,9 @@ export class TransactionsService {
       .eq('is_recurring', true)
       .order('date', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     // Group by recurring_group_id
     const groupsMap = new Map<string, Transaction[]>();
@@ -505,6 +524,8 @@ export class TransactionsService {
     // Build summary for each group
     const summaries: any[] = [];
     const today = new Date();
+
+    this.logger.log(`🔍 [Backend] Grupos encontrados: ${groupsMap.size}`);
 
     for (const [groupId, recurrences] of groupsMap.entries()) {
       const sorted = recurrences.sort(
@@ -543,6 +564,8 @@ export class TransactionsService {
         is_active: isActive,
       });
     }
+
+    this.logger.log(`🔍 [Backend] Summaries gerados: ${summaries.length}`);
 
     return summaries.sort(
       (a, b) =>
@@ -623,7 +646,8 @@ export class TransactionsService {
 
     // Sum expenses by month
     for (const transaction of data || []) {
-      const date = new Date(transaction.date);
+      const date = new Date(String(transaction.date));
+      if (isNaN(date.getTime())) continue;
       const month = date.getMonth() + 1; // 1-12
       const currentTotal = monthlyTotals.get(month) || 0;
       monthlyTotals.set(month, currentTotal + Number(transaction.amount));

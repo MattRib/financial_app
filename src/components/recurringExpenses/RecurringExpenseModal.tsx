@@ -46,6 +46,7 @@ export const RecurringExpenseModal: React.FC<RecurringExpenseModalProps> = ({
           start_date: new Date().toISOString().split('T')[0],
           account_id: accounts[0]?.id || '',
           total_recurrences: 12,
+          category_id: undefined,
         })
       }, 0)
       return () => clearTimeout(id)
@@ -54,6 +55,8 @@ export const RecurringExpenseModal: React.FC<RecurringExpenseModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('📝 [RecurringExpenseModal] handleSubmit chamado')
+    console.log('📝 [RecurringExpenseModal] formData:', formData)
     await onSubmit(formData)
   }
 
@@ -288,6 +291,15 @@ export const RecurringExpenseModal: React.FC<RecurringExpenseModalProps> = ({
                       ))}
                     </select>
                   </div>
+                  {expenseCategories.length === 0 ? (
+                    <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">
+                      Você ainda não tem categorias de despesa
+                    </p>
+                  ) : (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                      Opcional - ajuda a organizar suas despesas
+                    </p>
+                  )}
                 </div>
 
                 {/* Account */}
@@ -349,7 +361,7 @@ export const RecurringExpenseModal: React.FC<RecurringExpenseModalProps> = ({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleSubmit}
-                  type="submit"
+                  type="button"
                   disabled={loading}
                   className="
                     px-4 py-2.5 rounded-xl

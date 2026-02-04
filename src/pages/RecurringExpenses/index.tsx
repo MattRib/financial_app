@@ -12,6 +12,9 @@ import { useRecurringExpensesStore } from '../../store/recurringExpensesStore'
 import { useCategoriesStore } from '../../store/categoriesStore'
 import { useAccountsStore } from '../../store/accountsStore'
 import { Plus, Repeat, Trash2 } from 'lucide-react'
+import type { CreateRecurringExpenseDto } from '../../types'
+
+type CreateRecurringExpenseData = CreateRecurringExpenseDto
 
 // Animation variants
 const containerVariants = {
@@ -63,10 +66,18 @@ const RecurringExpensesPage: React.FC = () => {
   const { accounts, fetch: fetchAccounts } = useAccountsStore()
 
   useEffect(() => {
+    console.log('🔄 [RecurringExpensesPage] useEffect - buscando dados...')
     fetchRecurringExpenses()
     fetchCategories()
     fetchAccounts()
   }, [fetchRecurringExpenses, fetchCategories, fetchAccounts])
+
+  useEffect(() => {
+    console.log('📊 [RecurringExpensesPage] Lista atualizada:', {
+      total: recurringExpenses.length,
+      expenses: recurringExpenses,
+    })
+  }, [recurringExpenses])
 
   const handleNewRecurringExpense = () => {
     setShowModal(true)
@@ -76,9 +87,15 @@ const RecurringExpensesPage: React.FC = () => {
     setShowModal(false)
   }
 
-  const handleSubmit = async (data: any) => {
-    await createRecurringExpense(data)
-    setShowModal(false)
+  const handleSubmit = async (data: CreateRecurringExpenseData) => {
+    console.log('🚀 [RecurringExpensesPage] handleSubmit chamado com dados:', data)
+    try {
+      await createRecurringExpense(data)
+      console.log('✅ [RecurringExpensesPage] Despesa criada com sucesso')
+      setShowModal(false)
+    } catch (error) {
+      console.error('❌ [RecurringExpensesPage] Erro ao criar despesa:', error)
+    }
   }
 
   const handleDeleteClick = (groupId: string, description: string) => {

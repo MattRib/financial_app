@@ -9,8 +9,12 @@ export const recurringExpensesService = {
   /**
    * Get all recurring expense groups
    */
-  getGroups: () =>
-    api.get<RecurringExpenseSummary[]>('/transactions/recurring/groups'),
+  getGroups: async () => {
+    console.log('🔍 [Service] Buscando grupos de despesas recorrentes...')
+    const result = await api.get<RecurringExpenseSummary[]>('/transactions/recurring/groups')
+    console.log('🔍 [Service] Grupos retornados:', result)
+    return result
+  },
 
   /**
    * Get all transactions in a recurring expense group
