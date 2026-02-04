@@ -42,8 +42,10 @@ export const transactionsService = {
       end_date: endDate
     }),
 
-  getInstallmentGroups: () =>
-    api.get<InstallmentGroupSummary[]>('/transactions/installments/groups'),
+  getInstallmentGroups: (activeOnly?: boolean) =>
+    api.get<InstallmentGroupSummary[]>(
+      `/transactions/installments/groups${activeOnly ? '?active_only=true' : ''}`,
+    ),
 
   getInstallmentsByGroup: (groupId: string) =>
     api.get<Transaction[]>(`/transactions/installments/group/${groupId}`),

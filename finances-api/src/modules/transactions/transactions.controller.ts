@@ -78,8 +78,14 @@ export class TransactionsController {
   }
 
   @Get('installments/groups')
-  getInstallmentGroups(@CurrentUser() user: User) {
-    return this.transactionsService.getInstallmentGroups(user.id);
+  @ApiQuery({
+    name: 'active_only',
+    required: false,
+    description: 'When true, return only active (not fully paid) installment groups',
+  })
+  getInstallmentGroups(@CurrentUser() user: User, @Query('active_only') activeOnly?: string) {
+    const flag = activeOnly === 'true' || activeOnly === '1'
+    return this.transactionsService.getInstallmentGroups(user.id, flag);
   }
 
   @Get('installments/group/:groupId')
