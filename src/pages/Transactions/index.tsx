@@ -301,7 +301,7 @@ const TransactionsPage: React.FC = () => {
       {/* Delete Confirmation Modal */}
       <DeleteInstallmentModal
         isOpen={deleteConfirm.show}
-        transactionDescription={deleteConfirm.transaction?.description}
+        transactionDescription={deleteConfirm.transaction?.description ?? undefined}
         isInstallment={Boolean(
           deleteConfirm.transaction?.installment_number &&
           deleteConfirm.transaction?.total_installments
