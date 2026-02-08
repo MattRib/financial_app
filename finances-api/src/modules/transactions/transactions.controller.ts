@@ -32,7 +32,6 @@ import {
   GetMonthlyExpensesDto,
   OfxPreviewDto,
   ConfirmOfxImportDto,
-  RecurringExpenseSummaryDto,
   InstallmentDeleteMode,
 } from './dto';
 import { AuthGuard } from '../../common/guards/auth.guard';
