@@ -53,13 +53,33 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
   }
 
   try {
+    console.debug('[API] Request:', { url, method, hasToken: !!token })
+
     const response = await fetch(url, {
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
     })
 
+    // Log status for easier debugging
+    console.debug('[API] Response status:', { url, status: response.status })
+
     if (!response.ok) {
+      // Attempt to surface body content (json or text) before delegating to handler
+      try {
+        // Clone in case handler also reads the body
+        const clone = response.clone()
+        const bodyJson = await clone.json().catch(() => null)
+        if (bodyJson) {
+          console.error('[API] Error body (json):', bodyJson)
+        } else {
+          const bodyText = await response.text().catch(() => '')
+          if (bodyText) console.error('[API] Error body (text):', bodyText)
+        }
+      } catch (e) {
+        // swallow diagnostics errors
+      }
+
       await handleHttpError(response)
     }
 
@@ -68,18 +88,28 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
       return undefined as T
     }
 
-    return response.json()
-  } catch (error) {
-    // Network errors (connection failed, DNS error, etc)
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new HttpError(0, 'Erro de conexão. Verifique sua internet')
+    // Try to parse JSON, but fallback to text if response is not JSON
+    try {
+      return (await response.json()) as T
+    } catch (e) {
+      const text = await response.text().catch(() => '')
+      // Return text as unknown when JSON parse fails
+      return (text as unknown) as T
     }
-    
+  } catch (error: unknown) {
+    // Network errors (connection failed, DNS error, CORS, etc)
+    const err = error as Error
+    if (err instanceof TypeError || /Failed to fetch|NetworkError|Network request failed/i.test(err.message)) {
+      console.error('[API] Network error', { url, message: err.message })
+      throw new HttpError(0, `Erro de conexão. Verifique sua internet: ${err.message}`)
+    }
+
     // Re-throw HttpError instances
     if (error instanceof HttpError) {
       throw error
     }
-    
+
+    console.error('[API] Unexpected error', { url, error })
     // Generic error fallback
     throw new HttpError(0, 'Ocorreu um erro inesperado')
   }
@@ -92,9 +122,19 @@ async function handleHttpError(response: Response): Promise<never> {
 
   // Try to parse error response body
   try {
-    errorData = await response.json()
-    console.error('❌ [API] Erro do servidor:', errorData)
-    errorMessage = (errorData as { message?: string })?.message || ''
+    // Prefer JSON, but fall back to text if necessary
+    try {
+      errorData = await response.json()
+      console.error('❌ [API] Erro do servidor (json):', errorData)
+      errorMessage = (errorData as { message?: string })?.message || ''
+    } catch {
+      const text = await response.text().catch(() => '')
+      if (text) {
+        errorData = text
+        console.error('❌ [API] Erro do servidor (text):', text)
+        errorMessage = text
+      }
+    }
   } catch {
     // If JSON parsing fails, use default messages
   }

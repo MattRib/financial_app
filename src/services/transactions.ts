@@ -1,4 +1,4 @@
-import { api } from './api'
+import { api, HttpError } from './api'
 import type {
   Transaction,
   CreateTransactionDto,
@@ -61,23 +61,33 @@ export const transactionsService = {
 
     const token = useAuthStore.getState().getAccessToken()
     if (!token) {
-      throw new Error('Não autenticado')
+      throw new HttpError(401, 'Não autenticado')
     }
 
     const response = await fetch(`${API_URL}/transactions/import/ofx/preview?account_id=${accountId}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
       },
       body: formData,
     })
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Erro ao processar arquivo' }))
-      throw new Error(error.message || 'Erro ao processar arquivo OFX')
+      // Try parse json, fallback to text
+      const err = await response.json().catch(async () => {
+        const txt = await response.text().catch(() => '')
+        return { message: txt || 'Erro ao processar arquivo' }
+      })
+      throw new HttpError(response.status, err.message || 'Erro ao processar arquivo OFX', err)
     }
 
-    return response.json()
+    try {
+      return await response.json()
+    } catch {
+      const text = await response.text().catch(() => '')
+      return (text as unknown) as OfxPreview
+    }
   },
 
   confirmOfxImport: (data: OfxImportConfirm) =>

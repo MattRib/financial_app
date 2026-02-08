@@ -49,6 +49,22 @@ export const MonthlyExpensesChart: React.FC = () => {
     fetchData()
   }, [year])
 
+  // Ensure Recharts recalculates size after mount / data load
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const t = setTimeout(() => window.dispatchEvent(new Event('resize')), 250)
+    return () => clearTimeout(t)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    // trigger a resize shortly after data finishes loading so ResponsiveContainer measures correctly
+    if (!isLoading) {
+      const t = setTimeout(() => window.dispatchEvent(new Event('resize')), 120)
+      return () => clearTimeout(t)
+    }
+  }, [isLoading, data.length])
+
   const totalYear = data.reduce((sum, item) => sum + item.total, 0)
   const averageMonth = totalYear / 12
 
