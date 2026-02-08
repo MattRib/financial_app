@@ -3,7 +3,7 @@ import { useTransactionsStore } from '../store/transactionsStore'
 import { useAccountsStore } from '../store/accountsStore'
 import { useCategoriesStore } from '../store/categoriesStore'
 import { useToast } from '../store/toastStore'
-import type { Transaction, TransactionType } from '../types'
+import type { Transaction, TransactionType, DateFilterMode, DatePreset } from '../types'
 
 type TabId = 'all' | TransactionType
 
@@ -54,6 +54,12 @@ export function useTransaction(options: UseTransactionOptions = {}) {
   const [filterDateStart, setFilterDateStart] = useState<string>('')
   const [filterDateEnd, setFilterDateEnd] = useState<string>('')
 
+  // Date navigation state
+  const now = new Date()
+  const [month, setMonth] = useState(now.getMonth() + 1)
+  const [year, setYear] = useState(now.getFullYear())
+  const [dateFilterMode, setDateFilterMode] = useState<DateFilterMode>('month')
+
   // Infinite Scroll State
   const [loadedPages, setLoadedPages] = useState(1)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
@@ -77,6 +83,16 @@ export function useTransaction(options: UseTransactionOptions = {}) {
       toast.error(error)
     }
   }, [error, toast])
+
+  // Sync dates when in month navigation mode
+  useEffect(() => {
+    if (dateFilterMode === 'month') {
+      const firstDay = new Date(year, month - 1, 1)
+      const lastDay = new Date(year, month, 0)
+      setFilterDateStart(firstDay.toISOString().split('T')[0])
+      setFilterDateEnd(lastDay.toISOString().split('T')[0])
+    }
+  }, [month, year, dateFilterMode])
 
   // Filter transactions
   const filteredTransactions = useMemo(() => {
@@ -141,6 +157,101 @@ export function useTransaction(options: UseTransactionOptions = {}) {
     setFilterDateEnd(date)
     setLoadedPages(1)
   }, [])
+
+  // Month navigation functions
+  const goToPrevMonth = useCallback(() => {
+    if (month === 1) {
+      setMonth(12)
+      setYear((prev) => prev - 1)
+    } else {
+      setMonth((prev) => prev - 1)
+    }
+    setLoadedPages(1)
+  }, [month])
+
+  const goToNextMonth = useCallback(() => {
+    if (month === 12) {
+      setMonth(1)
+      setYear((prev) => prev + 1)
+    } else {
+      setMonth((prev) => prev + 1)
+    }
+    setLoadedPages(1)
+  }, [month])
+
+  const goToCurrentMonth = useCallback(() => {
+    const today = new Date()
+    setMonth(today.getMonth() + 1)
+    setYear(today.getFullYear())
+    setLoadedPages(1)
+  }, [])
+
+  // Apply date preset
+  const applyDatePreset = useCallback((preset: DatePreset) => {
+    const today = new Date()
+    let startDate: Date
+    let endDate: Date = today
+
+    switch (preset) {
+      case 'this-month':
+        setDateFilterMode('month')
+        setMonth(today.getMonth() + 1)
+        setYear(today.getFullYear())
+        setLoadedPages(1)
+        return // Early return, sync via useEffect
+
+      case 'last-month': {
+        const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+        startDate = lastMonthDate
+        endDate = new Date(today.getFullYear(), today.getMonth(), 0)
+        setDateFilterMode('custom')
+        break
+      }
+
+      case 'last-3-months':
+        startDate = new Date(today.getFullYear(), today.getMonth() - 3, 1)
+        setDateFilterMode('custom')
+        break
+
+      case 'last-6-months':
+        startDate = new Date(today.getFullYear(), today.getMonth() - 6, 1)
+        setDateFilterMode('custom')
+        break
+
+      case 'this-year':
+        startDate = new Date(today.getFullYear(), 0, 1)
+        setDateFilterMode('custom')
+        break
+
+      case 'last-year':
+        startDate = new Date(today.getFullYear() - 1, 0, 1)
+        endDate = new Date(today.getFullYear() - 1, 11, 31)
+        setDateFilterMode('custom')
+        break
+
+      default:
+        return
+    }
+
+    setFilterDateStart(startDate.toISOString().split('T')[0])
+    setFilterDateEnd(endDate.toISOString().split('T')[0])
+    setLoadedPages(1)
+  }, [])
+
+  // Count active filters
+  const getActiveFiltersCount = useCallback(() => {
+    let count = 0
+
+    if (filterCategory) count++
+    if (selectedTab !== 'all') count++
+
+    // Check if not in current month
+    const today = new Date()
+    const isCurrentMonth = month === today.getMonth() + 1 && year === today.getFullYear()
+    if (!isCurrentMonth || dateFilterMode === 'custom') count++
+
+    return count
+  }, [filterCategory, selectedTab, month, year, dateFilterMode])
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -245,9 +356,12 @@ export function useTransaction(options: UseTransactionOptions = {}) {
 
   const handleClearFilters = useCallback(() => {
     setFilterCategory('')
-    setFilterDateStart('')
-    setFilterDateEnd('')
+    setDateFilterMode('month')
+    const today = new Date()
+    setMonth(today.getMonth() + 1)
+    setYear(today.getFullYear())
     setLoadedPages(1)
+    // Dates will be synced via useEffect
   }, [])
 
   return {
@@ -274,6 +388,11 @@ export function useTransaction(options: UseTransactionOptions = {}) {
     filterDateStart,
     filterDateEnd,
 
+    // Date navigation
+    month,
+    year,
+    dateFilterMode,
+
     // Refs
     loadMoreRef,
 
@@ -282,6 +401,12 @@ export function useTransaction(options: UseTransactionOptions = {}) {
     setFilterCategory: handleSetFilterCategory,
     setFilterDateStart: handleSetFilterDateStart,
     setFilterDateEnd: handleSetFilterDateEnd,
+    setDateFilterMode,
+    goToPrevMonth,
+    goToNextMonth,
+    goToCurrentMonth,
+    applyDatePreset,
+    getActiveFiltersCount,
     handleNewTransaction,
     handleEditTransaction,
     handleCloseModal,

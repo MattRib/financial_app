@@ -569,3 +569,14 @@ export interface CreateTransferDto {
   description?: string
   date: string
 }
+
+// Transaction Filters - Date modes and presets
+export type DateFilterMode = 'month' | 'custom'
+
+export type DatePreset =
+  | 'this-month'
+  | 'last-month'
+  | 'last-3-months'
+  | 'last-6-months'
+  | 'this-year'
+  | 'last-year'

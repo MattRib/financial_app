@@ -39,3 +39,13 @@ export const getMonthLabel = (month: number): string => {
 export const getMonthShortLabel = (month: number): string => {
   return getMonthLabel(month).slice(0, 3)
 }
+
+// Date presets for transaction filters
+export const DATE_PRESETS = [
+  { value: 'this-month', label: 'Este mês' },
+  { value: 'last-month', label: 'Último mês' },
+  { value: 'last-3-months', label: 'Últimos 3 meses' },
+  { value: 'last-6-months', label: 'Últimos 6 meses' },
+  { value: 'this-year', label: 'Este ano' },
+  { value: 'last-year', label: 'Ano passado' },
+] as const

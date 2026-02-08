@@ -66,6 +66,11 @@ const TransactionsPage: React.FC = () => {
     filterDateStart,
     filterDateEnd,
 
+    // Date navigation
+    month,
+    year,
+    dateFilterMode,
+
     // Refs
     loadMoreRef,
     // Accounts
@@ -76,6 +81,12 @@ const TransactionsPage: React.FC = () => {
     setFilterCategory,
     setFilterDateStart,
     setFilterDateEnd,
+    setDateFilterMode,
+    goToPrevMonth,
+    goToNextMonth,
+    goToCurrentMonth,
+    applyDatePreset,
+    getActiveFiltersCount,
     handleNewTransaction,
     handleEditTransaction,
     handleCloseModal,
@@ -199,10 +210,19 @@ const TransactionsPage: React.FC = () => {
           filterCategory={filterCategory}
           filterDateStart={filterDateStart}
           filterDateEnd={filterDateEnd}
+          month={month}
+          year={year}
+          dateFilterMode={dateFilterMode}
+          activeFiltersCount={getActiveFiltersCount()}
           onTabChange={setSelectedTab}
           onCategoryChange={setFilterCategory}
           onDateStartChange={setFilterDateStart}
           onDateEndChange={setFilterDateEnd}
+          onPrevMonth={goToPrevMonth}
+          onNextMonth={goToNextMonth}
+          onCurrentMonth={goToCurrentMonth}
+          onDateFilterModeChange={setDateFilterMode}
+          onApplyPreset={applyDatePreset}
           onClearFilters={handleClearFilters}
         />
 

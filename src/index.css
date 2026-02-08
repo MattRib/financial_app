@@ -185,3 +185,13 @@ body {
   color: var(--text-primary);
   transition: background-color 0.2s ease, color 0.2s ease;
 }
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
