@@ -301,7 +301,7 @@ const TransactionsPage: React.FC = () => {
       {/* Delete Confirmation Modal */}
       <DeleteInstallmentModal
         isOpen={deleteConfirm.show}
-        transaction={deleteConfirm.transaction}
+        transactionDescription={deleteConfirm.transaction?.description}
         isInstallment={Boolean(
           deleteConfirm.transaction?.installment_number &&
           deleteConfirm.transaction?.total_installments
@@ -309,7 +309,7 @@ const TransactionsPage: React.FC = () => {
         installmentNumber={deleteConfirm.transaction?.installment_number || 1}
         totalInstallments={deleteConfirm.transaction?.total_installments || 1}
         onConfirm={handleDeleteConfirm}
-        onCancel={handleDeleteCancel}
+        onClose={handleDeleteCancel}
       />
 
       {/* OFX Import Modal */}
