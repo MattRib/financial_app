@@ -32,7 +32,7 @@ export class InsightsService {
       return existing; // Cache hit - retorna instantaneamente
     }
 
-    // 2. Buscar dados do mês
+    // 2. Buscar dados do mês atual
     const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0];
     const endDate = new Date(year, month, 0).toISOString().split('T')[0];
 
@@ -53,7 +53,31 @@ export class InsightsService {
       );
     }
 
-    // 3. Top 5 transações (maiores gastos)
+    // 3. Buscar dados do mês anterior para comparação
+    const prevMonth = month === 1 ? 12 : month - 1;
+    const prevYear = month === 1 ? year - 1 : year;
+    const prevStartDate = new Date(prevYear, prevMonth - 1, 1)
+      .toISOString()
+      .split('T')[0];
+    const prevEndDate = new Date(prevYear, prevMonth, 0)
+      .toISOString()
+      .split('T')[0];
+
+    let previousMonthData:
+      | { total_income: number; total_expense: number; balance: number }
+      | undefined;
+    try {
+      previousMonthData = await this.transactionsService.getSummary(
+        userId,
+        prevStartDate,
+        prevEndDate,
+      );
+    } catch {
+      // Se não houver dados do mês anterior, continua sem comparação
+      previousMonthData = undefined;
+    }
+
+    // 4. Top 5 transações (maiores gastos)
     const topTransactions = transactions
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 5)
@@ -64,7 +88,7 @@ export class InsightsService {
         date: t.date,
       }));
 
-    // 4. Chamar OpenAI
+    // 5. Chamar OpenAI com dados enriquecidos
     const { report, tokens, duration } =
       await this.openAIService.generateFinancialInsight({
         month,
@@ -74,9 +98,11 @@ export class InsightsService {
         balance: summary.balance,
         categories: categoryData,
         top_transactions: topTransactions,
+        previous_month: previousMonthData,
+        transactions_count: transactions.length,
       });
 
-    // 5. Salvar no banco
+    // 6. Salvar no banco
     const { data, error } = await this.supabase
       .from('insights')
       .insert({
@@ -173,6 +199,98 @@ export class InsightsService {
         `Erro ao remover insight: ${error.message}`,
       );
     }
+  }
+
+  /**
+   * Regenera insight para o mês/ano especificado
+   * Deleta o insight existente e gera um novo com dados atualizados
+   */
+  async regenerate(userId: string, dto: GenerateInsightDto): Promise<Insight> {
+    const { month, year } = dto;
+
+    // 1. Buscar insight existente
+    const existing = await this.findByUserAndMonth(userId, month, year);
+
+    // 2. Se existir, deletar
+    if (existing) {
+      const { error } = await this.supabase
+        .from('insights')
+        .delete()
+        .eq('id', existing.id)
+        .eq('user_id', userId);
+
+      if (error) {
+        throw new InternalServerErrorException(
+          `Erro ao deletar insight antigo: ${error.message}`,
+        );
+      }
+    }
+
+    // 3. Gerar novo insight
+    return this.generate(userId, dto);
+  }
+
+  /**
+   * Busca evolução financeira dos últimos N meses
+   */
+  async getEvolution(
+    userId: string,
+    months: number = 6,
+  ): Promise<
+    Array<{
+      month: number;
+      year: number;
+      month_name: string;
+      total_income: number;
+      total_expense: number;
+      balance: number;
+    }>
+  > {
+    const evolution: Array<{
+      month: number;
+      year: number;
+      month_name: string;
+      total_income: number;
+      total_expense: number;
+      balance: number;
+    }> = [];
+    const today = new Date();
+
+    // Calcular os últimos N meses
+    for (let i = months - 1; i >= 0; i--) {
+      const targetDate = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const month = targetDate.getMonth() + 1;
+      const year = targetDate.getFullYear();
+
+      const startDate = new Date(year, month - 1, 1)
+        .toISOString()
+        .split('T')[0];
+      const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+
+      // Buscar summary do mês
+      const summary = await this.transactionsService.getSummary(
+        userId,
+        startDate,
+        endDate,
+      );
+
+      // Formatar nome do mês
+      const monthName = new Intl.DateTimeFormat('pt-BR', {
+        month: 'short',
+        year: 'numeric',
+      }).format(targetDate);
+
+      evolution.push({
+        month,
+        year,
+        month_name: monthName,
+        total_income: summary.total_income,
+        total_expense: summary.total_expense,
+        balance: summary.balance,
+      });
+    }
+
+    return evolution;
   }
 
   /**

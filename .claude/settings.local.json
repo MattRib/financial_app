@@ -24,7 +24,8 @@
       "Bash(tree:*)",
       "Bash(xargs:*)",
       "Bash(npm test:*)",
-      "Bash(npx supabase db pull)"
+      "Bash(npx supabase db pull)",
+      "mcp__ide__getDiagnostics"
     ]
   }
 }

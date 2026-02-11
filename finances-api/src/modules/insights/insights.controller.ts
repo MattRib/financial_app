@@ -50,6 +50,26 @@ export class InsightsController {
     return this.insightsService.generate(user.id, dto);
   }
 
+  @Post('regenerate')
+  @ApiOperation({
+    summary: 'Regenera insights com dados atualizados (sobrescreve o existente)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Insight regenerado com sucesso',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Sem transações no período',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Erro ao chamar OpenAI',
+  })
+  regenerate(@CurrentUser() user: User, @Body() dto: GenerateInsightDto) {
+    return this.insightsService.regenerate(user.id, dto);
+  }
+
   @Get()
   @ApiOperation({ summary: 'Lista histórico de insights gerados' })
   @ApiResponse({
@@ -58,6 +78,19 @@ export class InsightsController {
   })
   findAll(@CurrentUser() user: User, @Query() filters: FilterInsightDto) {
     return this.insightsService.findAll(user.id, filters);
+  }
+
+  @Get('evolution')
+  @ApiOperation({ summary: 'Busca evolução financeira dos últimos meses' })
+  @ApiResponse({
+    status: 200,
+    description: 'Dados de evolução mensal',
+  })
+  getEvolution(
+    @CurrentUser() user: User,
+    @Query('months') months?: number,
+  ) {
+    return this.insightsService.getEvolution(user.id, months || 6);
   }
 
   @Get(':id')

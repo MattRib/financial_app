@@ -405,10 +405,21 @@ export interface ChangePasswordDto {
 
 // Insights
 export interface InsightReport {
+  financial_score?: {
+    score: number
+    level: 'excellent' | 'good' | 'moderate' | 'needs_attention' | 'critical'
+    description: string
+  }
   summary: {
     spending_pattern: string
     financial_health: 'excellent' | 'good' | 'moderate' | 'warning' | 'critical'
     balance_trend: 'positive' | 'neutral' | 'negative'
+    key_highlight?: string
+  }
+  month_comparison?: {
+    income_trend: 'increasing' | 'stable' | 'decreasing'
+    expense_trend: 'increasing' | 'stable' | 'decreasing'
+    analysis: string
   }
   insights: Array<{
     title: string
@@ -416,14 +427,30 @@ export interface InsightReport {
     category?: string
     impact: 'high' | 'medium' | 'low'
     type: 'observation' | 'warning' | 'opportunity'
+    metric?: string
   }>
   recommendations: Array<{
     title: string
     description: string
     priority: 'high' | 'medium' | 'low'
+    category?: string
     estimated_savings?: number
+    difficulty?: 'easy' | 'medium' | 'hard'
+    timeframe?: 'immediate' | 'short_term' | 'long_term'
   }>
-  top_categories: Array<{
+  spending_alerts?: Array<{
+    category: string
+    message: string
+    severity: 'high' | 'medium' | 'low'
+    suggested_limit?: number
+  }>
+  goals_suggestions?: Array<{
+    title: string
+    description: string
+    target_amount: number
+    timeframe_months: number
+  }>
+  top_categories?: Array<{
     category_name: string
     amount: number
     percentage: number
@@ -455,6 +482,15 @@ export interface GenerateInsightDto {
 export interface FilterInsightDto {
   month?: number
   year?: number
+}
+
+export interface FinancialEvolution {
+  month: number
+  year: number
+  month_name: string
+  total_income: number
+  total_expense: number
+  balance: number
 }
 
 // Account

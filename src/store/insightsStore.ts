@@ -11,6 +11,7 @@ export interface InsightsState {
 
   fetchInsights: (filters?: FilterInsightDto) => Promise<void>
   generateInsight: (data: GenerateInsightDto) => Promise<Insight>
+  regenerateInsight: (data: GenerateInsightDto) => Promise<Insight>
   deleteInsight: (id: string) => Promise<void>
   setCurrentInsight: (insight: Insight | null) => void
 }
@@ -38,6 +39,24 @@ export const useInsightsStore = create<InsightsState>((set) => ({
       const insight = await insightsService.generate(data)
       set((state) => ({
         insights: [insight, ...state.insights],
+        currentInsight: insight,
+        generating: false,
+      }))
+      return insight
+    } catch (err: unknown) {
+      set({ error: String(err), generating: false })
+      throw err
+    }
+  },
+
+  regenerateInsight: async (data: GenerateInsightDto) => {
+    set({ generating: true, error: null })
+    try {
+      const insight = await insightsService.regenerate(data)
+      set((state) => ({
+        insights: state.insights.map((i) =>
+          i.month === data.month && i.year === data.year ? insight : i
+        ),
         currentInsight: insight,
         generating: false,
       }))

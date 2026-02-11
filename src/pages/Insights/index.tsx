@@ -6,14 +6,19 @@ import { useToast } from '../../store/toastStore'
 import { MonthYearSelector } from './components/MonthYearSelector'
 import { GenerateInsightButton } from './components/GenerateInsightButton'
 import { InsightReportCard } from './components/InsightReportCard'
+import { FinancialEvolutionChart } from './components/FinancialEvolutionChart'
 import { PremiumEmptyState } from '../../components/common/PremiumEmptyState'
-import { Sparkles, AlertCircle } from 'lucide-react'
+import { Sparkles, AlertCircle, RefreshCw } from 'lucide-react'
+import { insightsService } from '../../services/insights'
+import type { FinancialEvolution } from '../../types'
 
 const InsightsPage: React.FC = () => {
   const [month, setMonth] = useState(() => new Date().getMonth() + 1)
   const [year, setYear] = useState(() => new Date().getFullYear())
+  const [evolution, setEvolution] = useState<FinancialEvolution[]>([])
+  const [loadingEvolution, setLoadingEvolution] = useState(false)
 
-  const { currentInsight, generating, error, generateInsight, setCurrentInsight } =
+  const { currentInsight, generating, error, generateInsight, regenerateInsight, setCurrentInsight } =
     useInsightsStore()
   const toast = useToast()
 
@@ -54,6 +59,40 @@ const InsightsPage: React.FC = () => {
     }
   }
 
+  // Handler de regeneração
+  const handleRegenerate = async () => {
+    try {
+      await regenerateInsight({ month, year })
+      ;(toast as unknown as { showToast?: (message: string, variant?: 'success' | 'error') => void }).showToast?.(
+        'Insights atualizados com sucesso!',
+        'success'
+      )
+    } catch {
+      ;(toast as unknown as { showToast?: (message: string, variant?: 'success' | 'error') => void }).showToast?.(
+        'Erro ao atualizar insights. Tente novamente.',
+        'error'
+      )
+    }
+  }
+
+  // Buscar evolução financeira
+  const fetchEvolution = async () => {
+    setLoadingEvolution(true)
+    try {
+      const data = await insightsService.getEvolution(6)
+      setEvolution(data)
+    } catch (err) {
+      console.error('Erro ao buscar evolução:', err)
+    } finally {
+      setLoadingEvolution(false)
+    }
+  }
+
+  // Carregar evolução ao montar
+  useEffect(() => {
+    fetchEvolution()
+  }, [])
+
   // Reset ao mudar mês/ano
   useEffect(() => {
     setCurrentInsight(null)
@@ -82,6 +121,14 @@ const InsightsPage: React.FC = () => {
             Análise inteligente dos seus gastos com recomendações personalizadas
           </p>
         </div>
+
+        {/* Evolution Chart */}
+        {!loadingEvolution && evolution.length > 0 && (
+          <FinancialEvolutionChart
+            data={evolution}
+            formatCurrency={formatCurrency}
+          />
+        )}
 
         {/* Month/Year Selector */}
         <MonthYearSelector
@@ -128,13 +175,35 @@ const InsightsPage: React.FC = () => {
 
         {/* Report Display */}
         {currentInsight && !generating && (
-          <InsightReportCard
-            report={currentInsight.report_data}
-            totalIncome={currentInsight.total_income}
-            totalExpense={currentInsight.total_expense}
-            balance={currentInsight.balance}
-            formatCurrency={formatCurrency}
-          />
+          <>
+            <div className="flex justify-end mb-4">
+              <motion.button
+                onClick={handleRegenerate}
+                disabled={generating}
+                whileHover={{ scale: generating ? 1 : 1.02 }}
+                whileTap={{ scale: generating ? 1 : 0.98 }}
+                className={`
+                  flex items-center gap-2 px-4 py-2 rounded-lg
+                  font-medium text-sm transition-all
+                  ${
+                    generating
+                      ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed'
+                      : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer'
+                  }
+                `}
+              >
+                <RefreshCw size={16} className={generating ? 'animate-spin' : ''} />
+                {generating ? 'Atualizando...' : 'Atualizar com dados recentes'}
+              </motion.button>
+            </div>
+            <InsightReportCard
+              report={currentInsight.report_data}
+              totalIncome={currentInsight.total_income}
+              totalExpense={currentInsight.total_expense}
+              balance={currentInsight.balance}
+              formatCurrency={formatCurrency}
+            />
+          </>
         )}
 
         {/* Empty State (primeira vez) */}

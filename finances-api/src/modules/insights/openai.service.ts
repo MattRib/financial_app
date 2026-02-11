@@ -19,6 +19,13 @@ export interface OpenAIInsightInput {
     category_name?: string;
     date: string;
   }>;
+  // Dados do mês anterior para comparação
+  previous_month?: {
+    total_income: number;
+    total_expense: number;
+    balance: number;
+  };
+  transactions_count: number;
 }
 
 @Injectable()
@@ -66,7 +73,7 @@ Sempre responda em português do Brasil.`,
           },
         ],
         temperature: 0.7,
-        max_tokens: 2000,
+        max_tokens: 3500,
         response_format: { type: 'json_object' },
       });
 
@@ -128,62 +135,170 @@ Sempre responda em português do Brasil.`,
             .join('\n')
         : '- Nenhuma transação registrada';
 
-    return `
-Analise os dados financeiros de ${monthName}/${input.year}:
+    // Comparação com mês anterior
+    let comparisonText = '';
+    if (input.previous_month) {
+      const incomeChange =
+        ((input.total_income - input.previous_month.total_income) /
+          (input.previous_month.total_income || 1)) *
+        100;
+      const expenseChange =
+        ((input.total_expense - input.previous_month.total_expense) /
+          (input.previous_month.total_expense || 1)) *
+        100;
 
-RESUMO FINANCEIRO:
+      comparisonText = `
+COMPARAÇÃO COM MÊS ANTERIOR:
+- Receitas: ${incomeChange > 0 ? '+' : ''}${incomeChange.toFixed(1)}% (anterior: R$ ${input.previous_month.total_income.toFixed(2)})
+- Despesas: ${expenseChange > 0 ? '+' : ''}${expenseChange.toFixed(1)}% (anterior: R$ ${input.previous_month.total_expense.toFixed(2)})
+- Saldo anterior: R$ ${input.previous_month.balance.toFixed(2)}
+`;
+    }
+
+    // Calcular métricas adicionais
+    const savingsRate =
+      input.total_income > 0
+        ? (input.balance / input.total_income) * 100
+        : 0;
+    const avgTransactionValue =
+      input.transactions_count > 0
+        ? input.total_expense / input.transactions_count
+        : 0;
+
+    return `
+Você é um consultor financeiro experiente especializado em finanças pessoais.
+Analise os dados financeiros de ${monthName}/${input.year} e forneça insights PROFUNDOS e ACIONÁVEIS:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 RESUMO FINANCEIRO MENSAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 - Receitas: R$ ${input.total_income.toFixed(2)}
 - Despesas: R$ ${input.total_expense.toFixed(2)}
 - Saldo: R$ ${input.balance.toFixed(2)}
-
-GASTOS POR CATEGORIA:
+- Taxa de poupança: ${savingsRate.toFixed(1)}%
+- Número de transações: ${input.transactions_count}
+- Ticket médio por transação: R$ ${avgTransactionValue.toFixed(2)}
+${comparisonText}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💳 DISTRIBUIÇÃO DE GASTOS POR CATEGORIA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${categoriesText}
 
-TOP 5 MAIORES TRANSAÇÕES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔝 TOP 5 MAIORES TRANSAÇÕES DO MÊS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${topTransactionsText}
 
-TAREFA:
-Forneça uma análise financeira completa em formato JSON com a seguinte estrutura:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 TAREFA: ANÁLISE FINANCEIRA PROFUNDA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Forneça uma análise financeira COMPLETA e PROFUNDA em formato JSON com a seguinte estrutura:
 
 {
+  "financial_score": {
+    "score": número de 0 a 100,
+    "level": "excellent | good | moderate | needs_attention | critical",
+    "description": "Explicação do score"
+  },
   "summary": {
-    "spending_pattern": "string descrevendo o padrão geral de gastos",
+    "spending_pattern": "Descrição DETALHADA do padrão de gastos (2-3 frases)",
     "financial_health": "excellent | good | moderate | warning | critical",
-    "balance_trend": "positive | neutral | negative"
+    "balance_trend": "positive | neutral | negative",
+    "key_highlight": "Principal destaque positivo ou negativo do mês"
+  },
+  "month_comparison": {
+    "income_trend": "increasing | stable | decreasing",
+    "expense_trend": "increasing | stable | decreasing",
+    "analysis": "Análise da evolução comparada ao mês anterior"
   },
   "insights": [
     {
-      "title": "Título do insight",
-      "description": "Descrição detalhada",
-      "category": "nome da categoria (opcional)",
+      "title": "Título claro e direto",
+      "description": "Descrição DETALHADA com dados concretos e contexto",
+      "category": "categoria relacionada (opcional)",
       "impact": "high | medium | low",
-      "type": "observation | warning | opportunity"
+      "type": "observation | warning | opportunity",
+      "metric": "Métrica específica (ex: '35% acima da média')"
     }
   ],
   "recommendations": [
     {
-      "title": "Título da recomendação",
-      "description": "Descrição detalhada e acionável",
+      "title": "Título da ação recomendada",
+      "description": "PASSO A PASSO detalhado e acionável de como implementar",
       "priority": "high | medium | low",
-      "estimated_savings": número (opcional)
+      "category": "categoria afetada (opcional)",
+      "estimated_savings": número (se aplicável),
+      "difficulty": "easy | medium | hard",
+      "timeframe": "immediate | short_term | long_term"
     }
   ],
-  "top_categories": [
+  "spending_alerts": [
     {
-      "category_name": "Nome da categoria",
-      "amount": número,
-      "percentage": número
+      "category": "nome da categoria",
+      "message": "Alerta específico",
+      "severity": "high | medium | low",
+      "suggested_limit": número (se aplicável)
+    }
+  ],
+  "goals_suggestions": [
+    {
+      "title": "Meta sugerida",
+      "description": "Por que essa meta é importante",
+      "target_amount": número,
+      "timeframe_months": número
     }
   ]
 }
 
-INSTRUÇÕES:
-- Seja específico e cite valores reais
-- Priorize insights acionáveis
-- Se houver gastos excessivos, alerte e sugira cortes
-- Se o saldo for negativo, priorize isso nos insights
-- Limite: 3-5 insights, 3-5 recomendações
-- Use linguagem clara e profissional em português BR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 DIRETRIZES PARA ANÁLISE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. **Score Financeiro (0-100):**
+   - 90-100: Excelente gestão, ótima taxa de poupança
+   - 70-89: Boa gestão, algumas oportunidades de melhoria
+   - 50-69: Gestão moderada, precisa de ajustes
+   - 30-49: Atenção necessária, gastos acima do ideal
+   - 0-29: Situação crítica, ação imediata necessária
+
+2. **Insights (4-7 insights):**
+   - Identifique PADRÕES comportamentais nos gastos
+   - Compare com mês anterior se disponível
+   - Identifique categorias que fogem do padrão comum
+   - Calcule percentuais em relação à renda
+   - Seja específico com números e contexto
+
+3. **Recomendações (4-7 recomendações):**
+   - Seja ULTRA ESPECÍFICO e ACIONÁVEL
+   - Forneça valores concretos de economia
+   - Priorize por impacto financeiro real
+   - Inclua dificuldade e prazo de implementação
+   - Explique COMO fazer, não só O QUE fazer
+
+4. **Alertas de Gastos (2-4 alertas):**
+   - Identifique categorias com gastos excessivos
+   - Sugira limites realistas baseados em % da renda
+   - Compare com benchmarks de finanças pessoais
+
+5. **Metas Sugeridas (2-3 metas):**
+   - Baseie-se na capacidade de poupança atual
+   - Seja realista e alcançável
+   - Defina prazos concretos
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ REGRAS IMPORTANTES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Use SEMPRE valores e percentuais reais dos dados
+- Seja CRÍTICO mas construtivo
+- Priorize AÇÃO sobre observação genérica
+- Se saldo negativo, faça disso prioridade #1
+- Compare com benchmarks (ex: "habitação não deve passar de 30% da renda")
+- Use linguagem clara, profissional e motivadora
+- NUNCA use frases genéricas como "controle seus gastos"
+- SEMPRE especifique QUANTO economizar e COMO
+
+Retorne APENAS o JSON válido, sem texto adicional.
 `;
   }
 }
