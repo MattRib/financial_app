@@ -489,15 +489,12 @@ export interface Account {
   user_id: string
   name: string
   type: AccountType
-  initial_balance: number
-  current_balance: number
   credit_limit?: number | null
   closing_day?: number | null
   due_day?: number | null
   color: string
   icon: string
   is_active: boolean
-  include_in_total: boolean
   notes?: string
   created_at: string
   updated_at: string
@@ -521,53 +518,39 @@ export interface CreditCardInvoice {
 }
 
 export interface AccountSummary {
-  total_balance: number
   total_accounts: number
   by_type: Array<{
     type: AccountType
     count: number
-    total_balance: number
   }>
 }
 
 export interface CreateAccountDto {
   name: string
   type: AccountType
-  initial_balance?: number
   credit_limit?: number
   closing_day?: number
   due_day?: number
   color?: string
   icon?: string
-  include_in_total?: boolean
   notes?: string
 }
 
 export interface UpdateAccountDto {
   name?: string
   type?: AccountType
-  initial_balance?: number
   credit_limit?: number
   closing_day?: number
   due_day?: number
   color?: string
   icon?: string
   is_active?: boolean
-  include_in_total?: boolean
   notes?: string
 }
 
 export interface FilterAccountDto {
   type?: AccountType
   is_active?: boolean
-}
-
-export interface CreateTransferDto {
-  from_account_id: string
-  to_account_id: string
-  amount: number
-  description?: string
-  date: string
 }
 
 // Transaction Filters - Date modes and presets

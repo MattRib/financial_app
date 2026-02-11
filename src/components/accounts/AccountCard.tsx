@@ -4,9 +4,6 @@ import {
   MoreVertical,
   Pencil,
   Trash2,
-  TrendingUp,
-  TrendingDown,
-  EyeOff,
   Receipt,
 } from 'lucide-react'
 import { AccountTypeLabels } from '../../types'
@@ -28,16 +25,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
   const [showActions, setShowActions] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const isPositive = account.current_balance >= 0
   const isCreditCard = account.type === 'credit_card' && account.credit_limit != null
-  const availableLimit = isCreditCard ? account.current_balance : 0
-  const usedLimit = isCreditCard
-    ? Math.max(0, Number(account.credit_limit) - Number(availableLimit))
-    : 0
-  const usagePct = isCreditCard && account.credit_limit
-    ? (usedLimit / Number(account.credit_limit)) * 100
-    : 0
-  const usageColor = usagePct > 100 ? 'bg-red-600' : usagePct > 80 ? 'bg-amber-500' : 'bg-emerald-500'
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -108,15 +96,8 @@ export const AccountCard: React.FC<AccountCardProps> = ({
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               {AccountTypeLabels[account.type]}
-              {!account.include_in_total && (
-                <>
-                  <span>•</span>
-                  <EyeOff size={12} />
-                  <span>Oculta do total</span>
-                </>
-              )}
             </p>
           </div>
         </div>
@@ -177,30 +158,17 @@ export const AccountCard: React.FC<AccountCardProps> = ({
         </div>
       </div>
 
-      {/* Balance */}
+      {/* Account Info */}
       <div className="mt-4">
         {isCreditCard ? (
           <>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
-              Limite disponível
+              Limite do cartão
             </p>
             <div className="flex items-center gap-2">
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                {formatCurrency(availableLimit)}
+                {formatCurrency(Number(account.credit_limit))}
               </p>
-            </div>
-
-            <div className="mt-3 space-y-2">
-              <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                <div
-                  className={`h-full ${usageColor}`}
-                  style={{ width: `${Math.min(100, Math.max(0, usagePct))}%` }}
-                />
-              </div>
-              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                <span>Usado: {formatCurrency(usedLimit)}</span>
-                <span>Limite: {formatCurrency(Number(account.credit_limit))}</span>
-              </div>
             </div>
 
             {(account.closing_day || account.due_day) && (
@@ -211,37 +179,12 @@ export const AccountCard: React.FC<AccountCardProps> = ({
           </>
         ) : (
           <>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
-              Saldo atual
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              Conta cadastrada
             </p>
-            <div className="flex items-center gap-2">
-              <p
-                className={`text-2xl font-bold ${
-                  isPositive
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-red-600 dark:text-red-400'
-                }`}
-              >
-                {formatCurrency(account.current_balance)}
-              </p>
-              {isPositive ? (
-                <TrendingUp
-                  size={18}
-                  className="text-emerald-500 dark:text-emerald-400"
-                />
-              ) : (
-                <TrendingDown
-                  size={18}
-                  className="text-red-500 dark:text-red-400"
-                />
-              )}
-            </div>
-
-            {account.initial_balance !== 0 && (
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                Saldo inicial: {formatCurrency(account.initial_balance)}
-              </p>
-            )}
+            <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+              Use esta conta para registrar transações
+            </p>
           </>
         )}
       </div>

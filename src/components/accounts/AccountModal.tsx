@@ -43,13 +43,11 @@ export const AccountModal: React.FC<AccountModalProps> = ({
 }) => {
   const [name, setName] = useState('')
   const [type, setType] = useState<AccountType>('checking')
-  const [initialBalance, setInitialBalance] = useState('')
   const [creditLimit, setCreditLimit] = useState('')
   const [closingDay, setClosingDay] = useState(10)
   const [dueDay, setDueDay] = useState(15)
   const [color, setColor] = useState(COLORS[0])
   const [icon, setIcon] = useState('🏦')
-  const [includeInTotal, setIncludeInTotal] = useState(true)
   const [isActive, setIsActive] = useState(true)
   const [notes, setNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -61,25 +59,21 @@ export const AccountModal: React.FC<AccountModalProps> = ({
     if (isOpen && account) {
       setName(account.name)
       setType(account.type)
-      setInitialBalance(String(account.initial_balance || ''))
       setCreditLimit(String(account.credit_limit ?? ''))
       setClosingDay(account.closing_day || 10)
       setDueDay(account.due_day || 15)
       setColor(account.color)
       setIcon(account.icon)
-      setIncludeInTotal(account.include_in_total)
       setIsActive(account.is_active)
       setNotes(account.notes || '')
     } else if (isOpen) {
       setName('')
       setType('checking')
-      setInitialBalance('')
       setCreditLimit('')
       setClosingDay(10)
       setDueDay(15)
       setColor(COLORS[0])
       setIcon('🏦')
-      setIncludeInTotal(true)
       setIsActive(true)
       setNotes('')
     }
@@ -101,12 +95,6 @@ export const AccountModal: React.FC<AccountModalProps> = ({
       const data: CreateAccountDto | UpdateAccountDto = {
         name: name.trim(),
         type,
-        initial_balance:
-          type === 'credit_card'
-            ? 0
-            : initialBalance
-              ? parseFloat(initialBalance)
-              : 0,
         credit_limit:
           type === 'credit_card' && creditLimit
             ? parseFloat(creditLimit)
@@ -115,7 +103,6 @@ export const AccountModal: React.FC<AccountModalProps> = ({
         due_day: type === 'credit_card' ? dueDay : undefined,
         color,
         icon,
-        include_in_total: includeInTotal,
         notes: notes.trim() || undefined,
       }
 
@@ -127,12 +114,6 @@ export const AccountModal: React.FC<AccountModalProps> = ({
     } finally {
       setSubmitting(false)
     }
-  }
-
-  const formatCurrencyInput = (value: string) => {
-    // Allow negative, numbers, and decimal
-    const cleaned = value.replace(/[^\d.-]/g, '')
-    return cleaned
   }
 
   if (!isOpen) return null
@@ -222,31 +203,8 @@ export const AccountModal: React.FC<AccountModalProps> = ({
               </div>
             </div>
 
-            {/* Initial Balance / Credit Card Settings */}
-            {type !== 'credit_card' ? (
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  Saldo inicial
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                    R$
-                  </span>
-                  <input
-                    type="text"
-                    value={initialBalance}
-                    onChange={(e) =>
-                      setInitialBalance(formatCurrencyInput(e.target.value))
-                    }
-                    placeholder="0,00"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400"
-                  />
-                </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Informe o saldo atual da conta para começar
-                </p>
-              </div>
-            ) : (
+            {/* Credit Card Settings */}
+            {type === 'credit_card' && (
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
@@ -260,7 +218,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                       type="text"
                       value={creditLimit}
                       onChange={(e) =>
-                        setCreditLimit(formatCurrencyInput(e.target.value))
+                        setCreditLimit(e.target.value.replace(/[^\d.-]/g, ''))
                       }
                       placeholder="0,00"
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400"
@@ -332,20 +290,8 @@ export const AccountModal: React.FC<AccountModalProps> = ({
             </div>
 
             {/* Options */}
-            <div className="space-y-3">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={includeInTotal}
-                  onChange={(e) => setIncludeInTotal(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-blue-500 focus:ring-blue-500"
-                />
-                <span className="text-sm text-slate-700 dark:text-slate-300">
-                  Incluir no saldo total
-                </span>
-              </label>
-
-              {isEditing && (
+            {isEditing && (
+              <div>
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
@@ -357,8 +303,8 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                     Conta ativa
                   </span>
                 </label>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Notes */}
             <div>

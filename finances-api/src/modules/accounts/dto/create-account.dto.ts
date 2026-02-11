@@ -41,15 +41,6 @@ export class CreateAccountDto {
   type: AccountType;
 
   @ApiPropertyOptional({
-    description: 'Saldo inicial',
-    example: 1000.0,
-    default: 0,
-  })
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @IsOptional()
-  initial_balance?: number;
-
-  @ApiPropertyOptional({
     description: 'Cor em hexadecimal',
     example: '#8B5CF6',
   })
@@ -63,14 +54,6 @@ export class CreateAccountDto {
   @MaxLength(10)
   @IsOptional()
   icon?: string;
-
-  @ApiPropertyOptional({
-    description: 'Incluir no total geral',
-    default: true,
-  })
-  @IsBoolean()
-  @IsOptional()
-  include_in_total?: boolean;
 
   @ApiPropertyOptional({ description: 'Notas/observações' })
   @IsString()

@@ -5,7 +5,6 @@ import {
   Wallet,
   TrendingUp,
   TrendingDown,
-  ArrowRightLeft,
 } from 'lucide-react'
 import { MainLayout } from '../../components/layout'
 import { StatCard } from '../../components/dashboard/StatCard'
@@ -16,7 +15,6 @@ import {
   AccountCard,
   AccountCardSkeleton,
   AccountModal,
-  TransferModal,
   CreditCardInvoiceModal,
 } from '../../components/accounts'
 import { useAccount } from '../../hooks/useAccount'
@@ -43,13 +41,6 @@ const itemVariants = {
   },
 }
 
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value)
-}
-
 const AccountsPage: React.FC = () => {
   const [invoiceAccount, setInvoiceAccount] = useState<Account | null>(null)
 
@@ -67,8 +58,6 @@ const AccountsPage: React.FC = () => {
     // Modal state
     showModal,
     editingAccount,
-    showTransferModal,
-    setShowTransferModal,
 
     // Delete confirmation
     deleteConfirm,
@@ -81,8 +70,6 @@ const AccountsPage: React.FC = () => {
     handleDeleteClick,
     handleDeleteConfirm,
     handleDeleteCancel,
-    handleTransfer,
-    handleTransferSubmit,
   } = useAccount()
 
   const handleInvoice = (account: Account) => {
@@ -90,7 +77,6 @@ const AccountsPage: React.FC = () => {
   }
 
   // Stats
-  const totalBalance = summary?.total_balance || 0
   const totalAccounts = summary?.total_accounts || 0
   const activeAccountsCount = allAccounts.filter((a) => a.is_active).length
 
@@ -124,71 +110,44 @@ const AccountsPage: React.FC = () => {
               Gerencie suas contas bancárias e carteiras
             </p>
           </div>
-          <div className="flex gap-3">
-            {allAccounts.length >= 2 && (
-              <button
-                onClick={handleTransfer}
-                className={`
-                  inline-flex items-center gap-2 px-4 py-2.5 rounded-lg
-                  border border-slate-200 dark:border-slate-700
-                  bg-white dark:bg-slate-800
-                  hover:bg-slate-50 dark:hover:bg-slate-700
-                  text-slate-700 dark:text-slate-300
-                  text-sm font-medium
-                  transition-colors duration-200
-                  cursor-pointer
-                `}
-              >
-                <ArrowRightLeft size={18} />
-                Transferir
-              </button>
-            )}
-            <button
-              onClick={handleNew}
-              className={`
-                inline-flex items-center gap-2 px-4 py-2.5 rounded-lg
-                bg-slate-900 dark:bg-slate-700
-                hover:bg-slate-800 dark:hover:bg-slate-600
-                text-white text-sm font-medium
-                transition-colors duration-200
-                cursor-pointer
-              `}
-            >
-              <Plus size={18} />
-              Nova Conta
-            </button>
-          </div>
+          <button
+            onClick={handleNew}
+            className={`
+              inline-flex items-center gap-2 px-4 py-2.5 rounded-lg
+              bg-slate-900 dark:bg-slate-700
+              hover:bg-slate-800 dark:hover:bg-slate-600
+              text-white text-sm font-medium
+              transition-colors duration-200
+              cursor-pointer
+            `}
+          >
+            <Plus size={18} />
+            Nova Conta
+          </button>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatCard
-            title="Saldo Total"
-            value={formatCurrency(totalBalance)}
+            title="Total de Contas"
+            value={totalAccounts.toString()}
             icon={<Wallet size={24} />}
             loading={loading}
             index={0}
           />
           <StatCard
-            title="Total de Contas"
-            value={totalAccounts.toString()}
+            title="Contas Ativas"
+            value={activeAccountsCount.toString()}
             icon={<TrendingUp size={24} />}
             loading={loading}
             index={1}
           />
           <StatCard
-            title="Contas Ativas"
-            value={activeAccountsCount.toString()}
+            title="Tipos de Conta"
+            value={Object.keys(accountsByType).length.toString()}
             icon={<TrendingDown size={24} />}
             loading={loading}
             index={2}
-          />
-          <StatCard
-            title="Tipos de Conta"
-            value={Object.keys(accountsByType).length.toString()}
-            icon={<Wallet size={24} />}
-            loading={loading}
-            index={3}
           />
         </div>
 
@@ -312,13 +271,6 @@ const AccountsPage: React.FC = () => {
         account={editingAccount}
         onClose={handleCloseModal}
         onSubmit={handleSubmit}
-      />
-
-      <TransferModal
-        isOpen={showTransferModal}
-        onClose={() => setShowTransferModal(false)}
-        onSubmit={handleTransferSubmit}
-        accounts={allAccounts.filter((a) => a.is_active)}
       />
 
       <CreditCardInvoiceModal

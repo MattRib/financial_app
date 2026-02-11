@@ -11,18 +11,14 @@ import {
   CreateAccountDto,
   UpdateAccountDto,
   FilterAccountDto,
-  CreateTransferDto,
 } from './dto';
-import { Account, AccountWithBalance } from './entities/account.entity';
-import { v4 as uuidv4 } from 'uuid';
+import { Account } from './entities/account.entity';
 
 export interface AccountSummary {
-  total_balance: number;
   total_accounts: number;
   by_type: Array<{
     type: string;
     count: number;
-    total_balance: number;
   }>;
 }
 
@@ -54,13 +50,11 @@ export class AccountsService {
         user_id: userId,
         name: dto.name,
         type: dto.type,
-        initial_balance: dto.initial_balance ?? 0,
         credit_limit: dto.credit_limit ?? null,
         closing_day: dto.closing_day ?? null,
         due_day: dto.due_day ?? null,
         color: dto.color ?? '#3b82f6',
         icon: dto.icon ?? '🏦',
-        include_in_total: dto.include_in_total ?? true,
         notes: dto.notes,
       })
       .select()
@@ -73,7 +67,7 @@ export class AccountsService {
   async findAll(
     userId: string,
     filters?: FilterAccountDto,
-  ): Promise<AccountWithBalance[]> {
+  ): Promise<Account[]> {
     let query = this.supabase
       .from('accounts')
       .select('*')
@@ -86,20 +80,10 @@ export class AccountsService {
     const { data, error } = await query.order('name', { ascending: true });
     if (error) throw error;
 
-    const accounts = data as Account[];
-
-    // Calculate balance for each account
-    const accountsWithBalance = await Promise.all(
-      accounts.map(async (account) => ({
-        ...account,
-        current_balance: await this.calculateBalance(account),
-      })),
-    );
-
-    return accountsWithBalance;
+    return data as Account[];
   }
 
-  async findOne(userId: string, id: string): Promise<AccountWithBalance> {
+  async findOne(userId: string, id: string): Promise<Account> {
     const { data, error } = await this.supabase
       .from('accounts')
       .select('*')
@@ -110,18 +94,14 @@ export class AccountsService {
     if (error) throw error;
     if (!data) throw new NotFoundException('Conta não encontrada');
 
-    const account = data as Account;
-    return {
-      ...account,
-      current_balance: await this.calculateBalance(account),
-    };
+    return data as Account;
   }
 
   async update(
     userId: string,
     id: string,
     dto: UpdateAccountDto,
-  ): Promise<AccountWithBalance> {
+  ): Promise<Account> {
     await this.findOne(userId, id);
 
     const { data, error } = await this.supabase
@@ -133,11 +113,7 @@ export class AccountsService {
       .single();
 
     if (error) throw error;
-    const account = data as Account;
-    return {
-      ...account,
-      current_balance: await this.calculateBalance(account),
-    };
+    return data as Account;
   }
 
   async remove(userId: string, id: string): Promise<void> {
@@ -155,27 +131,16 @@ export class AccountsService {
   async getSummary(userId: string): Promise<AccountSummary> {
     const accounts = await this.findAll(userId, { is_active: true });
 
-    const byType = new Map<string, { count: number; total_balance: number }>();
+    const byType = new Map<string, { count: number }>();
 
     for (const account of accounts) {
-      if (!account.include_in_total) continue;
-
-      const existing = byType.get(account.type) || {
-        count: 0,
-        total_balance: 0,
-      };
+      const existing = byType.get(account.type) || { count: 0 };
       byType.set(account.type, {
         count: existing.count + 1,
-        total_balance: existing.total_balance + account.current_balance,
       });
     }
 
-    const totalBalance = accounts
-      .filter((a) => a.include_in_total)
-      .reduce((sum, a) => sum + a.current_balance, 0);
-
     return {
-      total_balance: totalBalance,
       total_accounts: accounts.length,
       by_type: Array.from(byType.entries()).map(([type, data]) => ({
         type,
@@ -184,57 +149,13 @@ export class AccountsService {
     };
   }
 
-  async transfer(
-    userId: string,
-    dto: CreateTransferDto,
-  ): Promise<{ transfer_id: string }> {
-    // Validate accounts exist and belong to user
-    const fromAccount = await this.findOne(userId, dto.from_account_id);
-    const toAccount = await this.findOne(userId, dto.to_account_id);
-
-    if (dto.from_account_id === dto.to_account_id) {
-      throw new BadRequestException(
-        'Conta de origem e destino devem ser diferentes',
-      );
+  private async calculateCreditCardAvailableLimit(
+    account: Account,
+  ): Promise<number> {
+    if (account.type !== 'credit_card' || !account.credit_limit) {
+      return 0;
     }
 
-    const transferId = uuidv4();
-    const description =
-      dto.description ||
-      `Transferência: ${fromAccount.name} → ${toAccount.name}`;
-
-    // Create expense transaction (from account)
-    const { error: error1 } = await this.supabase.from('transactions').insert({
-      user_id: userId,
-      from_account_id: dto.from_account_id,
-      to_account_id: dto.to_account_id,
-      amount: dto.amount,
-      type: 'expense',
-      description: description,
-      date: dto.date,
-      transfer_id: transferId,
-    });
-
-    if (error1) throw error1;
-
-    // Create income transaction (to account)
-    const { error: error2 } = await this.supabase.from('transactions').insert({
-      user_id: userId,
-      from_account_id: dto.from_account_id,
-      to_account_id: dto.to_account_id,
-      amount: dto.amount,
-      type: 'income',
-      description: description,
-      date: dto.date,
-      transfer_id: transferId,
-    });
-
-    if (error2) throw error2;
-
-    return { transfer_id: transferId };
-  }
-
-  private async calculateBalance(account: Account): Promise<number> {
     const { data, error } = await this.supabase
       .from('transactions')
       .select('amount, type, date')
@@ -243,57 +164,42 @@ export class AccountsService {
     if (error) throw error;
 
     const transactions = data || [];
+    let used = 0;
+    let paidPeriods = new Set<string>();
 
-    if (account.type === 'credit_card' && account.credit_limit != null) {
-      let used = 0;
-      let paidPeriods = new Set<string>();
+    if (account.closing_day) {
+      const { data: payments, error: paymentsError } = await this.supabase
+        .from('credit_card_invoice_payments')
+        .select('period_start, period_end')
+        .eq('account_id', account.id);
 
-      if (account.closing_day) {
-        const { data: payments, error: paymentsError } = await this.supabase
-          .from('credit_card_invoice_payments')
-          .select('period_start, period_end')
-          .eq('account_id', account.id);
+      if (paymentsError) throw paymentsError;
 
-        if (paymentsError) throw paymentsError;
-
-        paidPeriods = new Set(
-          (payments || []).map((p: any) => `${p.period_start}|${p.period_end}`),
-        );
-      }
-
-      for (const tx of transactions) {
-        if (account.closing_day) {
-          const period = this.getInvoicePeriod(
-            new Date(String(tx.date) + 'T00:00:00'),
-            account.closing_day,
-          );
-          const start = format(period.start, 'yyyy-MM-dd');
-          const end = format(period.end, 'yyyy-MM-dd');
-          const key = `${start}|${end}`;
-          if (paidPeriods.has(key)) continue;
-        }
-
-        if (tx.type === 'income') {
-          used -= Number(tx.amount);
-        } else {
-          used += Number(tx.amount);
-        }
-      }
-      const available = Number(account.credit_limit) - used;
-      return Math.round(available * 100) / 100;
+      paidPeriods = new Set(
+        (payments || []).map((p: any) => `${p.period_start}|${p.period_end}`),
+      );
     }
-
-    let balance = Number(account.initial_balance);
 
     for (const tx of transactions) {
+      if (account.closing_day) {
+        const period = this.getInvoicePeriod(
+          new Date(String(tx.date) + 'T00:00:00'),
+          account.closing_day,
+        );
+        const start = format(period.start, 'yyyy-MM-dd');
+        const end = format(period.end, 'yyyy-MM-dd');
+        const key = `${start}|${end}`;
+        if (paidPeriods.has(key)) continue;
+      }
+
       if (tx.type === 'income') {
-        balance += Number(tx.amount);
+        used -= Number(tx.amount);
       } else {
-        balance -= Number(tx.amount);
+        used += Number(tx.amount);
       }
     }
-
-    return Math.round(balance * 100) / 100;
+    const available = Number(account.credit_limit) - used;
+    return Math.round(available * 100) / 100;
   }
 
   private buildDate(year: number, monthIndex: number, day: number): Date {

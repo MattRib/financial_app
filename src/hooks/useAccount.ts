@@ -6,7 +6,6 @@ import type {
   CreateAccountDto,
   UpdateAccountDto,
   AccountType,
-  CreateTransferDto,
 } from '../types'
 
 export function useAccount() {
@@ -20,14 +19,12 @@ export function useAccount() {
     create,
     update,
     delete: remove,
-    transfer,
   } = useAccountsStore()
 
   const toast = useToast()
 
   // UI State
   const [showModal, setShowModal] = useState(false)
-  const [showTransferModal, setShowTransferModal] = useState(false)
   const [editingAccount, setEditingAccount] = useState<Account | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<{
     account: Account | null
@@ -109,23 +106,6 @@ export function useAccount() {
     setDeleteConfirm({ account: null, show: false })
   }, [])
 
-  const handleTransfer = useCallback(() => {
-    setShowTransferModal(true)
-  }, [])
-
-  const handleTransferSubmit = useCallback(
-    async (data: CreateTransferDto) => {
-      try {
-        await transfer(data)
-        toast.success('Transferência realizada com sucesso!')
-        setShowTransferModal(false)
-      } catch {
-        toast.error('Erro ao realizar transferência.')
-      }
-    },
-    [transfer, toast]
-  )
-
   return {
     // Data
     accounts: filteredAccounts,
@@ -143,8 +123,6 @@ export function useAccount() {
     // Modal state
     showModal,
     editingAccount,
-    showTransferModal,
-    setShowTransferModal,
 
     // Delete confirmation
     deleteConfirm,
@@ -157,7 +135,5 @@ export function useAccount() {
     handleDeleteClick,
     handleDeleteConfirm,
     handleDeleteCancel,
-    handleTransfer,
-    handleTransferSubmit,
   }
 }

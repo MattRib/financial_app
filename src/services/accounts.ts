@@ -5,7 +5,6 @@ import type {
   CreateAccountDto,
   UpdateAccountDto,
   FilterAccountDto,
-  CreateTransferDto,
   CreditCardInvoice,
 } from '../types'
 
@@ -26,9 +25,6 @@ export const accountsService = {
   delete: (id: string) => api.delete(`/accounts/${id}`),
 
   getSummary: () => api.get<AccountSummary>('/accounts/summary'),
-
-  transfer: (data: CreateTransferDto) =>
-    api.post<{ transfer_id: string }>('/accounts/transfer', data),
 
   getCurrentInvoice: (accountId: string) =>
     api.get<CreditCardInvoice>(`/accounts/${accountId}/invoices/current`),

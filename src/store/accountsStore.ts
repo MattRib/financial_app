@@ -6,7 +6,6 @@ import type {
   CreateAccountDto,
   UpdateAccountDto,
   FilterAccountDto,
-  CreateTransferDto,
 } from '../types'
 
 export interface AccountsState {
@@ -20,7 +19,6 @@ export interface AccountsState {
   create: (data: CreateAccountDto) => Promise<Account>
   update: (id: string, data: UpdateAccountDto) => Promise<Account>
   delete: (id: string) => Promise<void>
-  transfer: (data: CreateTransferDto) => Promise<void>
 }
 
 export const useAccountsStore = create<AccountsState>((set, get) => ({
@@ -90,20 +88,6 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
         loading: false,
       }))
       get().fetchSummary()
-    } catch (err: unknown) {
-      set({ error: String(err), loading: false })
-      throw err
-    }
-  },
-
-  transfer: async (data) => {
-    set({ loading: true, error: null })
-    try {
-      await accountsService.transfer(data)
-      // Refresh accounts to update balances
-      await get().fetch()
-      get().fetchSummary()
-      set({ loading: false })
     } catch (err: unknown) {
       set({ error: String(err), loading: false })
       throw err

@@ -25,7 +25,6 @@ import {
   CreateAccountDto,
   UpdateAccountDto,
   FilterAccountDto,
-  CreateTransferDto,
   PayInvoiceDto,
 } from './dto';
 import { AuthGuard } from '../../common/guards/auth.guard';
@@ -68,16 +67,6 @@ export class AccountsController {
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   getSummary(@CurrentUser() user: User) {
     return this.accountsService.getSummary(user.id);
-  }
-
-  @Post('transfer')
-  @ApiOperation({ summary: 'Transferir entre contas' })
-  @ApiResponse({ status: 201, description: 'Transferência realizada' })
-  @ApiResponse({ status: 400, description: 'Dados inválidos ou contas iguais' })
-  @ApiResponse({ status: 404, description: 'Conta não encontrada' })
-  @ApiResponse({ status: 401, description: 'Não autorizado' })
-  transfer(@CurrentUser() user: User, @Body() dto: CreateTransferDto) {
-    return this.accountsService.transfer(user.id, dto);
   }
 
   @Get(':id')

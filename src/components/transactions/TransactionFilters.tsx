@@ -10,10 +10,7 @@ import {
   ChevronRight,
   X,
   Calendar,
-  CalendarDays,
   CalendarRange,
-  CalendarCheck,
-  CalendarClock,
 } from 'lucide-react'
 import type { TransactionType, Category, DateFilterMode, DatePreset } from '../../types'
 import { getMonthLabel, DATE_PRESETS } from '../../constants'
